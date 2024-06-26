@@ -19,7 +19,7 @@ class BaseActivity : NavBitActivity<Interaction, ScreenData>(
 }
 ```
 
-In order to do that, four classes needs be implemented, defining all the logic of the application:
+In order to do that, five classes needs be implemented, defining all the logic of the application:
 
 ```
 class Interaction : NavBitInteraction()
