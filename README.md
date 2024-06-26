@@ -3,10 +3,10 @@ NavBit is a comprehensive Android library that serves as the core backbone of yo
 
 ## Usage
 
-The main activity of the app needs to be a NavBitActivity:
+The main activity of the app needs to extend NavBitActivity:
 
 ```
-class BaseActivity : NavBitActivity<ScreenData>(
+class BaseActivity : NavBitActivity<Interaction, ScreenData>(
     InteractionHandler(),
     NavigationStateHandler(),
     ScreenGenerator()
@@ -22,8 +22,11 @@ class BaseActivity : NavBitActivity<ScreenData>(
 In order to do that, four classes needs be implemented, defining all the logic of the application:
 
 ```
-class InteractionHandler : NavBitInteractionHandler()
+class Interaction : NavBitInteraction()
+class InteractionHandler : NavBitInteractionHandler<Interaction>()
+
 class NavigationStateHandler : NavBitNavigationStateHandler()
+
 class ScreenData : NavBitScreenData()
 class ScreenGenerator : NavBitScreenGenerator<ScreenData>()
 ```
