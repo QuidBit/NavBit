@@ -42,6 +42,12 @@ class BaseActivity : NavBitActivity<Interaction, NavigationState, ScreenData>(
 
         initializeNavigation()
     }
+
+    companion object {
+        fun getNavBit() : NavBitActivity<Interaction, NavigationState, ScreenData> {
+            return getNavBitInstance()
+        }
+    }
 }
 ```
 

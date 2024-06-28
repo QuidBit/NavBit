@@ -1,0 +1,9 @@
+Publishing Package
+
+1. Make sure credentials are present in github.properties (in root folder)
+    gpr.usr=USER_ID
+    gpr.key=ACCESS_TOKEN
+
+2. Define a new version name in NavBit/build.gradle.kts
+
+3. Run .\gradlew publish (in root folder)
