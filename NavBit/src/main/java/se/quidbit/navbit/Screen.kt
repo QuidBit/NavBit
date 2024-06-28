@@ -48,7 +48,7 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
             ScreenType.Full -> {
                 // Inflate layout
                 // ----------------------------------------------------
-                val layoutId = layoutIds.full ?:  throw IllegalStateException("Screen does not support Full stype")
+                val layoutId = layoutIds.full ?:  throw IllegalStateException("Screen does not support Full type")
                 LayoutInflater.from(context).inflate(layoutId, this, true)
             }
             ScreenType.Sheet -> {
@@ -237,7 +237,6 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
     // Updating
     // -----------------------------------------
     fun notifyUpdatedData(updatedData: NavBitScreenData) {
-        Log.i("FragmentFull", "Updating data: $updatedData")
         val oldData = storeNewData(updatedData, true)!!
 
         // Make any view changes on the main thread

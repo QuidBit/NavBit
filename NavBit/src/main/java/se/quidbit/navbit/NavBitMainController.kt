@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.lifecycleScope
+import org.greenrobot.eventbus.android.BuildConfig
 
 class NavBitMainController<T : NavBitInteraction, U : NavBitNavigationState, V : NavBitScreenData>(
     private val activity: AppCompatActivity,
@@ -55,7 +56,7 @@ class NavBitMainController<T : NavBitInteraction, U : NavBitNavigationState, V :
         // Go to the start screen
         //  Note: Ideally, this should use the interaction system to reduce this code duplication
         // -----------------------------------------------------------------------
-        val (startFragment, screenType) = when (val result = screenHandler. screenDataFromNavigationState(
+        val (startFragment, screenType) = when (val result = screenHandler.screenDataFromNavigationState(
             stateHandler.getCurrentState(), activity)) {
             is ScreenDataResult.ErrorRead -> Pair(stateHandler.fallbackStartScreenData(activity), ScreenType.Full)
             is ScreenDataResult.Success -> Pair(result.data, result.type)
@@ -75,7 +76,7 @@ class NavBitMainController<T : NavBitInteraction, U : NavBitNavigationState, V :
     // --------------------------------------------------------
 
     fun handleInteraction(interaction: T) {
-        Log.i("Interaction", "Received: ${StringHelper.prettyPrintSealed(interaction.toString())} - ${stateHandler.getCurrentState().prettyString()}")
+        Log.i("NavBit", "Interaction Received: ${StringHelper.prettyPrintSealed(interaction.toString())} - ${stateHandler.getCurrentState().prettyString()}")
 
         // Handle the interactions
         // ---------------------------------------------------------------------------------
@@ -96,6 +97,7 @@ class NavBitMainController<T : NavBitInteraction, U : NavBitNavigationState, V :
             is InteractionResult.CloseApp ->
                 activity.finish()
             is InteractionResult.NewState -> {
+                Log.i("NavBit", "New State: ${interactionResult.state.prettyString()}}")
                 stateHandler.setCurrentState(interactionResult.state)
 
                 currentScreen?.let { (screen, screenData) ->
@@ -103,9 +105,11 @@ class NavBitMainController<T : NavBitInteraction, U : NavBitNavigationState, V :
                         is NavigationResult.ErrorRead ->
                             showError("Navigation", "Error Reading [${navigationResult.error}]")
                         is NavigationResult.Navigate -> {
+                            Log.i("NavBit", "Navigating ${interactionResult.direction} to Screen ${StringHelper.prettyPrintSealed(navigationResult.data.toString())} - ${navigationResult.type}}")
                             switchScreen(navigationResult.data, navigationResult.type, interactionResult.direction)
                         }
                         is NavigationResult.Update -> {
+                            Log.i("NavBit", "Updating Screen ${StringHelper.prettyPrintSealed(navigationResult.data.toString())}}")
                             screen.notifyUpdatedData(navigationResult.data)
 
                             // Also update any visible screens behind the current one (sheet support)
@@ -142,7 +146,7 @@ class NavBitMainController<T : NavBitInteraction, U : NavBitNavigationState, V :
         val currentState = stateHandler.getCurrentState()
         val infoString = "$error - ${currentState.prettyString()}"
 
-        Log.e(source, infoString)
+        Log.e("NavBit", "$source $infoString")
 
         // If we are debugging, we can show the error directly on screen for simplicity
         Handler(Looper.getMainLooper()).post {
