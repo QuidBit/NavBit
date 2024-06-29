@@ -1,2 +1,3 @@
-rootProject.name = "NavBitDemo"
+rootProject.name = "NavBit"
+include ':demoApp'
 include ':NavBit'

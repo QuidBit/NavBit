@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Welcome to NavBit"
+                android:textColor="@color/black"
+                android:textSize="30sp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Easy and fluid navigation"
+                android:textColor="@color/black"
+                android:textSize="15sp"
+                android:layout_gravity="center"/>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/info_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="32dp"
+                app:cardBackgroundColor="@color/teal_200"
+                app:cardCornerRadius="8dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="View Info"
+                    android:textSize="15sp"
+                    android:layout_margin="8dp"
+                    android:layout_gravity="center"/>
+            </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
+
+</FrameLayout>

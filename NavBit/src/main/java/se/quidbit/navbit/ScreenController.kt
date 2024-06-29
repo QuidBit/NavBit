@@ -41,7 +41,7 @@ object ScreenController {
 
                 // Add the new screen
                 // ----------------------------------------------------------
-                val screen = screenHandler. startGenerateNewScreen(context, screenData.tag(), type)
+                val screen = screenHandler.startGenerateNewScreen(context, screenData.tag(), type)
                 backstack.add(Pair(screen, type))
 
                 // Make sure the screen appears with the correct insets
@@ -88,7 +88,7 @@ object ScreenController {
                 toBeRemoved.addAll(toRemove)
 
                 val finalScreen = foundScreen ?: run {
-                    Log.e("ScreenCacher", "getScreen() - Backing to a view that is not in the backing stack")
+                    Log.i("NavBit", "NOTE: Backing to a screen that is not in the backing stack")
                     screenHandler.startGenerateNewScreen(context, screenData.tag(), ScreenType.Full)
                 }
 
@@ -130,7 +130,7 @@ object ScreenController {
             }
 
             delay(totalDelay)
-            Log.i("ScreenCacher", "cleanupAndPreloadScreens() is DONE - toBeRemoved: ${toBeRemoved.size}")
+            Log.i("NavBit", "Screens cleanup done - toBeRemoved: ${toBeRemoved.size}")
         }
     }
 

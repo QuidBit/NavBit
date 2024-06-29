@@ -10,7 +10,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.lifecycleScope
-import org.greenrobot.eventbus.android.BuildConfig
 
 class NavBitMainController<T : NavBitInteraction, U : NavBitNavigationState, V : NavBitScreenData>(
     private val activity: AppCompatActivity,
@@ -105,7 +104,7 @@ class NavBitMainController<T : NavBitInteraction, U : NavBitNavigationState, V :
                         is NavigationResult.ErrorRead ->
                             showError("Navigation", "Error Reading [${navigationResult.error}]")
                         is NavigationResult.Navigate -> {
-                            Log.i("NavBit", "Navigating ${interactionResult.direction} to Screen ${StringHelper.prettyPrintSealed(navigationResult.data.toString())} - ${navigationResult.type}}")
+                            Log.i("NavBit", "Navigating ${interactionResult.direction} to Screen ${StringHelper.prettyPrintSealed(navigationResult.data.toString())} - ${navigationResult.type}")
                             switchScreen(navigationResult.data, navigationResult.type, interactionResult.direction)
                         }
                         is NavigationResult.Update -> {

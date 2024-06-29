@@ -30,6 +30,7 @@ abstract class NavBitActivity<T : NavBitInteraction, U : NavBitNavigationState, 
 
     fun initializeNavigation() {
         window.statusBarColor = ContextCompat.getColor(this, android.R.color.transparent)
+        actionBar?.hide()
 
         navBitMainController = NavBitMainController(
         this,
