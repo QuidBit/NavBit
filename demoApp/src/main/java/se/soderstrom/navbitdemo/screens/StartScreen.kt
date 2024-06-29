@@ -27,7 +27,9 @@ class StartScreen(context : Context) : Screen<ScreenData.Start>(context) {
         return ScreenInsets()
     }
 
-    override fun entering(newData: ScreenData.Start, notifyReady: () -> Unit) {}
+    override fun entering(newData: ScreenData.Start, notifyReady: () -> Unit) {
+        notifyReady()
+    }
 
     override fun updating(oldData: ScreenData.Start, newData: ScreenData.Start) {}
 

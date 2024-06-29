@@ -11,6 +11,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
+import androidx.core.view.doOnAttach
+import androidx.core.view.doOnLayout
+import androidx.core.view.doOnNextLayout
 import androidx.core.view.doOnPreDraw
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -138,7 +141,7 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
             }
         }
 
-        this.doOnPreDraw {
+        this.doOnLayout {
             checkReadyForEnteringTransition(readyCounter, transition)
         }
     }
@@ -177,8 +180,6 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
     // -------------------------------------------------------------
 
     fun initiateLeavingTransition(transition: ScreenTransition) {
-        //if (exiting) return
-
         visibility = VISIBLE
         inputBlocker.block(true)
         exiting = true

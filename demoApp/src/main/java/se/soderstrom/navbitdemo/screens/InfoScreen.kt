@@ -30,10 +30,12 @@ class InfoScreen(context : Context) : Screen<ScreenData.Info>(context) {
             EventBus.getDefault().post(Interaction.Done())
         }
 
-        return ScreenInsets()
+        return ScreenInsets(null, null, view, R.dimen.sheet_bottom)
     }
 
-    override fun entering(newData: ScreenData.Info, notifyReady: () -> Unit) {}
+    override fun entering(newData: ScreenData.Info, notifyReady: () -> Unit) {
+        notifyReady()
+    }
 
     override fun updating(oldData: ScreenData.Info, newData: ScreenData.Info) {}
 

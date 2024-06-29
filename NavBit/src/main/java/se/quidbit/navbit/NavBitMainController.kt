@@ -34,7 +34,7 @@ class NavBitMainController<T : NavBitInteraction, U : NavBitNavigationState, V :
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT
             )
-            setBackgroundResource(R.color.app_background)
+            setBackgroundResource(R.color.container_background)
         }
         activity.setContentView(mainContainer)
 
