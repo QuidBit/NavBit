@@ -58,7 +58,7 @@ object ScreenController {
                 val transitionType = backstack.lastOrNull()?.let {
                     screenHandler.getTransitionType(it.first.getData() as T, it.second, direction)
                 } ?: run {
-                    TransitionType.Slide
+                    TransitionType.Full.Slide
                 }
                 val transition = ScreenTransition(transitionType, direction)
 

@@ -102,13 +102,13 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
 
         // Prepare appearing
         when (transition.type) {
-            TransitionType.Slide -> {
+            TransitionType.Full.Slide -> {
                 x = when (transition.direction) {
                     TransitionDirection.Forward -> Resources.getSystem().displayMetrics.widthPixels.toFloat()
                     TransitionDirection.Backward -> 0.0f
                 }
             }
-            TransitionType.Fade -> {
+            TransitionType.Full.Fade -> {
                 alpha = 0.0f
             }
             TransitionType.Sheet -> {

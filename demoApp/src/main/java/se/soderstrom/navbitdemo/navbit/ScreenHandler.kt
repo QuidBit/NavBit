@@ -64,19 +64,10 @@ class ScreenHandler : NavBitScreenHandler<ScreenData>() {
         return ScreenDataResult.Success(screenData, screenType)
     }
 
-    override fun getTransitionType(
-        data: ScreenData,
-        screenType: ScreenType,
+    override fun getFullScreenTransitionType(
+        screenData: ScreenData,
         direction: TransitionDirection
-    ): TransitionType {
-        return when (screenType) {
-            ScreenType.Sheet -> TransitionType.Sheet
-            ScreenType.Full -> {
-               when (data) {
-                   else -> TransitionType.Slide
-               }
-            }
-
-        }
+    ): TransitionType.Full {
+        return TransitionType.Full.Slide
     }
 }

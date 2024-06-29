@@ -6,8 +6,16 @@ abstract class NavBitScreenHandler<T : NavBitScreenData> {
     abstract fun screenDataDeepCopy(t : NavBitScreenData) : T
     abstract fun screenDataFromNavigationState(s: NavBitNavigationState, context : Context) : ScreenDataResult<T>
 
+
+    fun getTransitionType(screenData: T, screenType : ScreenType, direction: TransitionDirection) : TransitionType {
+        return when (screenType) {
+            ScreenType.Sheet -> TransitionType.Sheet
+            else -> getFullScreenTransitionType(screenData, direction)
+        }
+    }
+
     // NOTE: Should be based on NavigationState instead of screen data ideally for maximum flexibility - TO BE FIXED
-    abstract fun getTransitionType(fragment: T, screenType : ScreenType, direction: TransitionDirection) : TransitionType
+    protected abstract fun getFullScreenTransitionType(screenData: T, direction: TransitionDirection) : TransitionType.Full
 
     fun startGenerateNewScreen(context: Context, screenTag: String, type : ScreenType) : Screen<*> {
         val screen = generateNewScreen(context, screenTag, type)

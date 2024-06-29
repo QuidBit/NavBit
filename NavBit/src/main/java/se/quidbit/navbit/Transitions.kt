@@ -5,17 +5,17 @@ import android.animation.PropertyValuesHolder
 import android.content.res.Resources
 import android.view.View
 
-
-enum class TransitionType {
-    Slide,
-    Fade,
-    Sheet;
+sealed class TransitionType {
+    object Sheet : TransitionType()
+    sealed class Full : TransitionType() {
+        object Fade : Full()
+        object Slide : Full()
+    }
 
     fun hideOnExit() : Boolean {
         return when (this) {
-            Slide,
-            Fade -> true
-            Sheet -> false
+            is Sheet -> false
+            else -> true
         }
     }
 }
@@ -48,7 +48,7 @@ data class ScreenTransition (
     fun asLeavingAnimation(view: View) : ObjectAnimator {
 
         return when(type) {
-            TransitionType.Slide -> when (direction) {
+            TransitionType.Full.Slide -> when (direction) {
                 TransitionDirection.Forward ->
                     ObjectAnimator.ofPropertyValuesHolder(
                         view,
@@ -71,7 +71,7 @@ data class ScreenTransition (
                         PropertyValuesHolder.ofFloat(View.ALPHA, view.alpha, 1.0f)
                     ).setDuration(TRANSITION_LENGTH)
             }
-            TransitionType.Fade ->
+            TransitionType.Full.Fade ->
                 ObjectAnimator.ofPropertyValuesHolder(
                     view,
                     PropertyValuesHolder.ofFloat(View.SCALE_X, view.scaleX, 1.0f),
