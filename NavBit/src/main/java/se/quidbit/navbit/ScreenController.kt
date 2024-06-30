@@ -24,14 +24,12 @@ object ScreenController {
         direction: TransitionDirection,
         screenHandler: NavBitScreenHandler<T>
     ) : Screen<*> {
-        val (newScreen, transition) = when (direction) {
+        val result = when (direction) {
             TransitionDirection.Forward -> {
+
                 // Animate away the current screen
                 // -----------------------------------------------------------
-                val transition = ScreenTransition(
-                    screenHandler.getTransitionType(screenData, type, direction),
-                    direction
-                )
+                val transition = screenHandler.getScreenTransition(screenData, type, direction)
 
                 backstack.lastOrNull()?.let { (oldScreen, _) ->
                     Handler(Looper.getMainLooper()).post {
@@ -41,68 +39,120 @@ object ScreenController {
 
                 // Add the new screen
                 // ----------------------------------------------------------
-                val screen = screenHandler.startGenerateNewScreen(context, screenData.tag(), type)
-                backstack.add(Pair(screen, type))
+                val screen = addNewScreen(context, mainContainer, screenData, type, screenHandler)
 
-                // Make sure the screen appears with the correct insets
-                ViewCompat.getRootWindowInsets(mainContainer)?.let { startInsets ->
-                    ViewCompat.dispatchApplyWindowInsets(screen, startInsets)
-                }
-
-                // Then add it for display
-                mainContainer.addView(screen)
-
-                Pair(screen, transition)
+                goToResult(screen, transition, true)
             }
             TransitionDirection.Backward -> {
-                val transitionType = backstack.lastOrNull()?.let {
-                    screenHandler.getTransitionType(it.first.getData() as T, it.second, direction)
-                } ?: run {
-                    TransitionType.Full.Slide
-                }
-                val transition = ScreenTransition(transitionType, direction)
+                if (!backStackContains(screenData.tag(), type)) {
+                    // We are backing to a screen that is not available
 
-                // Search the backstack in reverse order for the screen we are backing to
-                var foundScreen : Screen<*>? = null
+                    // Take the current screen
+                    // ------------------------------------------------------------------
+                    val old = backstack.removeAt(backstack.lastIndex)
+                    val (oldScreen, oldType) = old
 
-                val toRemove = mutableListOf<Pair<Screen<*>, ScreenType>>()
+                    // Add a new screen at the end of the stack instead
+                    // ------------------------------------------------------------------
+                    val screen = addNewScreen(context, mainContainer, screenData, type, screenHandler)
 
-                backstack.takeLastWhile { screen ->
-                    if (screen.first.getData().tag() == screenData.tag()) {
-                        foundScreen = screen.first
-                    } else {
-                        toRemove.add(screen)
+                    // Remove and re-add the leaving screen to make sure it visually stays on top
+                    // ------------------------------------------------------------------
+                    mainContainer.removeView(oldScreen)
+                    mainContainer.addView(oldScreen)
+
+                    // Animate out the current screen
+                    // ------------------------------------------------------------------
+                    val transition = screenHandler.getScreenTransition(
+                        oldScreen.getData() as T,
+                        oldType,
+                        direction
+                    )
+
+                    oldScreen.initiateLeavingTransition(transition)
+                    toBeRemoved.add(old)
+
+                    goToResult(screen, transition, true)
+                } else {
+                    // Search the backstack in reverse order for the screen we are backing to
+
+                    // Check how the current screen should be animated out
+                    // ----------------------------------------------------------
+                    val transition = backstack.lastOrNull()?.let {
+                        screenHandler.getScreenTransition(it.first.getData() as T, it.second, direction)
+                    } ?: run {
+                        ScreenTransition(TransitionType.Full.Slide, direction)
                     }
 
-                    foundScreen == null
-                }
+                    // Remove until we find the screen we are looking for
+                    var foundScreen : Screen<*>? = null
 
-                // Make sure all that is getting dropped from the backstack is also animated away
-                for (toRemoveScreen in toRemove) {
-                    Handler(Looper.getMainLooper()).post {
-                        toRemoveScreen.first.initiateLeavingTransition(transition)
+                    val toRemove = mutableListOf<Pair<Screen<*>, ScreenType>>()
+
+                    backstack.takeLastWhile { screen ->
+                        if (screen.first.getData().tag() == screenData.tag()) {
+                            foundScreen = screen.first
+                        } else {
+                            toRemove.add(screen)
+                        }
+
+                        foundScreen == null
                     }
+
+                    // Make sure all that is getting dropped from the backstack is also animated away
+                    for (toRemoveScreen in toRemove) {
+                        Handler(Looper.getMainLooper()).post {
+                            toRemoveScreen.first.initiateLeavingTransition(transition)
+                        }
+                    }
+
+                    backstack.removeAll(toRemove.toSet())
+                    toBeRemoved.addAll(toRemove)
+
+                    // NOTE! HAVING TO ADD A NEW SCREEN HERE SHOULD NEVER HAPPEN
+                    // Since we check backstack contains first, but lets include it for completeness/avoid crashing
+                    var newlyAdded = false
+                    val screen = foundScreen ?: run {
+                        newlyAdded = true
+                        addNewScreen(context, mainContainer, screenData, type, screenHandler)
+                    }
+
+                    goToResult(screen, transition, newlyAdded)
                 }
-
-                backstack.removeAll(toRemove.toSet())
-                toBeRemoved.addAll(toRemove)
-
-                val finalScreen = foundScreen ?: run {
-                    Log.i("NavBit", "NOTE: Backing to a screen that is not in the backing stack")
-                    screenHandler.startGenerateNewScreen(context, screenData.tag(), ScreenType.Full)
-                }
-
-                Pair(finalScreen, transition)
             }
         }
 
         // Animate in the screen transition (must be done on the main thread)
         // ---------------------------------------------------
         Handler(Looper.getMainLooper()).post {
-            newScreen.initiateEnteringTransition(transition, screenData)
+            result.screen.initiateAppearingTransition(result.transition, screenData, result.newlyAdded)
         }
 
-        return newScreen
+        return result.screen
+    }
+
+    private fun <T : NavBitScreenData> addNewScreen(context: Context, mainContainer: FrameLayout, screenData : T, type : ScreenType, screenHandler : NavBitScreenHandler<T>) : Screen<*> {
+        val screen = screenHandler.startGenerateNewScreen(context, screenData.tag(), type)
+        backstack.add(Pair(screen, type))
+
+        // Make sure the screen appears with the correct insets
+        ViewCompat.getRootWindowInsets(mainContainer)?.let { startInsets ->
+            ViewCompat.dispatchApplyWindowInsets(screen, startInsets)
+        }
+
+        // Then add it for display
+        mainContainer.addView(screen)
+
+        return screen
+    }
+
+    private fun backStackContains(screenTag : String, type : ScreenType) : Boolean {
+        for (screen in backstack) {
+            if (screen.first.getData().tag() == screenTag && screen.second == type) {
+                return true
+            }
+        }
+        return false
     }
 
     fun cleanupScreens(lifecycleScope : LifecycleCoroutineScope, mainContainer : FrameLayout) {
@@ -212,3 +262,9 @@ object ScreenController {
         }
     }
 }
+
+data class goToResult (
+    val screen : Screen<*>,
+    val transition: ScreenTransition,
+    val newlyAdded : Boolean
+)

@@ -7,11 +7,12 @@ abstract class NavBitScreenHandler<T : NavBitScreenData> {
     abstract fun screenDataFromNavigationState(s: NavBitNavigationState, context : Context) : ScreenDataResult<T>
 
 
-    fun getTransitionType(screenData: T, screenType : ScreenType, direction: TransitionDirection) : TransitionType {
-        return when (screenType) {
+    fun getScreenTransition(screenData: T, screenType : ScreenType, direction: TransitionDirection) : ScreenTransition {
+        val transitionType = when (screenType) {
             ScreenType.Sheet -> TransitionType.Sheet
             else -> getFullScreenTransitionType(screenData, direction)
         }
+        return ScreenTransition(transitionType, direction)
     }
 
     // NOTE: Should be based on NavigationState instead of screen data ideally for maximum flexibility - TO BE FIXED

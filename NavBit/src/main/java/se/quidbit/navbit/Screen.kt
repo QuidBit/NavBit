@@ -7,14 +7,12 @@ import android.content.Context
 import android.content.res.Resources
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
-import androidx.core.view.doOnAttach
 import androidx.core.view.doOnLayout
-import androidx.core.view.doOnNextLayout
-import androidx.core.view.doOnPreDraw
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
@@ -94,30 +92,32 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
     // -------------------------------------------------------------
 
     fun restoreScreen(data : NavBitScreenData, visible : Boolean) {
-        storeNewData(data, false)
+        storeNewData(data)
         entering(data as T) {
             this.visibility = if (visible) View.VISIBLE else View.INVISIBLE
         }
     }
 
-    fun initiateEnteringTransition(transition: ScreenTransition, newState: NavBitScreenData) {
+    fun initiateAppearingTransition(transition: ScreenTransition, newState: NavBitScreenData, newlyLoaded : Boolean) {
         exiting = false
+
+        val startOutside = transition.direction == TransitionDirection.Forward || newlyLoaded
 
         // Prepare appearing
         when (transition.type) {
             TransitionType.Full.Slide -> {
-                x = when (transition.direction) {
-                    TransitionDirection.Forward -> Resources.getSystem().displayMetrics.widthPixels.toFloat()
-                    TransitionDirection.Backward -> 0.0f
+                x = when (startOutside) {
+                    true -> Resources.getSystem().displayMetrics.widthPixels.toFloat()
+                    false -> 0.0f
                 }
             }
             TransitionType.Full.Fade -> {
                 alpha = 0.0f
             }
             TransitionType.Sheet -> {
-                y = when (transition.direction) {
-                    TransitionDirection.Forward -> Resources.getSystem().displayMetrics.heightPixels.toFloat()
-                    TransitionDirection.Backward -> 0.0f
+                y = when (startOutside) {
+                    true -> Resources.getSystem().displayMetrics.heightPixels.toFloat()
+                    false -> 0.0f
                 }
             }
         }
@@ -126,51 +126,40 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
         val readyCounter = AtomicInteger(0)
         when (transition.direction) {
             TransitionDirection.Forward -> {
-                storeNewData(newState, false)
+                storeNewData(newState)
                 entering(data) {
-                    checkReadyForEnteringTransition(readyCounter, transition)
+                    checkReadyForAppearingTransition(readyCounter, transition)
                 }
             }
 
             TransitionDirection.Backward -> {
-                val oldData = storeNewData(newState, true)!!
+                val oldData = storeNewData(newState, true)
 
-                startEnteringTransition(transition) {
-                    returning(oldData, data)
+                returning(oldData, data) {
+                    checkReadyForAppearingTransition(readyCounter, transition)
                 }
             }
         }
 
         this.doOnLayout {
-            checkReadyForEnteringTransition(readyCounter, transition)
+            checkReadyForAppearingTransition(readyCounter, transition)
         }
     }
 
-    private fun checkReadyForEnteringTransition(
+    private fun checkReadyForAppearingTransition(
         readyCounter: AtomicInteger,
         transition: ScreenTransition
     ) {
-        if (readyCounter.incrementAndGet() == 2) {
-            startEnteringTransition(transition) {}
+        if (readyCounter.incrementAndGet() != 2) {
+            return
         }
-    }
 
-    private fun startEnteringTransition(transition: ScreenTransition, onComplete : () -> Unit) {
         this.visibility = View.VISIBLE
         inputBlocker.block(false)
 
         startBackgroundWork()
 
         val newAnimation = transition.asEnteringAnimation(this)
-        newAnimation.addListener(object : AnimatorListener {
-            override fun onAnimationEnd(p0: Animator) {
-                onComplete()
-            }
-            override fun onAnimationStart(p0: Animator) {}
-            override fun onAnimationCancel(p0: Animator) {}
-            override fun onAnimationRepeat(p0: Animator) {}
-
-        })
 
         transitionAnimation?.cancel()
         transitionAnimation = newAnimation
@@ -219,15 +208,17 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
         return data
     }
 
-    private fun storeNewData(state: NavBitScreenData, returnOld: Boolean): T? {
+    private fun storeNewData(state: NavBitScreenData, returnOld: Boolean = false): T? {
         // Dangerous cast here!
         // However, it is safe as long as this function is only called with the same type as was used to find the fragment
         // Making them guaranteed to match
         // As currently done in BaseActivity
         val newData = state as T
-        val oldData = if (returnOld) {
+        val oldData = if (returnOld && this::data.isInitialized) {
             NavBitActivity.getNavBitInstance<NavBitInteraction, NavBitNavigationState, T>().getScreenGenerator().screenDataDeepCopy(data)
-        } else null
+        } else {
+            null
+        }
 
         data = NavBitActivity.getNavBitInstance<NavBitInteraction, NavBitNavigationState, T>().getScreenGenerator().screenDataDeepCopy(newData)
         return oldData
@@ -237,11 +228,13 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
     // Updating
     // -----------------------------------------
     fun notifyUpdatedData(updatedData: NavBitScreenData) {
-        val oldData = storeNewData(updatedData, true)!!
 
-        // Make any view changes on the main thread
-        Handler(Looper.getMainLooper()).post {
-            updating(oldData, data)
+        storeNewData(updatedData, true)?.let { oldData ->
+
+            // Make any view changes on the main thread
+            Handler(Looper.getMainLooper()).post {
+                updating(oldData, data)
+            }
         }
     }
 
@@ -249,13 +242,14 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
     //------------------------------------------------
 
     // Entering the fragment (user going forwards)
-    abstract fun entering(newData: T, notifyReady: () -> Unit)
+    abstract fun entering(data: T, notifyReady: () -> Unit)
 
     // Updated state on the current fragment
-    abstract fun updating(oldData: T, newData: T)
+    abstract fun updating(oldData: T, data: T)
 
     // Returning to the fragment (user going backwards)
-    abstract fun returning(oldData: T, newData: T)
+    // NOTE: The screen might not have been loaded before, in which there is no oldData available
+    abstract fun returning(oldData: T?, data: T, notifyReady: () -> Unit)
 
     // Background work - Used to correctly start/stop any background work done by the fragment
     // ------------------------------------------------------------------------------

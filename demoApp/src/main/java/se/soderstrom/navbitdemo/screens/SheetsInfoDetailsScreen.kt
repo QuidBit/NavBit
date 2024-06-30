@@ -13,33 +13,30 @@ import se.soderstrom.navbitdemo.R
 import se.soderstrom.navbitdemo.navbit.Interaction
 import se.soderstrom.navbitdemo.navbit.ScreenData
 
-class InfoScreen(context : Context) : Screen<ScreenData.Info>(context) {
+class SheetsInfoDetailsScreen(context : Context) : Screen<ScreenData.InfoDetails>(context) {
 
     override fun getLayoutIds(type: ScreenType): ScreenLayoutIds {
-        return ScreenLayoutIds(null, R.layout.screen_info)
+        return ScreenLayoutIds(R.layout.screen_info_details, R.layout.screen_info_details)
     }
 
     override fun prepareLayout(view: View, type: ScreenType): ScreenInsets {
-        val detailsButton = view.findViewById<MaterialCardView>(R.id.details_button)
-        detailsButton.setOnClickListener{
-            EventBus.getDefault().post(Interaction.ViewInfoDetails())
-        }
-
         val doneButton = view.findViewById<MaterialCardView>(R.id.done_button)
         doneButton.setOnClickListener{
-            EventBus.getDefault().post(Interaction.Done())
+            EventBus.getDefault().post(Interaction.Done)
         }
 
         return ScreenInsets(null, null, view, R.dimen.sheet_bottom)
     }
 
-    override fun entering(newData: ScreenData.Info, notifyReady: () -> Unit) {
+    override fun entering(data: ScreenData.InfoDetails, notifyReady: () -> Unit) {
         notifyReady()
     }
 
-    override fun updating(oldData: ScreenData.Info, newData: ScreenData.Info) {}
+    override fun updating(oldData: ScreenData.InfoDetails, data: ScreenData.InfoDetails) {}
 
-    override fun returning(oldData: ScreenData.Info, newData: ScreenData.Info) {}
+    override fun returning(oldData: ScreenData.InfoDetails?, data: ScreenData.InfoDetails, notifyReady: () -> Unit) {
+        notifyReady()
+    }
 
     override fun getBackgroundWork(): BackgroundWork? {
         return null

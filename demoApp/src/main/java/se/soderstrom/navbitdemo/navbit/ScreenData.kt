@@ -3,7 +3,7 @@ package se.soderstrom.navbitdemo.navbit
 import se.quidbit.navbit.NavBitScreenData
 
 sealed class ScreenData : NavBitScreenData {
-    object Start : ScreenData()
+    class Start(var count : Int) : ScreenData()
     object Info : ScreenData()
     object InfoDetails : ScreenData()
 }

@@ -44,6 +44,31 @@
                     android:layout_margin="8dp"
                     android:layout_gravity="center"/>
             </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:id="@+id/increment_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:textSize="15sp"
+                android:layout_gravity="center"/>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/increment_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="32dp"
+                app:cardBackgroundColor="@color/teal_200"
+                app:cardCornerRadius="8dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Increment"
+                    android:textSize="15sp"
+                    android:layout_margin="8dp"
+                    android:layout_gravity="center"/>
+            </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
 
 </FrameLayout>

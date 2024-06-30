@@ -5,11 +5,11 @@ import se.quidbit.navbit.NavBitNavigationStateHandler
 
 class NavigationStateHandler : NavBitNavigationStateHandler<NavigationState, ScreenData>() {
     override fun fallbackStartScreenData(context: Context): ScreenData {
-        return ScreenData.Start
+        return ScreenData.Start(0)
     }
 
     override fun initializeAndGetStartState(): NavigationState {
-        return NavigationState.Start
+        return NavigationState.Start(0)
     }
 
     override fun onSettingState(state: NavigationState) {

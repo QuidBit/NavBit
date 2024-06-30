@@ -15,6 +15,7 @@
             android:layout_gravity="center"
             android:paddingVertical="16dp"
             android:text="In multiple layers"
+            android:textColor="@color/black"
             android:textSize="20sp"/>
 
         <com.google.android.material.card.MaterialCardView
@@ -29,9 +30,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Close"
-                android:textSize="15sp"
+                android:textSize="18sp"
                 android:textColor="@color/white"
-                android:layout_margin="8dp"
+                android:layout_margin="12dp"
                 android:layout_gravity="center"/>
         </com.google.android.material.card.MaterialCardView>
 
