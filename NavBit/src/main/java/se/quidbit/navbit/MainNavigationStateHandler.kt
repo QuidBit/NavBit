@@ -12,6 +12,9 @@ abstract class NavBitNavigationStateHandler <T : NavBitNavigationState, U : NavB
     }
 
     fun getCurrentState() : T {
+        // Dangerous cast here!
+        // However, it is safe as long as this function is only called with the same type as was used to find the screen
+        // Making them guaranteed to match, so it has to be enforced within the library
         return state.deepCopy() as T
     }
 

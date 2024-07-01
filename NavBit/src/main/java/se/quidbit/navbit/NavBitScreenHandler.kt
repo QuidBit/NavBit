@@ -18,13 +18,13 @@ abstract class NavBitScreenHandler<T : NavBitScreenData> {
     // NOTE: Should be based on NavigationState instead of screen data ideally for maximum flexibility - TO BE FIXED
     protected abstract fun getFullScreenTransitionType(screenData: T, direction: TransitionDirection) : TransitionType.Full
 
-    fun startGenerateNewScreen(context: Context, screenTag: String, type : ScreenType) : Screen<*> {
-        val screen = generateNewScreen(context, screenTag, type)
+    fun startGenerateNewScreen(context: Context, screenData: T, type : ScreenType) : Screen<*> {
+        val screen = generateNewScreen(context, screenData, type)
         screen.initialize(type)
         return screen
     }
 
-    protected abstract fun generateNewScreen(context: Context, screenTag: String, type : ScreenType) : Screen<*>
+    protected abstract fun generateNewScreen(context: Context, screenData: T, type : ScreenType) : Screen<*>
 
     // A manual copy since sealed/data classes don't have deep copy...
     // SO MAKE SURE EVERY SINGLE PROPERTY IS CREATED AS A NEW OBJECT

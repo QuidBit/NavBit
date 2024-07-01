@@ -29,11 +29,11 @@ class InteractionHandler : NavBitInteractionHandler<Interaction, NavigationState
             is Interaction.Back -> return applyBackInteractionOnState(s)
             is Interaction.ViewSheetsInfo -> when (s) {
                 is NavigationState.Start -> NavigationState.Info
-                else -> return InteractionResult.Unhandled()
+                else -> return InteractionResult.Unexpected()
             }
             is Interaction.ViewSheetsInfoDetails -> when (s) {
                 is NavigationState.Info -> NavigationState.InfoDetails
-                else -> return InteractionResult.Unhandled()
+                else -> return InteractionResult.Unexpected()
             }
             is Interaction.Done -> when (s) {
                 is NavigationState.Info,
@@ -41,11 +41,11 @@ class InteractionHandler : NavBitInteractionHandler<Interaction, NavigationState
                     transition = TransitionDirection.Backward
                     NavigationState.Start(0)
                 }
-                else -> return InteractionResult.Unhandled()
+                else -> return InteractionResult.Unexpected()
             }
             is Interaction.Increment -> when (s) {
                 is NavigationState.Start -> NavigationState.Start(s.count + 1)
-                else -> return InteractionResult.Unhandled()
+                else -> return InteractionResult.Unexpected()
             }
         }
 

@@ -16,20 +16,18 @@ import se.soderstrom.navbitdemo.screens.StartScreen
 class ScreenHandler : NavBitScreenHandler<ScreenData>() {
     override fun generateNewScreen(
         context: Context,
-        screenTag: String,
+        screenData: ScreenData,
         type: ScreenType
     ): Screen<*> {
-        return when (screenTag) {
+        return when (screenData) {
             // Supports only fullscreen
-            ScreenData.Start::class.java.toString() -> StartScreen(context)
-            ScreenData.Info::class.java.toString() -> SheetsInfoScreen(context)
-            ScreenData.InfoDetails::class.java.toString() -> SheetsInfoDetailsScreen(context)
+            is ScreenData.Start -> StartScreen(context)
+            is ScreenData.Info -> SheetsInfoScreen(context)
+            is ScreenData.InfoDetails -> SheetsInfoDetailsScreen(context)
 
             // Supports only sheet
 
             // Supports both
-
-            else -> throw IllegalStateException("Missing Screen for screenTag type: $screenTag")
         }
     }
 

@@ -86,11 +86,12 @@ class NavBitMainController<T : NavBitInteraction, U : NavBitNavigationState, V :
         )
 
         when(interactionResult) {
-            is InteractionResult.None -> {
-                // Used when the view should not be updated by an interaction (for example on swiping, which is handled directly)
+            is InteractionResult.Ignore -> {
+                // Used when the view should not be updated by an interaction,
+                // for example ignoring no longer relevant API calls coming in
             }
-            is InteractionResult.Unhandled ->
-                showError("Interaction", "Unhandled: [${StringHelper.prettyPrintSealed(interaction.toString())}]")
+            is InteractionResult.Unexpected ->
+                showError("Interaction", "Unexpected: [${StringHelper.prettyPrintSealed(interaction.toString())}]")
             is InteractionResult.ErrorRead ->
                 showError("Interaction", "Error Reading: [${interactionResult.error}]")
             is InteractionResult.CloseApp ->
@@ -125,7 +126,7 @@ class NavBitMainController<T : NavBitInteraction, U : NavBitNavigationState, V :
                                             is ScreenDataResult.Success -> {
                                                 // Make sure the data is of a correct type before updating
                                                 // The coming screen is not guaranteed to back to the one that was just shown
-                                                if (backgroundScreen.getData().tag() == screenResult.data.tag()) {
+                                                if (backgroundScreen.getScreenTag() == screenResult.data.tag()) {
                                                     backgroundScreen.notifyUpdatedData(screenResult.data)
                                                 }
                                             }

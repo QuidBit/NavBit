@@ -91,9 +91,9 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
     // Transitioning
     // -------------------------------------------------------------
 
-    fun restoreScreen(data : NavBitScreenData, visible : Boolean) {
-        storeNewData(data)
-        entering(data as T) {
+    fun restoreScreen(newData : NavBitScreenData, visible : Boolean) {
+        storeNewData(newData)
+        entering(data) {
             this.visibility = if (visible) View.VISIBLE else View.INVISIBLE
         }
     }
@@ -204,15 +204,21 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
         return visibility == View.VISIBLE && exiting
     }
 
-    fun getData(): T {
-        return data
+    fun getScreenTag(): String {
+        return data.tag()
+    }
+
+    fun <X : NavBitScreenData>getData(): X {
+        // Dangerous cast here!
+        // However, it is safe as long as this function is only called with the same type as was used to find the screen
+        // Making them guaranteed to match, so it has to be enforced within the library
+        return data as X
     }
 
     private fun storeNewData(state: NavBitScreenData, returnOld: Boolean = false): T? {
         // Dangerous cast here!
-        // However, it is safe as long as this function is only called with the same type as was used to find the fragment
-        // Making them guaranteed to match
-        // As currently done in BaseActivity
+        // However, it is safe as long as this function is only called with the same type as was used to find the screen
+        // Making them guaranteed to match, so it has to be enforced within the library
         val newData = state as T
         val oldData = if (returnOld && this::data.isInitialized) {
             NavBitActivity.getNavBitInstance<NavBitInteraction, NavBitNavigationState, T>().getScreenGenerator().screenDataDeepCopy(data)
