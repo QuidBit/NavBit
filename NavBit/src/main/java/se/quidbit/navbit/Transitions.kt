@@ -7,6 +7,7 @@ import android.view.View
 
 sealed class TransitionType {
     object Sheet : TransitionType()
+    object PopUp : TransitionType()
     sealed class Full : TransitionType() {
         object Fade : Full()
         object Slide : Full()
@@ -14,8 +15,9 @@ sealed class TransitionType {
 
     fun hideOnExit() : Boolean {
         return when (this) {
-            is Sheet -> false
-            else -> true
+            is Sheet,
+            is PopUp -> false
+            is Full -> true
         }
     }
 }
@@ -43,7 +45,6 @@ data class ScreenTransition (
             PropertyValuesHolder.ofFloat(View.ALPHA, view.alpha, 1.0f),
         ).setDuration(TRANSITION_LENGTH)
     }
-
 
     fun asLeavingAnimation(view: View) : ObjectAnimator {
 
@@ -99,9 +100,30 @@ data class ScreenTransition (
                         PropertyValuesHolder.ofFloat(
                             View.TRANSLATION_Y,
                             view.translationY,
-                            Resources.getSystem().displayMetrics.heightPixels .toFloat()
+                            Resources.getSystem().displayMetrics.heightPixels.toFloat()
                         ),
                         PropertyValuesHolder.ofFloat(View.ALPHA, view.alpha, 1.0f)
+                    ).setDuration(TRANSITION_LENGTH)
+            }
+            TransitionType.PopUp -> when (direction) {
+                TransitionDirection.Forward ->
+                    ObjectAnimator.ofPropertyValuesHolder(
+                        view,
+                        PropertyValuesHolder.ofFloat(View.SCALE_X, view.scaleX, 1.0f),
+                        PropertyValuesHolder.ofFloat(View.SCALE_Y, view.scaleY, 1.0f),
+                        PropertyValuesHolder.ofFloat(View.TRANSLATION_X, view.translationX, 0.0f),
+                        PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, view.translationX, 0.0f),
+                        PropertyValuesHolder.ofFloat(View.ALPHA, view.alpha, 1.0f),
+                    ).setDuration(TRANSITION_LENGTH)
+
+                TransitionDirection.Backward ->
+                    ObjectAnimator.ofPropertyValuesHolder(
+                        view,
+                        PropertyValuesHolder.ofFloat(View.SCALE_X, view.scaleX, 0.8f),
+                        PropertyValuesHolder.ofFloat(View.SCALE_Y, view.scaleY, 0.8f),
+                        PropertyValuesHolder.ofFloat(View.TRANSLATION_X, view.translationX, 0.0f),
+                        PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, view.translationY, 0.0f),
+                        PropertyValuesHolder.ofFloat(View.ALPHA, view.alpha, 0.0f)
                     ).setDuration(TRANSITION_LENGTH)
             }
         }

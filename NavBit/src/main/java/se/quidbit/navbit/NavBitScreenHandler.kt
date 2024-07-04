@@ -10,6 +10,7 @@ abstract class NavBitScreenHandler<T : NavBitScreenData> {
     fun getScreenTransition(screenData: T, screenType : ScreenType, direction: TransitionDirection) : ScreenTransition {
         val transitionType = when (screenType) {
             ScreenType.Sheet -> TransitionType.Sheet
+            ScreenType.PopUp -> TransitionType.PopUp
             else -> getFullScreenTransitionType(screenData, direction)
         }
         return ScreenTransition(transitionType, direction)

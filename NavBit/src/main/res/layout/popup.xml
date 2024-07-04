@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
 
@@ -11,20 +11,18 @@
     <View
         android:id="@+id/background"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_alignParentTop="true"
-        android:layout_marginBottom="-80dp"
-        android:background="@drawable/sheet_background"
-        android:layout_above="@id/sheet"/>
+        android:layout_height="match_parent"
+        android:background="@drawable/popup_background"/>
 
     <com.google.android.material.card.MaterialCardView
-        android:id="@+id/sheet"
-        android:layout_marginTop="50dp"
+        android:id="@+id/popup"
+        android:layout_gravity="center"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:background="@drawable/sheet"
+        android:background="@drawable/popup"
+        android:layout_marginHorizontal="24dp"
         app:cardCornerRadius="24dp"
+        app:cardElevation="8dp"
         app:cardBackgroundColor="@color/app_background">
 
         <FrameLayout
@@ -32,22 +30,12 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/sheet_line"
-                android:layout_width="30dp"
-                android:layout_height="4dp"
-                android:layout_marginTop="6dp"
-                app:cardCornerRadius="3dp"
-                app:cardBackgroundColor="@color/black"
-                android:alpha="0.3"
-                android:layout_gravity="center_horizontal"/>
-
             <FrameLayout
-                android:id="@+id/sheet_content_area"
-                android:layout_width="match_parent"
+                android:id="@+id/popup_content_area"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:paddingTop="16dp"/>
-
 
             <ImageView
                 android:id="@+id/bottomSheetClose"
@@ -60,5 +48,6 @@
                 android:src="@drawable/ic_close"
                 app:tint="@color/navigation_icons" />
         </FrameLayout>
+
     </com.google.android.material.card.MaterialCardView>
-</RelativeLayout>
+</FrameLayout>

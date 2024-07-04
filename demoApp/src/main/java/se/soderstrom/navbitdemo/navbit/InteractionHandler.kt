@@ -9,8 +9,9 @@ class InteractionHandler : NavBitInteractionHandler<Interaction, NavigationState
     override fun applyBackInteractionOnState(s: NavigationState): InteractionResult<NavigationState> {
         val newState = when (s) {
             is NavigationState.Start -> return InteractionResult.CloseApp()
-            is NavigationState.Info -> NavigationState.Start(0)
-            is NavigationState.InfoDetails -> NavigationState.Info
+            is NavigationState.ClearCheck -> NavigationState.Start(s.count)
+            is NavigationState.Info -> NavigationState.Start(s.count)
+            is NavigationState.InfoDetails -> NavigationState.Info(s.count)
         }
 
         return InteractionResult.NewState(newState, TransitionDirection.Backward)
@@ -27,19 +28,29 @@ class InteractionHandler : NavBitInteractionHandler<Interaction, NavigationState
 
         val newState = when (i) {
             is Interaction.Back -> return applyBackInteractionOnState(s)
+            is Interaction.ClearCheck ->  when (s) {
+                is NavigationState.Start -> NavigationState.ClearCheck(s.count)
+                else -> return InteractionResult.Unexpected()
+            }
+            is Interaction.ClearPerform ->  when (s) {
+                is NavigationState.ClearCheck -> {
+                    transition = TransitionDirection.Backward
+                    NavigationState.Start(0)
+                }
+                else -> return InteractionResult.Unexpected()
+            }
             is Interaction.ViewSheetsInfo -> when (s) {
-                is NavigationState.Start -> NavigationState.Info
+                is NavigationState.Start -> NavigationState.Info(s.count)
                 else -> return InteractionResult.Unexpected()
             }
             is Interaction.ViewSheetsInfoDetails -> when (s) {
-                is NavigationState.Info -> NavigationState.InfoDetails
+                is NavigationState.Info -> NavigationState.InfoDetails(s.count)
                 else -> return InteractionResult.Unexpected()
             }
             is Interaction.Done -> when (s) {
-                is NavigationState.Info,
                 is NavigationState.InfoDetails -> {
                     transition = TransitionDirection.Backward
-                    NavigationState.Start(0)
+                    NavigationState.Start(s.count)
                 }
                 else -> return InteractionResult.Unexpected()
             }

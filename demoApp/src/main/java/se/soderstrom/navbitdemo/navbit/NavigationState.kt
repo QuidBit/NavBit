@@ -4,14 +4,16 @@ import se.quidbit.navbit.NavBitNavigationState
 
 sealed class NavigationState : NavBitNavigationState() {
     class Start(var count : Int) : NavigationState()
-    object Info : NavigationState()
-    object InfoDetails : NavigationState()
+    class ClearCheck(var count : Int) : NavigationState()
+    class Info(var count : Int) : NavigationState()
+    class InfoDetails(var count : Int) : NavigationState()
 
     override fun deepCopy(): NavigationState {
         return when (this) {
-            is Start -> Start(this.count)
-            is Info -> Info
-            is InfoDetails -> InfoDetails
+            is Start -> Start(count)
+            is ClearCheck -> ClearCheck(count)
+            is Info -> Info(count)
+            is InfoDetails -> InfoDetails(count)
         }
     }
 }

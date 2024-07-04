@@ -4,6 +4,8 @@ import se.quidbit.navbit.NavBitInteraction
 
 sealed class Interaction : NavBitInteraction() {
     object Back : Interaction()
+    object ClearCheck : Interaction()
+    object ClearPerform : Interaction()
     object ViewSheetsInfo  : Interaction()
     object ViewSheetsInfoDetails  : Interaction()
     object Done  : Interaction()

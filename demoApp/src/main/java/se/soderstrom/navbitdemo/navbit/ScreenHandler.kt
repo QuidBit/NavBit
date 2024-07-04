@@ -9,6 +9,7 @@ import se.quidbit.navbit.ScreenDataResult
 import se.quidbit.navbit.ScreenType
 import se.quidbit.navbit.TransitionDirection
 import se.quidbit.navbit.TransitionType
+import se.soderstrom.navbitdemo.screens.PopupClearScreen
 import se.soderstrom.navbitdemo.screens.SheetsInfoDetailsScreen
 import se.soderstrom.navbitdemo.screens.SheetsInfoScreen
 import se.soderstrom.navbitdemo.screens.StartScreen
@@ -22,6 +23,7 @@ class ScreenHandler : NavBitScreenHandler<ScreenData>() {
         return when (screenData) {
             // Supports only fullscreen
             is ScreenData.Start -> StartScreen(context)
+            is ScreenData.ClearCheck -> PopupClearScreen(context)
             is ScreenData.Info -> SheetsInfoScreen(context)
             is ScreenData.InfoDetails -> SheetsInfoDetailsScreen(context)
 
@@ -35,6 +37,7 @@ class ScreenHandler : NavBitScreenHandler<ScreenData>() {
         val t = t as ScreenData
         return when(t) {
             is ScreenData.Start -> ScreenData.Start(t.count)
+            is ScreenData.ClearCheck -> ScreenData.ClearCheck
             is ScreenData.Info -> ScreenData.Info
             is ScreenData.InfoDetails -> ScreenData.InfoDetails
         }
@@ -49,6 +52,10 @@ class ScreenHandler : NavBitScreenHandler<ScreenData>() {
 
         val screenData = when (s) {
             is NavigationState.Start -> ScreenData.Start(s.count)
+            is NavigationState.ClearCheck -> {
+                screenType = ScreenType.PopUp
+                ScreenData.ClearCheck
+            }
             is NavigationState.Info -> {
                 screenType = ScreenType.Sheet
                 ScreenData.Info

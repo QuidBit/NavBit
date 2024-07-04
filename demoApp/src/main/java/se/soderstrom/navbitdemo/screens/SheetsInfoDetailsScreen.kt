@@ -16,7 +16,7 @@ import se.soderstrom.navbitdemo.navbit.ScreenData
 class SheetsInfoDetailsScreen(context : Context) : Screen<ScreenData.InfoDetails>(context) {
 
     override fun getLayoutIds(type: ScreenType): ScreenLayoutIds {
-        return ScreenLayoutIds(R.layout.screen_info_details, R.layout.screen_info_details)
+        return ScreenLayoutIds(R.layout.screen_info_details)
     }
 
     override fun prepareLayout(view: View, type: ScreenType): ScreenInsets {

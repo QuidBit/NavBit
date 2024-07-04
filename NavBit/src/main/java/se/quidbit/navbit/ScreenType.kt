@@ -2,5 +2,6 @@ package se.quidbit.navbit
 
 enum class ScreenType {
     Full,
-    Sheet
+    Sheet,
+    PopUp
 }

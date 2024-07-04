@@ -20,7 +20,7 @@ class StartScreen(context : Context) : Screen<ScreenData.Start>(context) {
     private lateinit var incrementText : TextView
 
     override fun getLayoutIds(type: ScreenType): ScreenLayoutIds {
-        return ScreenLayoutIds(R.layout.screen_start, null)
+        return ScreenLayoutIds(R.layout.screen_start)
     }
 
     override fun prepareLayout(view: View, type: ScreenType): ScreenInsets {
@@ -34,6 +34,11 @@ class StartScreen(context : Context) : Screen<ScreenData.Start>(context) {
         val incrementButton = view.findViewById<MaterialCardView>(R.id.increment_button)
         incrementButton.setOnClickListener {
             EventBus.getDefault().post(Interaction.Increment)
+        }
+
+        val clearButton = view.findViewById<MaterialCardView>(R.id.clear_button)
+        clearButton.setOnClickListener {
+            EventBus.getDefault().post(Interaction.ClearCheck)
         }
 
         return ScreenInsets()

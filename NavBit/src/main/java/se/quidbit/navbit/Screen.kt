@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.res.Resources
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
@@ -72,6 +71,27 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
                     EventBus.getDefault().post(InternalInteraction.Back)
                 }
             }
+            ScreenType.PopUp -> {
+                // Inflate layout
+                // ----------------------------------------------------
+                LayoutInflater.from(context).inflate(R.layout.popup, this, true)
+                val sheetContentArea = findViewById<FrameLayout>(R.id.popup_content_area)
+
+                val layoutId = layoutIds.popup ?:  throw IllegalStateException("Screen does not support Sheet type")
+                LayoutInflater.from(context).inflate(layoutId, sheetContentArea, true)
+
+                // Support closing
+                // ----------------------------------------------------
+                val background = findViewById<View>(R.id.background)
+                background?.setOnClickListener{
+                    EventBus.getDefault().post(InternalInteraction.Back)
+                }
+
+                val closeIcon = findViewById<ImageView>(R.id.bottomSheetClose)
+                closeIcon?.setOnClickListener{
+                    EventBus.getDefault().post(InternalInteraction.Back)
+                }
+            }
         }
 
         // Set insets
@@ -118,6 +138,20 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
                 y = when (startOutside) {
                     true -> Resources.getSystem().displayMetrics.heightPixels.toFloat()
                     false -> 0.0f
+                }
+            }
+            TransitionType.PopUp -> {
+                alpha = when (startOutside) {
+                    true -> 0.0f
+                    false -> 1.0f
+                }
+                scaleX = when (startOutside) {
+                    true -> 0.8f
+                    false -> 1.0f
+                }
+                scaleY = when (startOutside) {
+                    true -> 0.8f
+                    false -> 1.0f
                 }
             }
         }
@@ -174,7 +208,7 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
         exiting = true
         stopBackgroundWork()
 
-        val screenFull = this
+        val screen = this
         // Generate the new animation first to guarantee that the current position is retained
         val newAnimation = transition.asLeavingAnimation(this).apply {
             addListener(object : AnimatorListener {
@@ -182,7 +216,7 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
                     if (exiting &&
                         transition.direction == TransitionDirection.Backward || transition.type.hideOnExit()
                     ) {
-                        screenFull.visibility = INVISIBLE
+                        screen.visibility = INVISIBLE
                     }
                 }
                 override fun onAnimationStart(p0: Animator) {}
@@ -296,8 +330,11 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
 
 data class ScreenLayoutIds (
     val full : Int?,
-    val sheet : Int?
-)
+    val sheet : Int?,
+    val popup : Int?
+) {
+    constructor(id: Int) : this(id, id, id)
+}
 
 data class BackgroundWork (
     val periodMs : Long? = null,
