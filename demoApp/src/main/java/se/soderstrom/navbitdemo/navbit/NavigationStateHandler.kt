@@ -8,7 +8,7 @@ class NavigationStateHandler : NavBitNavigationStateHandler<NavigationState, Scr
         return ScreenData.Start(0)
     }
 
-    override fun initializeAndGetStartState(): NavigationState {
+    override fun prepareStartup(): NavigationState {
         return NavigationState.Start(0)
     }
 

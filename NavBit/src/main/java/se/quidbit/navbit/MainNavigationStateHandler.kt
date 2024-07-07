@@ -11,6 +11,16 @@ abstract class NavBitNavigationStateHandler <T : NavBitNavigationState, U : NavB
         onSettingState(state)
     }
 
+    fun initialize() {
+        // We should only perform an initialization if a state is not set (on app startup)
+        // Not after a screen rotation, in which everything is set up again as well
+        if (!this::state.isInitialized) {
+            val startState = prepareStartup()
+            onSettingState(startState)
+            setCurrentState(startState)
+        }
+    }
+
     fun getCurrentState() : T {
         // Dangerous cast here!
         // However, it is safe as long as this function is only called with the same type as was used to find the screen
@@ -49,6 +59,6 @@ abstract class NavBitNavigationStateHandler <T : NavBitNavigationState, U : NavB
     // -------------------------------------------------------------------------------
 
     abstract fun fallbackStartScreenData(context: Context) : U
-    abstract fun initializeAndGetStartState() : T
+    abstract fun prepareStartup() : T
     abstract fun onSettingState(state : T)
 }

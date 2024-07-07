@@ -16,7 +16,7 @@
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/popup"
         android:layout_gravity="center"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/popup"
         android:layout_marginHorizontal="24dp"
@@ -28,8 +28,9 @@
         app:cardBackgroundColor="@color/app_background">
 
         <FrameLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:minWidth="360dp"
             android:orientation="vertical">
 
             <FrameLayout

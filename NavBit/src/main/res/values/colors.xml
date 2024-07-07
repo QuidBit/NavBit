@@ -5,4 +5,6 @@
 
     <color name="container_background">#EEEEEE</color>
     <color name="navigation_icons">#333333</color>
+
+    <color name="popup_shadow">#BA000000</color>
 </resources>

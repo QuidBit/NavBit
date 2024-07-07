@@ -20,12 +20,11 @@ class NavBitMainController<T : NavBitInteraction, U : NavBitNavigationState, V :
     private var mainContainer : FrameLayout
     private var currentScreen : Pair<Screen<*>, V>? = null
 
+
     init {
-        // Prepare starting state
-        // ----------------------------------
-        val startState = stateHandler.initializeAndGetStartState()
-        stateHandler.onSettingState(startState)
-        stateHandler.setCurrentState(startState)
+        // Make sure we have a valid app state before starting
+        // --------------------------------------------------------
+        stateHandler.initialize()
 
         // Set up the container
         // --------------------------------------------------------

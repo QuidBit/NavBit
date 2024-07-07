@@ -10,19 +10,26 @@ import se.soderstrom.navbitdemo.navbit.ScreenData
 import se.soderstrom.navbitdemo.navbit.ScreenHandler
 
 class BaseActivity : NavBitActivity<Interaction, NavigationState, ScreenData>(
-    InteractionHandler(),
-    NavigationStateHandler(),
-    ScreenHandler()
+    interactionHandler,
+    stateHandler,
+    screenHandler
 ) {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        initializeNavigation()
-    }
-
     companion object {
+        // Retain all handlers between rotations
+            // Especially important for the stateHandler so the app state is not lost
+        val interactionHandler = InteractionHandler()
+        val stateHandler = NavigationStateHandler()
+        val screenHandler = ScreenHandler()
+
+        // Allow easy access to NavBit from anywhere in the app
         fun getNavBit() : NavBitActivity<Interaction, NavigationState, ScreenData> {
             return getNavBitInstance()
         }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        initializeNavBit()
     }
 }
