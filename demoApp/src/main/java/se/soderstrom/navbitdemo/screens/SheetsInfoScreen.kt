@@ -30,7 +30,7 @@ class SheetsInfoScreen(context : Context) : Screen<ScreenData.Info>(context) {
             EventBus.getDefault().post(Interaction.Back)
         }
 
-        return ScreenInsets(null, null, view, R.dimen.sheet_bottom)
+        return ScreenInsets(null, null, view, null)
     }
 
     override fun entering(data: ScreenData.Info, notifyReady: () -> Unit) {

@@ -16,6 +16,8 @@ object ScreenController {
     private val backstack   = ArrayList<Pair<Screen<*>, ScreenType>>()
     private val toBeRemoved = ArrayList<Pair<Screen<*>, ScreenType>>()
 
+    private val toBeRestored = ArrayList<Pair<NavBitScreenData, ScreenType>>()
+
     fun <T : NavBitScreenData> goToScreen(
         context : Context,
         mainContainer : FrameLayout,
@@ -23,7 +25,7 @@ object ScreenController {
         type : ScreenType,
         direction: TransitionDirection,
         screenHandler: NavBitScreenHandler<T>
-    ) : Screen<*> {
+    ) {
         val result = when (direction) {
             TransitionDirection.Forward -> {
 
@@ -41,10 +43,11 @@ object ScreenController {
                 // ----------------------------------------------------------
                 val screen = addNewScreen(context, mainContainer, screenData, type, screenHandler)
 
-                goToResult(screen, transition, true)
+                GoToResult(screen, transition, true)
             }
             TransitionDirection.Backward -> {
                 if (!backStackContains<T>(screenData.tag(), type)) {
+                    Log.e("NavBit", "GUSTAV BACKING TO UNAVAILABLE")
                     // We are backing to a screen that is not available
 
                     // Take the current screen
@@ -72,8 +75,9 @@ object ScreenController {
                     oldScreen.initiateLeavingTransition(transition)
                     toBeRemoved.add(old)
 
-                    goToResult(screen, transition, true)
+                    GoToResult(screen, transition, true)
                 } else {
+                    Log.e("NavBit", "GUSTAV BACKING TO AVAILABLE!!")
                     // Search the backstack in reverse order for the screen we are backing to
 
                     // Check how the current screen should be animated out
@@ -117,7 +121,7 @@ object ScreenController {
                         addNewScreen(context, mainContainer, screenData, type, screenHandler)
                     }
 
-                    goToResult(screen, transition, newlyAdded)
+                    GoToResult(screen, transition, newlyAdded)
                 }
             }
         }
@@ -127,8 +131,6 @@ object ScreenController {
         Handler(Looper.getMainLooper()).post {
             result.screen.initiateAppearingTransition(result.transition, screenData, result.newlyAdded)
         }
-
-        return result.screen
     }
 
     private fun <T : NavBitScreenData> addNewScreen(context: Context, mainContainer: FrameLayout, screenData : T, type : ScreenType, screenHandler : NavBitScreenHandler<T>) : Screen<*> {
@@ -153,6 +155,10 @@ object ScreenController {
             }
         }
         return false
+    }
+
+    fun getCurrentScreen() : Screen<*> {
+        return backstack[backstack.lastIndex].first
     }
 
     fun cleanupScreens(lifecycleScope : LifecycleCoroutineScope, mainContainer : FrameLayout) {
@@ -216,54 +222,56 @@ object ScreenController {
     // Used on startup/rotation to make sure all old views are properly recreated
 
     fun destroyScreens(container : FrameLayout) {
-        // To be removed
+        // Remove all to be removed
         // -------------------------------
         for (screen in toBeRemoved) {
             container.removeView(screen.first)
         }
         toBeRemoved.clear()
 
-        // Backstack
+        // Remove all in the backstack
         // -------------------------------
         for (screen in backstack) {
             container.removeView(screen.first)
         }
-        // NOTE: The backstack is NOT emptied, since the data will be reused during restoring
-            // With the exception being the last/current screen
-            // Which is removed to make sure that no duplicate is generated
-            // As the current screen is always generated during startup
-        backstack.removeLastOrNull()
-    }
 
-    fun <T : NavBitScreenData>restoreScreens(container : FrameLayout, screenGenerator: NavBitScreenHandler<T>) {
+        // Copy the relevant data for restoring later
+        toBeRestored.clear()
+        for (screen in backstack.reversed()) {
+            toBeRestored.add(Pair(screen.first.getData(), screen.second))
 
-        // Take a copy of all
-        // -------------------------------
-        val oldStack =  ArrayList<Pair<Screen<*>, ScreenType>>()
-
-        for (screen in backstack) {
-            oldStack.add(screen)
+            // Skip restoring screens that are hidden (i.e., the display is already covered by a screen of "full" type)
+            if (screen.second == ScreenType.Full) {
+                break
+            }
         }
         backstack.clear()
 
-        // Regenerate
-        // -------------------------------
-        for ((oldScreen, screenType) in oldStack) {
-            val oldData = oldScreen.getData() as T
-            val newScreen = screenGenerator.startGenerateNewScreen(container.context, oldData, screenType)
-            val visible = oldScreen.visibility == View.VISIBLE
+        // Do not restore the current screen - It is opened using the normal process
+        //toBeRestored.removeFirst()
+    }
+
+    fun <T : NavBitScreenData>restoreScreens(container : FrameLayout, screenHandler: NavBitScreenHandler<T>) {
+        Log.i("NavBit", "Restoring ${toBeRestored.size} screens")
+
+        for ((oldData, screenType) in toBeRestored.reversed()) {
+            Log.i("NavBit", "    --- $oldData - $screenType")
+
+            val newScreen = screenHandler.startGenerateNewScreen(container.context, oldData as T, screenType)
 
             Handler(Looper.getMainLooper()).post {
-                newScreen.restoreScreen(oldData, visible)
+                newScreen.restoreScreen(oldData)
             }
 
             backstack.add(Pair(newScreen, screenType))
             container.addView(newScreen)
         }
+
+        toBeRestored.clear()
     }
 }
 
-data class goToResult (
+data class GoToResult (
     val screen : Screen<*>,
     val transition: ScreenTransition,
     val newlyAdded : Boolean

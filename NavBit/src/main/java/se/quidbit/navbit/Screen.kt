@@ -111,10 +111,10 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
     // Transitioning
     // -------------------------------------------------------------
 
-    fun restoreScreen(newData : NavBitScreenData, visible : Boolean) {
+    fun restoreScreen(newData : NavBitScreenData) {
         storeNewData(newData)
         entering(data) {
-            this.visibility = if (visible) View.VISIBLE else View.INVISIBLE
+            this.visibility = View.VISIBLE
         }
     }
 

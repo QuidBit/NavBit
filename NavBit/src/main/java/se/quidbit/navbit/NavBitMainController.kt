@@ -18,14 +18,8 @@ class NavBitMainController<T : NavBitInteraction, U : NavBitNavigationState, V :
     private val screenHandler: NavBitScreenHandler<V>
 ) {
     private var mainContainer : FrameLayout
-    private var currentScreen : Pair<Screen<*>, V>? = null
-
 
     init {
-        // Make sure we have a valid app state before starting
-        // --------------------------------------------------------
-        stateHandler.initialize()
-
         // Set up the container
         // --------------------------------------------------------
         mainContainer = FrameLayout(activity).apply {
@@ -46,27 +40,31 @@ class NavBitMainController<T : NavBitInteraction, U : NavBitNavigationState, V :
             insets
         }
 
-        // Restore screens (after activity recreation, for example after rotation)
+        // Make sure we have a valid app state before starting
         // --------------------------------------------------------
-        ScreenController.restoreScreens(mainContainer, screenHandler)
+        when (stateHandler.initialize()) {
+            StartState.Restoring -> ScreenController.restoreScreens(mainContainer, screenHandler)
+            StartState.New -> {
+                // -----------------------------------------------------------------------
+                // Go to the start screen
+                //  Note: Ideally, this should use the interaction system to reduce this code duplication
+                // -----------------------------------------------------------------------
+                val (startFragment, screenType) = when (val result = screenHandler.screenDataFromNavigationState(
+                    stateHandler.getCurrentState(), activity)) {
+                    is ScreenDataResult.ErrorRead -> Pair(stateHandler.fallbackStartScreenData(activity), ScreenType.Full)
+                    is ScreenDataResult.Success -> Pair(result.data, result.type)
+                }
 
-        // -----------------------------------------------------------------------
-        // Go to the start screen
-        //  Note: Ideally, this should use the interaction system to reduce this code duplication
-        // -----------------------------------------------------------------------
-        val (startFragment, screenType) = when (val result = screenHandler.screenDataFromNavigationState(
-            stateHandler.getCurrentState(), activity)) {
-            is ScreenDataResult.ErrorRead -> Pair(stateHandler.fallbackStartScreenData(activity), ScreenType.Full)
-            is ScreenDataResult.Success -> Pair(result.data, result.type)
+                // Open the fragment
+                //----------------------------------------
+                switchScreen(startFragment, screenType, TransitionDirection.Forward)
+            }
         }
-
-        // Open the fragment
-        //----------------------------------------
-        switchScreen(startFragment, screenType, TransitionDirection.Forward)
     }
 
     fun onDestroy() {
         ScreenController.destroyScreens(mainContainer)
+        activity.setContentView(FrameLayout(activity))
     }
 
     // --------------------------------------------------------
@@ -99,40 +97,41 @@ class NavBitMainController<T : NavBitInteraction, U : NavBitNavigationState, V :
                 Log.i("NavBit", "New State: ${interactionResult.state.prettyString()}}")
                 stateHandler.setCurrentState(interactionResult.state)
 
-                currentScreen?.let { (screen, screenData) ->
-                    when(val navigationResult = stateHandler.getNavigationResult<V>(screenData, activity, screenHandler)) {
-                        is NavigationResult.ErrorRead ->
-                            showError("Navigation", "Error Reading [${navigationResult.error}]")
-                        is NavigationResult.Navigate -> {
-                            Log.i("NavBit", "Navigating ${interactionResult.direction} to Screen ${StringHelper.prettyPrintSealed(navigationResult.data.toString())} - ${navigationResult.type}")
-                            switchScreen(navigationResult.data, navigationResult.type, interactionResult.direction)
-                        }
-                        is NavigationResult.Update -> {
-                            Log.i("NavBit", "Updating Screen ${StringHelper.prettyPrintSealed(navigationResult.data.toString())}}")
-                            screen.notifyUpdatedData(navigationResult.data)
+                val screen = ScreenController.getCurrentScreen()
+                val screenData = screen.getData<V>()
 
-                            // Also update any visible screens behind the current one (sheet support)
-                            // ---------------------------------------------------------------------------
-                            var backState = stateHandler.getCurrentState()
+                when(val navigationResult = stateHandler.getNavigationResult<V>(screenData, activity, screenHandler)) {
+                    is NavigationResult.ErrorRead ->
+                        showError("Navigation", "Error Reading [${navigationResult.error}]")
+                    is NavigationResult.Navigate -> {
+                        Log.i("NavBit", "Navigating ${interactionResult.direction} to Screen ${StringHelper.prettyPrintSealed(navigationResult.data.toString())} - ${navigationResult.type}")
+                        switchScreen(navigationResult.data, navigationResult.type, interactionResult.direction)
+                    }
+                    is NavigationResult.Update -> {
+                        Log.i("NavBit", "Updating Screen ${StringHelper.prettyPrintSealed(navigationResult.data.toString())}}")
+                        screen.notifyUpdatedData(navigationResult.data)
 
-                            for (backgroundScreen in ScreenController.getBackgroundScreens()) {
-                                // Simply update them with the data that would be generated if we backed to that screen
-                                when(val backResult = interactionHandler.applyBackInteractionOnState(backState)) {
-                                    is InteractionResult.NewState -> {
-                                        backState = backResult.state
-                                        when (val screenResult = screenHandler.screenDataFromNavigationState(backState, activity)) {
-                                            is ScreenDataResult.ErrorRead -> return@let
-                                            is ScreenDataResult.Success -> {
-                                                // Make sure the data is of a correct type before updating
-                                                // The coming screen is not guaranteed to back to the one that was just shown
-                                                if (backgroundScreen.getScreenTag() == screenResult.data.tag()) {
-                                                    backgroundScreen.notifyUpdatedData(screenResult.data)
-                                                }
+                        // Also update any visible screens behind the current one (sheet support)
+                        // ---------------------------------------------------------------------------
+                        var backState = stateHandler.getCurrentState()
+
+                        for (backgroundScreen in ScreenController.getBackgroundScreens()) {
+                            // Simply update them with the data that would be generated if we backed to that screen
+                            when(val backResult = interactionHandler.applyBackInteractionOnState(backState)) {
+                                is InteractionResult.NewState -> {
+                                    backState = backResult.state
+                                    when (val screenResult = screenHandler.screenDataFromNavigationState(backState, activity)) {
+                                        is ScreenDataResult.ErrorRead -> return
+                                        is ScreenDataResult.Success -> {
+                                            // Make sure the data is of a correct type before updating
+                                            // The coming screen is not guaranteed to back to the one that was just shown
+                                            if (backgroundScreen.getScreenTag() == screenResult.data.tag()) {
+                                                backgroundScreen.notifyUpdatedData(screenResult.data)
                                             }
                                         }
                                     }
-                                    else -> return@let
                                 }
+                                else -> return
                             }
                         }
                     }
@@ -163,6 +162,7 @@ class NavBitMainController<T : NavBitInteraction, U : NavBitNavigationState, V :
     // Screen Handling
     // --------------------------------------------------------
     private fun switchScreen(screenData: V, screenType : ScreenType, direction: TransitionDirection) {
+
         //Start by hiding any visible keyboard as it should not retain between screens
         // ---------------------------------------------------
         val view = activity.findViewById<View>(android.R.id.content)
@@ -174,8 +174,7 @@ class NavBitMainController<T : NavBitInteraction, U : NavBitNavigationState, V :
         // Get the new screen
         // ---------------------------------------------------
         Handler(Looper.getMainLooper()).post{
-            val newScreen = ScreenController.goToScreen(activity, mainContainer, screenData, screenType, direction, screenHandler)
-            currentScreen = Pair(newScreen, screenData)
+            ScreenController.goToScreen(activity, mainContainer, screenData, screenType, direction, screenHandler)
             ScreenController.cleanupScreens(activity.lifecycleScope, mainContainer)
         }
     }
