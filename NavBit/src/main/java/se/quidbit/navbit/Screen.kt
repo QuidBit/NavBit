@@ -214,7 +214,7 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
             addListener(object : AnimatorListener {
                 override fun onAnimationEnd(p0: Animator) {
                     if (exiting &&
-                        transition.direction == TransitionDirection.Backward || transition.type.hideOnExit()
+                        (transition.direction == TransitionDirection.Backward || transition.type.hideOnExit())
                     ) {
                         screen.visibility = INVISIBLE
                     }
