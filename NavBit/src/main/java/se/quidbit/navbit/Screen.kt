@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
+import androidx.core.content.ContextCompat
 import androidx.core.view.doOnLayout
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -49,6 +50,9 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
                 // ----------------------------------------------------
                 val layoutId = layoutIds.full ?:  throw IllegalStateException("Screen does not support Full type")
                 LayoutInflater.from(context).inflate(layoutId, this, true)
+
+                val color = ContextCompat.getColor(context, R.color.screen_full_background)
+                setBackgroundColor(color)
             }
             ScreenType.Sheet -> {
                 // Inflate layout
@@ -114,6 +118,7 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
     fun restoreScreen(newData : NavBitScreenData) {
         storeNewData(newData)
         entering(data) {
+            startBackgroundWork()
             this.visibility = View.VISIBLE
         }
     }

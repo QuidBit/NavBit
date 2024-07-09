@@ -24,7 +24,7 @@
         android:layout_alignParentBottom="true"
         android:background="@drawable/sheet"
         app:cardCornerRadius="24dp"
-        app:cardBackgroundColor="@color/app_background">
+        app:cardBackgroundColor="@color/screen_sheet_popup_background">
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -36,17 +36,15 @@
                 android:layout_width="30dp"
                 android:layout_height="4dp"
                 android:layout_marginTop="6dp"
-                app:cardCornerRadius="3dp"
-                app:cardBackgroundColor="@color/black"
-                android:alpha="0.3"
-                android:layout_gravity="center_horizontal"/>
+                android:layout_gravity="center_horizontal"
+                app:cardBackgroundColor="@color/sheet_line"
+                app:cardCornerRadius="3dp"/>
 
             <FrameLayout
                 android:id="@+id/sheet_content_area"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="16dp"/>
-
 
             <ImageView
                 android:id="@+id/bottomSheetClose"

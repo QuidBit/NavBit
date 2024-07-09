@@ -7,4 +7,5 @@ sealed class ScreenData : NavBitScreenData {
     object ClearCheck : ScreenData()
     object Info : ScreenData()
     object InfoDetails : ScreenData()
+    object Timer : ScreenData()
 }

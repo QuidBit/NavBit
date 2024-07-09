@@ -8,6 +8,7 @@ sealed class Interaction : NavBitInteraction() {
     object ClearPerform : Interaction()
     object ViewSheetsInfo  : Interaction()
     object ViewSheetsInfoDetails  : Interaction()
+    object GoToTimer  : Interaction()
     object Done  : Interaction()
     object Increment  : Interaction()
 }

@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#000000</color>
-    <color name="app_background">#FFFFFF</color>
-
+    <!-- Differs in light and dark mode -->
     <color name="container_background">#EEEEEE</color>
-    <color name="navigation_icons">#333333</color>
+    <color name="screen_full_background">#FFFFFF</color>
+    <color name="screen_sheet_popup_background">#FFFFFF</color>
 
-    <color name="popup_shadow">#BA000000</color>
+    <color name="navigation_icons">#333333</color>
+    <color name="sheet_line">#CCCCCC</color>
+
+    <color name="sheet_popup_shadow_background">#4D808080</color>
+
+    <!-- Same in dark mode -->
+    <color name="popup_shadow_edge">#BA000000</color>
 </resources>

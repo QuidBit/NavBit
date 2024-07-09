@@ -7,6 +7,7 @@ sealed class NavigationState : NavBitNavigationState() {
     class ClearCheck(var count : Int) : NavigationState()
     class Info(var count : Int) : NavigationState()
     class InfoDetails(var count : Int) : NavigationState()
+    class Timer(var count : Int) : NavigationState()
 
     override fun deepCopy(): NavigationState {
         return when (this) {
@@ -14,6 +15,7 @@ sealed class NavigationState : NavBitNavigationState() {
             is ClearCheck -> ClearCheck(count)
             is Info -> Info(count)
             is InfoDetails -> InfoDetails(count)
+            is Timer -> Timer(count)
         }
     }
 }

@@ -13,6 +13,7 @@ import se.soderstrom.navbitdemo.screens.PopupClearScreen
 import se.soderstrom.navbitdemo.screens.SheetsInfoDetailsScreen
 import se.soderstrom.navbitdemo.screens.SheetsInfoScreen
 import se.soderstrom.navbitdemo.screens.StartScreen
+import se.soderstrom.navbitdemo.screens.TimerScreen
 
 class ScreenHandler : NavBitScreenHandler<ScreenData>() {
     override fun generateNewScreen(
@@ -21,15 +22,11 @@ class ScreenHandler : NavBitScreenHandler<ScreenData>() {
         type: ScreenType
     ): Screen<*> {
         return when (screenData) {
-            // Supports only fullscreen
             is ScreenData.Start -> StartScreen(context)
             is ScreenData.ClearCheck -> PopupClearScreen(context)
             is ScreenData.Info -> SheetsInfoScreen(context)
             is ScreenData.InfoDetails -> SheetsInfoDetailsScreen(context)
-
-            // Supports only sheet
-
-            // Supports both
+            is ScreenData.Timer -> TimerScreen(context)
         }
     }
 
@@ -40,6 +37,7 @@ class ScreenHandler : NavBitScreenHandler<ScreenData>() {
             is ScreenData.ClearCheck -> ScreenData.ClearCheck
             is ScreenData.Info -> ScreenData.Info
             is ScreenData.InfoDetails -> ScreenData.InfoDetails
+            is ScreenData.Timer -> ScreenData.Timer
         }
     }
 
@@ -64,6 +62,7 @@ class ScreenHandler : NavBitScreenHandler<ScreenData>() {
                 screenType = ScreenType.Sheet
                 ScreenData.InfoDetails
             }
+            is NavigationState.Timer -> ScreenData.Timer
         }
 
         return ScreenDataResult.Success(screenData, screenType)

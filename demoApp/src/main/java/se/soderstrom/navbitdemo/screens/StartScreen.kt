@@ -41,6 +41,11 @@ class StartScreen(context : Context) : Screen<ScreenData.Start>(context) {
             EventBus.getDefault().post(Interaction.ClearCheck)
         }
 
+        val timerButton = view.findViewById<MaterialCardView>(R.id.timer_button)
+        timerButton.setOnClickListener {
+            EventBus.getDefault().post(Interaction.GoToTimer)
+        }
+
         return ScreenInsets()
     }
 

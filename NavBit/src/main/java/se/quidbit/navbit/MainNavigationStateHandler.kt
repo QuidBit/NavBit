@@ -8,15 +8,15 @@ abstract class NavBitNavigationStateHandler <T : NavBitNavigationState, U : NavB
 
     fun setCurrentState(state : T) {
         this.state = state
-        onSettingState(state)
+        storeStartupNavigationState(state)
     }
 
     fun initialize() : StartState {
         // We should only perform an initialization if a state is not set (on app startup)
         // Not after a screen rotation, in which everything is set up again as well
         return if (!this::state.isInitialized) {
-            val startState = prepareStartup()
-            onSettingState(startState)
+            val startState = loadStartupNavigationState()
+            storeStartupNavigationState(startState)
             setCurrentState(startState)
             StartState.New
         } else {
@@ -61,9 +61,9 @@ abstract class NavBitNavigationStateHandler <T : NavBitNavigationState, U : NavB
 
     // -------------------------------------------------------------------------------
 
-    abstract fun fallbackStartScreenData(context: Context) : U
-    abstract fun prepareStartup() : T
-    abstract fun onSettingState(state : T)
+    abstract fun fallbackStartupScreenData(context: Context) : U
+    abstract fun loadStartupNavigationState() : T
+    abstract fun storeStartupNavigationState(state : T)
 }
 
 enum class StartState {

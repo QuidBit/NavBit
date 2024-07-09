@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="container_background">#000000</color>
+    <color name="screen_full_background">#111111</color>
+    <color name="screen_sheet_popup_background">#222222</color>
+
+    <color name="navigation_icons">#EEEEEE</color>
+    <color name="sheet_line">#CCCCCC</color>
+
+    <color name="sheet_popup_shadow_background">#4D000000</color>
+</resources>

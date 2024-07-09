@@ -21,11 +21,11 @@
         android:background="@drawable/popup"
         android:layout_marginHorizontal="24dp"
         android:layout_marginVertical="8dp"
-        android:outlineSpotShadowColor="@color/popup_shadow"
-        android:outlineAmbientShadowColor="@color/popup_shadow"
+        android:outlineSpotShadowColor="@color/popup_shadow_edge"
+        android:outlineAmbientShadowColor="@color/popup_shadow_edge"
         app:cardCornerRadius="24dp"
         app:cardElevation="8dp"
-        app:cardBackgroundColor="@color/app_background">
+        app:cardBackgroundColor="@color/screen_sheet_popup_background">
 
         <FrameLayout
             android:layout_width="match_parent"

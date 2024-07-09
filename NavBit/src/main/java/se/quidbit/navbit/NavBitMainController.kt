@@ -51,7 +51,7 @@ class NavBitMainController<T : NavBitInteraction, U : NavBitNavigationState, V :
                 // -----------------------------------------------------------------------
                 val (startFragment, screenType) = when (val result = screenHandler.screenDataFromNavigationState(
                     stateHandler.getCurrentState(), activity)) {
-                    is ScreenDataResult.ErrorRead -> Pair(stateHandler.fallbackStartScreenData(activity), ScreenType.Full)
+                    is ScreenDataResult.ErrorRead -> Pair(stateHandler.fallbackStartupScreenData(activity), ScreenType.Full)
                     is ScreenDataResult.Success -> Pair(result.data, result.type)
                 }
 

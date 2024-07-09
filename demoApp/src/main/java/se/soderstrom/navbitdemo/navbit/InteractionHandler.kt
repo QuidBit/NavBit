@@ -12,6 +12,7 @@ class InteractionHandler : NavBitInteractionHandler<Interaction, NavigationState
             is NavigationState.ClearCheck -> NavigationState.Start(s.count)
             is NavigationState.Info -> NavigationState.Start(s.count)
             is NavigationState.InfoDetails -> NavigationState.Info(s.count)
+            is NavigationState.Timer -> NavigationState.Start(s.count)
         }
 
         return InteractionResult.NewState(newState, TransitionDirection.Backward)
@@ -29,7 +30,12 @@ class InteractionHandler : NavBitInteractionHandler<Interaction, NavigationState
         val newState = when (i) {
             is Interaction.Back -> return applyBackInteractionOnState(s)
             is Interaction.ClearCheck ->  when (s) {
-                is NavigationState.Start -> NavigationState.ClearCheck(s.count)
+                is NavigationState.Start -> {
+                    if (s.count > 0)
+                        NavigationState.ClearCheck(s.count)
+                    else
+                        return InteractionResult.Ignore()
+                }
                 else -> return InteractionResult.Unexpected()
             }
             is Interaction.ClearPerform ->  when (s) {
@@ -45,6 +51,10 @@ class InteractionHandler : NavBitInteractionHandler<Interaction, NavigationState
             }
             is Interaction.ViewSheetsInfoDetails -> when (s) {
                 is NavigationState.Info -> NavigationState.InfoDetails(s.count)
+                else -> return InteractionResult.Unexpected()
+            }
+            is Interaction.GoToTimer -> when (s) {
+                is NavigationState.Start -> NavigationState.Timer(s.count)
                 else -> return InteractionResult.Unexpected()
             }
             is Interaction.Done -> when (s) {
