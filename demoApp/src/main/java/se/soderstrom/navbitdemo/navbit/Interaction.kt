@@ -11,4 +11,5 @@ sealed class Interaction : NavBitInteraction() {
     object GoToTimer  : Interaction()
     object Done  : Interaction()
     object Increment  : Interaction()
+    object Expand  : Interaction()
 }

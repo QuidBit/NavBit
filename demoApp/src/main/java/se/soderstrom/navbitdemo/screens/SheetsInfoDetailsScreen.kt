@@ -2,6 +2,8 @@ package se.soderstrom.navbitdemo.screens
 
 import android.content.Context
 import android.view.View
+import android.widget.LinearLayout
+import android.widget.TextView
 import com.google.android.material.card.MaterialCardView
 import org.greenrobot.eventbus.EventBus
 import se.quidbit.navbit.BackgroundWork
@@ -15,6 +17,8 @@ import se.soderstrom.navbitdemo.navbit.ScreenData
 
 class SheetsInfoDetailsScreen(context : Context) : Screen<ScreenData.InfoDetails>(context) {
 
+    lateinit var expandText : TextView
+
     override fun getLayoutIds(type: ScreenType): ScreenLayoutIds {
         return ScreenLayoutIds(R.layout.screen_info_details)
     }
@@ -25,14 +29,24 @@ class SheetsInfoDetailsScreen(context : Context) : Screen<ScreenData.InfoDetails
             EventBus.getDefault().post(Interaction.Done)
         }
 
-        return ScreenInsets(null, null, view, R.dimen.sheet_bottom)
+        expandText = view.findViewById(R.id.expand_text)
+        val expandButton = view.findViewById<MaterialCardView>(R.id.expand_button)
+        expandButton?.setOnClickListener{
+            EventBus.getDefault().post(Interaction.Expand)
+        }
+
+        val mainContent = view.findViewById<LinearLayout>(R.id.main_content)
+        return ScreenInsets(mainContent)
     }
 
     override fun entering(data: ScreenData.InfoDetails, notifyReady: () -> Unit) {
+        updateData(data)
         notifyReady()
     }
 
-    override fun updating(oldData: ScreenData.InfoDetails, data: ScreenData.InfoDetails) {}
+    override fun updating(oldData: ScreenData.InfoDetails, data: ScreenData.InfoDetails) {
+        updateData(data)
+    }
 
     override fun returning(oldData: ScreenData.InfoDetails?, data: ScreenData.InfoDetails, notifyReady: () -> Unit) {
         notifyReady()
@@ -40,5 +54,12 @@ class SheetsInfoDetailsScreen(context : Context) : Screen<ScreenData.InfoDetails
 
     override fun getBackgroundWork(): BackgroundWork? {
         return null
+    }
+
+    fun updateData(data : ScreenData.InfoDetails) {
+        expandText.visibility = when (data.expanded) {
+            true -> View.VISIBLE
+            false -> View.GONE
+        }
     }
 }

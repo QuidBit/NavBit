@@ -3,13 +3,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/pattern_background">
 
     <LinearLayout
+        android:id="@+id/main_content"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:paddingBottom="96dp"
         android:orientation="vertical">
 
         <TextView
@@ -17,8 +18,7 @@
             android:layout_height="wrap_content"
             android:text="It can open sheets"
             android:textColor="@color/black"
-            android:paddingTop="16dp"
-            android:paddingBottom="96dp"
+            android:paddingBottom="72dp"
             android:textSize="20sp"/>
 
         <com.google.android.material.card.MaterialCardView
@@ -40,21 +40,22 @@
                 android:layout_gravity="center"/>
         </com.google.android.material.card.MaterialCardView>
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/done_button"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/done_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="48dp"
+            app:cardBackgroundColor="@color/black"
+            app:cardCornerRadius="8dp">
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                app:cardBackgroundColor="@color/black"
-                app:cardCornerRadius="8dp">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Close"
-                    android:textSize="18sp"
-                    android:textColor="@color/white"
-                    android:layout_margin="12dp"
-                    android:layout_gravity="center"/>
-            </com.google.android.material.card.MaterialCardView>
+                android:text="Close"
+                android:textSize="18sp"
+                android:textColor="@color/white"
+                android:layout_margin="12dp"
+                android:layout_gravity="center"/>
+        </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
 </FrameLayout>

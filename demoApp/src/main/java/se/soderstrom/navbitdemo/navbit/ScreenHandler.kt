@@ -36,7 +36,7 @@ class ScreenHandler : NavBitScreenHandler<ScreenData>() {
             is ScreenData.Start -> ScreenData.Start(t.count)
             is ScreenData.ClearCheck -> ScreenData.ClearCheck
             is ScreenData.Info -> ScreenData.Info
-            is ScreenData.InfoDetails -> ScreenData.InfoDetails
+            is ScreenData.InfoDetails -> ScreenData.InfoDetails(t.expanded)
             is ScreenData.Timer -> ScreenData.Timer
         }
     }
@@ -60,7 +60,7 @@ class ScreenHandler : NavBitScreenHandler<ScreenData>() {
             }
             is NavigationState.InfoDetails -> {
                 screenType = ScreenType.Sheet
-                ScreenData.InfoDetails
+                ScreenData.InfoDetails(s.expanded)
             }
             is NavigationState.Timer -> ScreenData.Timer
         }
@@ -72,6 +72,9 @@ class ScreenHandler : NavBitScreenHandler<ScreenData>() {
         screenData: ScreenData,
         direction: TransitionDirection
     ): TransitionType.Full {
-        return TransitionType.Full.Slide
+        return when (screenData) {
+            is ScreenData.Start -> TransitionType.Full.Fade
+            else -> TransitionType.Full.Slide
+        }
     }
 }

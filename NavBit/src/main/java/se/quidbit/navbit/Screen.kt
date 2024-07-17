@@ -44,10 +44,10 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
     fun initialize(type : ScreenType) {
         val layoutIds = getLayoutIds(type)
 
+        // Inflate layout
+        // ------------------------------------------------------
         when (type) {
             ScreenType.Full -> {
-                // Inflate layout
-                // ----------------------------------------------------
                 val layoutId = layoutIds.full ?:  throw IllegalStateException("Screen does not support Full type")
                 LayoutInflater.from(context).inflate(layoutId, this, true)
 
@@ -55,60 +55,87 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
                 setBackgroundColor(color)
             }
             ScreenType.Sheet -> {
-                // Inflate layout
-                // ----------------------------------------------------
                 LayoutInflater.from(context).inflate(R.layout.sheet, this, true)
                 val sheetContentArea = findViewById<FrameLayout>(R.id.sheet_content_area)
 
                 val layoutId = layoutIds.sheet ?:  throw IllegalStateException("Screen does not support Sheet type")
                 LayoutInflater.from(context).inflate(layoutId, sheetContentArea, true)
-
-                // Support closing
-                // ----------------------------------------------------
-                val background = findViewById<View>(R.id.background)
-                background?.setOnClickListener{
-                    EventBus.getDefault().post(InternalInteraction.Back)
-                }
-
-                val closeIcon = findViewById<ImageView>(R.id.bottomSheetClose)
-                closeIcon?.setOnClickListener{
-                    EventBus.getDefault().post(InternalInteraction.Back)
-                }
             }
             ScreenType.PopUp -> {
-                // Inflate layout
-                // ----------------------------------------------------
                 LayoutInflater.from(context).inflate(R.layout.popup, this, true)
                 val sheetContentArea = findViewById<FrameLayout>(R.id.popup_content_area)
 
                 val layoutId = layoutIds.popup ?:  throw IllegalStateException("Screen does not support Sheet type")
                 LayoutInflater.from(context).inflate(layoutId, sheetContentArea, true)
-
-                // Support closing
-                // ----------------------------------------------------
-                val background = findViewById<View>(R.id.background)
-                background?.setOnClickListener{
-                    EventBus.getDefault().post(InternalInteraction.Back)
-                }
-
-                val closeIcon = findViewById<ImageView>(R.id.bottomSheetClose)
-                closeIcon?.setOnClickListener{
-                    EventBus.getDefault().post(InternalInteraction.Back)
-                }
             }
         }
 
-        // Set insets
+        // Support closing
+        // ------------------------------------------------------
+        if (type == ScreenType.Sheet || type == ScreenType.PopUp) {
+            val background = findViewById<View>(R.id.background)
+            background?.setOnClickListener {
+                requestExit()
+            }
+
+            val closeIcon = findViewById<ImageView>(R.id.closeButton)
+            closeIcon?.setOnClickListener{
+                requestExit()
+            }
+        }
+
+        // Set up screen insets
         // ----------------------------------------------------
         val screenInsets = prepareLayout(this, type)
-        screenInsets.setUpListeners()
 
+        // Prepare the correct insets for the screen type
+        val finalScreenInsets = when (type) {
+            // Use as defined
+            ScreenType.Full -> screenInsets
+
+            ScreenType.Sheet -> {
+                // As the sheet never reaches the top, no topInset is needed
+                // Instead, a basic constant inset is added to the top to not overlap with the handle
+                val topPaddingId = screenInsets.topExtraPaddingId ?: R.dimen.sheet_padding_top
+
+                screenInsets.topView?.let {
+                    val topPadding = context.resources.getDimensionPixelSize(topPaddingId)
+                    it.setPadding(
+                        it.paddingLeft,
+                        topPadding,
+                        it.paddingRight,
+                        it.paddingBottom
+                    )
+                }
+
+                ScreenInsets(
+                    null,
+                    null,
+                    screenInsets.bottomView,
+                    screenInsets.bottomExtraPaddingId ?: R.dimen.sheet_padding_bottom
+                )
+            }
+
+            // No insets needed for a popup as it is centered, if it fits on screen it fits!
+            ScreenType.PopUp -> null
+        }
+
+        finalScreenInsets?.setUpListeners()
+
+        // Set up input blocker
+        // ---------------------------------------------------------------------
         // In order to consume all touch/input when the screen is leaving
         inputBlocker = InputBlocker(context)
         inputBlocker.z = 10f
         addView(inputBlocker)
 
         this.visibility = View.INVISIBLE
+    }
+
+    private fun requestExit() {
+        if (!exiting) {
+            EventBus.getDefault().post(InternalInteraction.Back)
+        }
     }
 
     // -------------------------------------------------------------

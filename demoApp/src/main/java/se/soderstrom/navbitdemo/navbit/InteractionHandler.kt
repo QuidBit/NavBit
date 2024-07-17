@@ -50,7 +50,7 @@ class InteractionHandler : NavBitInteractionHandler<Interaction, NavigationState
                 else -> return InteractionResult.Unexpected()
             }
             is Interaction.ViewSheetsInfoDetails -> when (s) {
-                is NavigationState.Info -> NavigationState.InfoDetails(s.count)
+                is NavigationState.Info -> NavigationState.InfoDetails(s.count, false)
                 else -> return InteractionResult.Unexpected()
             }
             is Interaction.GoToTimer -> when (s) {
@@ -66,6 +66,10 @@ class InteractionHandler : NavBitInteractionHandler<Interaction, NavigationState
             }
             is Interaction.Increment -> when (s) {
                 is NavigationState.Start -> NavigationState.Start(s.count + 1)
+                else -> return InteractionResult.Unexpected()
+            }
+            is Interaction.Expand -> when (s) {
+                is NavigationState.InfoDetails -> NavigationState.InfoDetails(s.count, !s.expanded)
                 else -> return InteractionResult.Unexpected()
             }
         }

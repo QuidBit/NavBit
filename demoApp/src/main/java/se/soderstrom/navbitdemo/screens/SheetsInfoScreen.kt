@@ -2,6 +2,7 @@ package se.soderstrom.navbitdemo.screens
 
 import android.content.Context
 import android.view.View
+import android.widget.LinearLayout
 import com.google.android.material.card.MaterialCardView
 import org.greenrobot.eventbus.EventBus
 import se.quidbit.navbit.BackgroundWork
@@ -30,7 +31,8 @@ class SheetsInfoScreen(context : Context) : Screen<ScreenData.Info>(context) {
             EventBus.getDefault().post(Interaction.Back)
         }
 
-        return ScreenInsets(null, null, view, null)
+        val mainContent = view.findViewById<LinearLayout>(R.id.main_content)
+        return ScreenInsets(mainContent)
     }
 
     override fun entering(data: ScreenData.Info, notifyReady: () -> Unit) {

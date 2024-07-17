@@ -2,26 +2,32 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main_content"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:animateLayoutChanges="true"
     android:elevation="8dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:paddingVertical="16dp"
-            android:text="In multiple layers"
-            android:textColor="@color/black"
-            android:textSize="20sp"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:paddingVertical="16dp"
+        android:text="In multiple layers"
+        android:textColor="@color/black"
+        android:textSize="20sp"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center">
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/done_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginVertical="16dp"
+            android:layout_margin="16dp"
             app:cardBackgroundColor="@color/black"
             app:cardCornerRadius="8dp">
 
@@ -36,6 +42,36 @@
 
         </com.google.android.material.card.MaterialCardView>
 
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/expand_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="16dp"
+            app:cardBackgroundColor="@color/teal_700"
+            app:cardCornerRadius="8dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Expand"
+                android:textSize="18sp"
+                android:textColor="@color/white"
+                android:layout_margin="12dp"
+                android:layout_gravity="center"/>
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
+
+
+    <TextView
+        android:id="@+id/expand_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at lorem vel sapien mattis malesuada. Integer imperdiet vulputate dignissim. Donec quis accumsan felis. Donec et accumsan est. Phasellus tristique tellus sit amet turpis sodales tempor. Donec eleifend turpis hendrerit neque scelerisque, eu feugiat mi pretium. Sed fermentum arcu sed mi consectetur, ut ultrices est fringilla. Mauris ac elementum libero. Aliquam rhoncus leo eros, eu interdum purus laoreet sit amet."
+        android:textSize="18sp"
+        android:textColor="@color/black"
+        android:layout_marginVertical="24dp"
+        android:layout_marginHorizontal="48dp"
+        android:layout_gravity="center" />
     <View
         android:id="@+id/bottom_inset"
         android:layout_width="match_parent"

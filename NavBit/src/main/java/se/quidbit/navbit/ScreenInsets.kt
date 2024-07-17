@@ -16,6 +16,7 @@ data class ScreenInsets (
     val bottomExtraPaddingId: Int?,
 ) {
     constructor() : this(null, null, null, null)
+    constructor(contentView: View?) : this(contentView, null, contentView, null)
     constructor(topView: View?, bottomView: View?) : this(topView, null, bottomView, null)
 
     constructor(topView: View?, topExtraPaddingId: Int, bottomView: View?) : this(topView, topExtraPaddingId, bottomView, null)

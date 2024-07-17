@@ -2,8 +2,10 @@ package se.quidbit.navbit
 
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
+import android.content.Context
 import android.content.res.Resources
 import android.view.View
+import android.provider.Settings
 
 sealed class TransitionType {
     object Sheet : TransitionType()
@@ -32,7 +34,14 @@ data class ScreenTransition (
     var direction : TransitionDirection,
 ) {
     companion object {
-        const val TRANSITION_LENGTH = 250L
+        fun getTransitionLength(context: Context): Long {
+            val scale = Settings.Global.getFloat(
+                context.contentResolver,
+                Settings.Global.TRANSITION_ANIMATION_SCALE,
+                1.0f
+            )
+            return (250 * scale).toLong()
+        }
     }
 
     fun asEnteringAnimation(view: View) : ObjectAnimator {
@@ -43,10 +52,11 @@ data class ScreenTransition (
             PropertyValuesHolder.ofFloat(View.TRANSLATION_X, view.translationX, 0.0f),
             PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, view.translationY, 0.0f),
             PropertyValuesHolder.ofFloat(View.ALPHA, view.alpha, 1.0f),
-        ).setDuration(TRANSITION_LENGTH)
+        ).setDuration(getTransitionLength(view.context))
     }
 
     fun asLeavingAnimation(view: View) : ObjectAnimator {
+        val transitionLength = getTransitionLength(view.context)
 
         return when(type) {
             TransitionType.Full.Slide -> when (direction) {
@@ -57,7 +67,7 @@ data class ScreenTransition (
                         PropertyValuesHolder.ofFloat(View.SCALE_Y, view.scaleY, 0.8f),
                         PropertyValuesHolder.ofFloat(View.TRANSLATION_X, view.translationX, 0.0f),
                         PropertyValuesHolder.ofFloat(View.ALPHA, view.alpha, 1.0f),
-                    ).setDuration(TRANSITION_LENGTH)
+                    ).setDuration(transitionLength)
 
                 TransitionDirection.Backward ->
                     ObjectAnimator.ofPropertyValuesHolder(
@@ -70,7 +80,7 @@ data class ScreenTransition (
                             Resources.getSystem().displayMetrics.widthPixels.toFloat()
                         ),
                         PropertyValuesHolder.ofFloat(View.ALPHA, view.alpha, 1.0f)
-                    ).setDuration(TRANSITION_LENGTH)
+                    ).setDuration(transitionLength)
             }
             TransitionType.Full.Fade ->
                 ObjectAnimator.ofPropertyValuesHolder(
@@ -79,7 +89,7 @@ data class ScreenTransition (
                     PropertyValuesHolder.ofFloat(View.SCALE_Y, view.scaleY, 1.0f),
                     PropertyValuesHolder.ofFloat(View.TRANSLATION_X, view.translationX, 0.0f),
                     PropertyValuesHolder.ofFloat(View.ALPHA, 1.0f, 0.0f),
-                ).setDuration(TRANSITION_LENGTH)
+                ).setDuration(transitionLength)
             TransitionType.Sheet -> when (direction) {
                 TransitionDirection.Forward ->
                     ObjectAnimator.ofPropertyValuesHolder(
@@ -89,7 +99,7 @@ data class ScreenTransition (
                         PropertyValuesHolder.ofFloat(View.TRANSLATION_X, view.translationX, 0.0f),
                         PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, view.translationX, 0.0f),
                         PropertyValuesHolder.ofFloat(View.ALPHA, view.alpha, 1.0f),
-                    ).setDuration(TRANSITION_LENGTH)
+                    ).setDuration(transitionLength)
 
                 TransitionDirection.Backward ->
                     ObjectAnimator.ofPropertyValuesHolder(
@@ -103,7 +113,7 @@ data class ScreenTransition (
                             Resources.getSystem().displayMetrics.heightPixels.toFloat()
                         ),
                         PropertyValuesHolder.ofFloat(View.ALPHA, view.alpha, 1.0f)
-                    ).setDuration(TRANSITION_LENGTH)
+                    ).setDuration(transitionLength)
             }
             TransitionType.PopUp -> when (direction) {
                 TransitionDirection.Forward ->
@@ -114,7 +124,7 @@ data class ScreenTransition (
                         PropertyValuesHolder.ofFloat(View.TRANSLATION_X, view.translationX, 0.0f),
                         PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, view.translationX, 0.0f),
                         PropertyValuesHolder.ofFloat(View.ALPHA, view.alpha, 1.0f),
-                    ).setDuration(TRANSITION_LENGTH)
+                    ).setDuration(transitionLength)
 
                 TransitionDirection.Backward ->
                     ObjectAnimator.ofPropertyValuesHolder(
@@ -124,7 +134,7 @@ data class ScreenTransition (
                         PropertyValuesHolder.ofFloat(View.TRANSLATION_X, view.translationX, 0.0f),
                         PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, view.translationY, 0.0f),
                         PropertyValuesHolder.ofFloat(View.ALPHA, view.alpha, 0.0f)
-                    ).setDuration(TRANSITION_LENGTH)
+                    ).setDuration(transitionLength)
             }
         }
     }

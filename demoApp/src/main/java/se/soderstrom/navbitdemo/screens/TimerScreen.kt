@@ -4,7 +4,6 @@ import android.content.Context
 import android.view.View
 import android.widget.TextView
 import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.card.MaterialCardView
 import org.greenrobot.eventbus.EventBus
 import se.quidbit.navbit.BackgroundWork
 import se.quidbit.navbit.Screen

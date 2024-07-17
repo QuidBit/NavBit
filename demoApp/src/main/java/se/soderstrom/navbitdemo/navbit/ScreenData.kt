@@ -6,6 +6,6 @@ sealed class ScreenData : NavBitScreenData {
     class Start(var count : Int) : ScreenData()
     object ClearCheck : ScreenData()
     object Info : ScreenData()
-    object InfoDetails : ScreenData()
+    class InfoDetails(var expanded : Boolean) : ScreenData()
     object Timer : ScreenData()
 }

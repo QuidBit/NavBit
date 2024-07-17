@@ -47,7 +47,6 @@ object ScreenController {
             }
             TransitionDirection.Backward -> {
                 if (!backStackContains<T>(screenData.tag(), type)) {
-                    Log.e("NavBit", "GUSTAV BACKING TO UNAVAILABLE")
                     // We are backing to a screen that is not available
 
                     // Take the current screen
@@ -77,7 +76,6 @@ object ScreenController {
 
                     GoToResult(screen, transition, true)
                 } else {
-                    Log.e("NavBit", "GUSTAV BACKING TO AVAILABLE!!")
                     // Search the backstack in reverse order for the screen we are backing to
 
                     // Check how the current screen should be animated out
@@ -168,7 +166,7 @@ object ScreenController {
         lifecycleScope.launch(Dispatchers.IO) {
             var totalDelay = 0L
 
-            delay(ScreenTransition.TRANSITION_LENGTH + timeSpacing)
+            delay(ScreenTransition.getTransitionLength(mainContainer.context) + timeSpacing)
 
             // Clear all toBeRemoved that are no longer transitioning
             // ------------------------------------------------------------
