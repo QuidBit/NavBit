@@ -19,9 +19,9 @@ import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 
 // ------------------------------------------------------------------------------------------------------------------
-// The Fragment type to be used by all views that we navigate between with transactions
+// The Screen type to be used by all views that we navigate between with transactions
 // -----------------------------------------------------------------------------------------------------------------
-// Note: All functions are abstract for clarity, forcing all function the fragment can/should implement being clearly visible
+// Note: All functions are abstract for clarity, forcing all function the screen can/should implement being clearly visible
 
 abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(context) {
     private lateinit var data: T
@@ -336,17 +336,17 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
     // The three main navigation functions
     //------------------------------------------------
 
-    // Entering the fragment (user going forwards)
+    // Entering the screen (user going forwards)
     abstract fun entering(data: T, releaseForDisplay: (workAfter : () -> Unit) -> Unit)
 
-    // Updated state on the current fragment
+    // Updated state on the current screen
     abstract fun updating(oldData: T, data: T)
 
-    // Returning to the fragment (user going backwards)
+    // Returning to the screen (user going backwards)
     // NOTE: The screen might not have been loaded before, in which there is no oldData available
     abstract fun returning(oldData: T?, data: T, notifyReady: () -> Unit)
 
-    // Background work - Used to correctly start/stop any background work done by the fragment
+    // Background work - Used to correctly start/stop any background work done by the screen
     // ------------------------------------------------------------------------------
     abstract fun getBackgroundWork() : BackgroundWork?
 

@@ -2,6 +2,7 @@ package se.soderstrom.navbitdemo.navbit
 
 import android.content.Context
 import se.quidbit.navbit.NavBitNavigationStateHandler
+import se.quidbit.navbit.ScreenType
 import se.soderstrom.navbitdemo.BaseActivity
 
 class NavigationStateHandler : NavBitNavigationStateHandler<NavigationState, ScreenData>() {
@@ -31,5 +32,13 @@ class NavigationStateHandler : NavBitNavigationStateHandler<NavigationState, Scr
         val editor = sharedPreferences.edit()
         editor.putInt("count", count)
         editor.apply()
+    }
+
+    override fun getScreenToPreload(state: NavigationState): Pair<ScreenData, ScreenType>? {
+        return when (state) {
+            is NavigationState.Start -> Pair(ScreenData.Timer, ScreenType.Full)
+            is NavigationState.Info -> Pair(ScreenData.InfoDetails(false), ScreenType.Sheet)
+            else -> null
+        }
     }
 }

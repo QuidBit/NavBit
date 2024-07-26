@@ -33,7 +33,7 @@ abstract class NavBitNavigationStateHandler <T : NavBitNavigationState, U : NavB
 
     fun <T : NavBitScreenData>getNavigationResult(oldScreenData: U, baseActivity: AppCompatActivity, screenGenerator : NavBitScreenHandler<U>) : NavigationResult<U> {
 
-        // Check if we are navigating elsewhere, or simply updating a current fragment
+        // Check if we are navigating elsewhere, or simply updating a current screen
         val (newScreenData, newScreenType) = when (val screenResult =
             screenGenerator.screenDataFromNavigationState(
                 state,
@@ -64,6 +64,8 @@ abstract class NavBitNavigationStateHandler <T : NavBitNavigationState, U : NavB
     abstract fun fallbackStartupScreenData(context: Context) : U
     abstract fun loadStartupNavigationState() : T
     abstract fun storeStartupNavigationState(state : T)
+
+    abstract fun getScreenToPreload(state : T) : Pair<U, ScreenType>?
 }
 
 enum class StartState {

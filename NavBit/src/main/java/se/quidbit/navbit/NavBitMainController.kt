@@ -1,7 +1,5 @@
 package se.quidbit.navbit
 
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -48,15 +46,15 @@ class NavBitMainController<T : NavBitInteraction, U : NavBitNavigationState, V :
                 // Go to the start screen
                 //  Note: Ideally, this should use the interaction system to reduce this code duplication
                 // -----------------------------------------------------------------------
-                val (startFragment, screenType) = when (val result = screenHandler.screenDataFromNavigationState(
+                val (startScreen, screenType) = when (val result = screenHandler.screenDataFromNavigationState(
                     stateHandler.getCurrentState(), activity)) {
                     is ScreenDataResult.ErrorRead -> Pair(stateHandler.fallbackStartupScreenData(activity), ScreenType.Full)
                     is ScreenDataResult.Success -> Pair(result.data, result.type)
                 }
 
-                // Open the fragment
+                // Open the screen
                 //----------------------------------------
-                switchScreen(startFragment, screenType, TransitionDirection.Forward)
+                switchScreen(stateHandler.getCurrentState(), startScreen, screenType, TransitionDirection.Forward)
             }
         }
     }
@@ -104,7 +102,7 @@ class NavBitMainController<T : NavBitInteraction, U : NavBitNavigationState, V :
                         showError("Navigation", "Error Reading [${navigationResult.error}]")
                     is NavigationResult.Navigate -> {
                         Log.i("NavBit", "Navigating ${interactionResult.direction} to Screen ${StringHelper.prettyPrintSealed(navigationResult.data.toString())} - ${navigationResult.type}")
-                        switchScreen(navigationResult.data, navigationResult.type, interactionResult.direction)
+                        switchScreen(interactionResult.state, navigationResult.data, navigationResult.type, interactionResult.direction)
                     }
                     is NavigationResult.Update -> {
                         Log.i("NavBit", "Updating Screen ${StringHelper.prettyPrintSealed(navigationResult.data.toString())}}")
@@ -160,7 +158,7 @@ class NavBitMainController<T : NavBitInteraction, U : NavBitNavigationState, V :
     // --------------------------------------------------------
     // Screen Handling
     // --------------------------------------------------------
-    private fun switchScreen(screenData: V, screenType : ScreenType, direction: TransitionDirection) {
+    private fun switchScreen(state : U, screenData: V, screenType : ScreenType, direction: TransitionDirection) {
 
         //Start by hiding any visible keyboard as it should not retain between screens
         // ---------------------------------------------------
@@ -170,11 +168,15 @@ class NavBitMainController<T : NavBitInteraction, U : NavBitNavigationState, V :
             imm.hideSoftInputFromWindow(view.windowToken, 0)
         }
 
-        // Get the new screen
+        // Go to the new screen
         // ---------------------------------------------------
         NavBitActivity.backgroundHandler.post {
             ScreenController.goToScreen(activity, mainContainer, screenData, screenType, direction, screenHandler)
             ScreenController.cleanupScreens(activity.lifecycleScope, mainContainer)
+
+            stateHandler.getScreenToPreload(state)?.let { (data, screenType) ->
+                ScreenController.preInitializeScreen(activity, screenHandler, data, screenType)
+            }
         }
     }
 }

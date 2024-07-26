@@ -53,7 +53,7 @@ abstract class NavBitActivity<T : NavBitInteraction, U : NavBitNavigationState, 
         // --------------------------------------------------------
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                // Backing is always allowed regardless if we are mid fragment switching
+                // Backing is always allowed regardless if we are mid screen switching
                 navBitMainController.handleInteraction(interactionHandler.getBackInteraction())
             }
         })

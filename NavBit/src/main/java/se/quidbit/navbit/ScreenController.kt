@@ -1,8 +1,6 @@
 package se.quidbit.navbit
 
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
@@ -12,11 +10,59 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+sealed class ScreenPreInitializedState {
+    class InProgress(val onDone : ((Screen<*>) -> Unit)?) : ScreenPreInitializedState()
+    class Done(val screen : Screen<*>) : ScreenPreInitializedState()
+}
 object ScreenController {
     private val backstack   = ArrayList<Pair<Screen<*>, ScreenType>>()
     private val toBeRemoved = ArrayList<Pair<Screen<*>, ScreenType>>()
 
     private val toBeRestored = ArrayList<Pair<NavBitScreenData, ScreenType>>()
+
+    private val preInitializedScreens = HashMap<String, ScreenPreInitializedState>()
+
+    private fun preInitId(data : NavBitScreenData, type : ScreenType) : String {
+        return "${data.tag()}${type}"
+    }
+
+    fun <T : NavBitScreenData> preInitializeScreen(
+        context : Context,
+        screenHandler: NavBitScreenHandler<T>,
+        screenData : NavBitScreenData,
+        type : ScreenType,
+    ) {
+        val id = preInitId(screenData, type)
+        Log.e("ScreenController", "[$id] - Pre-initialize")
+
+        // Check so it has not already been requested
+        if (preInitializedScreens.containsKey(id)) {
+            return
+        }
+
+        // It has not, so start!
+        preInitializedScreens[id] = ScreenPreInitializedState.InProgress(null)
+        screenHandler.startGenerateNewScreen(context, screenData as T, type) { screen ->
+            Log.e("ScreenController", "[$id] - Pre-initialize --READY")
+
+            preInitializedScreens[id]?.let { state ->
+                when (state) {
+                    is ScreenPreInitializedState.InProgress -> {
+                        if (state.onDone != null) {
+                            Log.e("ScreenController", "[$id] - Pre-initialize----Use directly")
+                            state.onDone.invoke(screen)
+                            preInitializedScreens.remove(screenData.tag())
+                        } else {
+                            // Store for later use
+                            Log.e("ScreenController", "[$id] - Pre-initialize ----Store for later")
+                            preInitializedScreens[id] = ScreenPreInitializedState.Done(screen)
+                        }
+                    }
+                    is ScreenPreInitializedState.Done -> {}
+                }
+            }
+        }
+    }
 
     fun <T : NavBitScreenData> goToScreen(
         context : Context,
@@ -41,8 +87,35 @@ object ScreenController {
 
                 // Add the new screen
                 // ----------------------------------------------------------
-                addNewScreen(context, screenData, type, screenHandler) {
-                    completeGoToScreen(it, transition, true, mainContainer, screenData)
+                // Check if it is available among the pre-initialized
+                val id = preInitId(screenData, type)
+
+                preInitializedScreens[id]?.let { state ->
+                    when (state) {
+                        // It is done, so use it now
+                        is ScreenPreInitializedState.Done -> {
+                            Log.e("ScreenController", "[$id] - GoTo --- DIRECTLY")
+                            backstack.add(Pair(state.screen, type))
+                            completeGoToScreen(state.screen, transition, true, mainContainer, screenData)
+                            preInitializedScreens.remove(id)
+                        }
+                        // Wait for its completion
+                        is ScreenPreInitializedState.InProgress -> {
+                            Log.e("ScreenController", "[$id] - GoTo --- Wait for ready...")
+                            preInitializedScreens[id] = ScreenPreInitializedState.InProgress {
+                                backstack.add(Pair(it, type))
+                                completeGoToScreen(it, transition, true, mainContainer, screenData)
+                                preInitializedScreens.remove(id)
+                            }
+                        }
+                    }
+                }
+                // Not available, so generate a new screen
+                ?: run {
+                    Log.e("ScreenController", "[$id] - GoTo --- Generate")
+                    addNewScreen(context, screenData, type, screenHandler) {
+                        completeGoToScreen(it, transition, true, mainContainer, screenData)
+                    }
                 }
             }
             TransitionDirection.Backward -> {
