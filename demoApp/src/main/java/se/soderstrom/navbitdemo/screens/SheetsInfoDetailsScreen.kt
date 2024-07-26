@@ -17,6 +17,7 @@ import se.soderstrom.navbitdemo.navbit.ScreenData
 
 class SheetsInfoDetailsScreen(context : Context) : Screen<ScreenData.InfoDetails>(context) {
 
+    lateinit var expandButtonText : TextView
     lateinit var expandText : TextView
 
     override fun getLayoutIds(type: ScreenType): ScreenLayoutIds {
@@ -29,6 +30,7 @@ class SheetsInfoDetailsScreen(context : Context) : Screen<ScreenData.InfoDetails
             EventBus.getDefault().post(Interaction.Done)
         }
 
+        expandButtonText = view.findViewById(R.id.expand_button_text)
         expandText = view.findViewById(R.id.expand_text)
         val expandButton = view.findViewById<MaterialCardView>(R.id.expand_button)
         expandButton?.setOnClickListener{
@@ -39,9 +41,9 @@ class SheetsInfoDetailsScreen(context : Context) : Screen<ScreenData.InfoDetails
         return ScreenInsets(mainContent)
     }
 
-    override fun entering(data: ScreenData.InfoDetails, notifyReady: () -> Unit) {
+    override fun entering(data: ScreenData.InfoDetails, releaseForDisplay: (workAfter : () -> Unit) -> Unit) {
         updateData(data)
-        notifyReady()
+        releaseForDisplay{}
     }
 
     override fun updating(oldData: ScreenData.InfoDetails, data: ScreenData.InfoDetails) {
@@ -56,10 +58,14 @@ class SheetsInfoDetailsScreen(context : Context) : Screen<ScreenData.InfoDetails
         return null
     }
 
-    fun updateData(data : ScreenData.InfoDetails) {
+    private fun updateData(data : ScreenData.InfoDetails) {
+        expandButtonText.text = when (data.expanded) {
+            false -> "Expand"
+            true -> "Collapse"
+        }
         expandText.visibility = when (data.expanded) {
-            true -> View.VISIBLE
             false -> View.GONE
+            true -> View.VISIBLE
         }
     }
 }

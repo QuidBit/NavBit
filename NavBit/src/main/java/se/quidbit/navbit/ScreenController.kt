@@ -34,14 +34,14 @@ object ScreenController {
                 val transition = screenHandler.getScreenTransition(screenData, type, direction)
 
                 backstack.lastOrNull()?.let { (oldScreen, _) ->
-                    Handler(Looper.getMainLooper()).post {
+                    NavBitActivity.mainHandler.post {
                         oldScreen.initiateLeavingTransition(transition)
                     }
                 }
 
                 // Add the new screen
                 // ----------------------------------------------------------
-                val screen = addNewScreen(context, mainContainer, screenData, type, screenHandler)
+                val screen = addNewScreen(context, screenData, type, screenHandler)
 
                 GoToResult(screen, transition, true)
             }
@@ -56,12 +56,14 @@ object ScreenController {
 
                     // Add a new screen at the end of the stack instead
                     // ------------------------------------------------------------------
-                    val screen = addNewScreen(context, mainContainer, screenData, type, screenHandler)
+                    val screen = addNewScreen(context, screenData, type, screenHandler)
 
                     // Remove and re-add the leaving screen to make sure it visually stays on top
                     // ------------------------------------------------------------------
-                    mainContainer.removeView(oldScreen)
-                    mainContainer.addView(oldScreen)
+                    NavBitActivity.mainHandler.post {
+                        mainContainer.removeView(oldScreen)
+                        mainContainer.addView(oldScreen)
+                    }
 
                     // Animate out the current screen
                     // ------------------------------------------------------------------
@@ -71,7 +73,9 @@ object ScreenController {
                         direction
                     )
 
-                    oldScreen.initiateLeavingTransition(transition)
+                    NavBitActivity.mainHandler.post {
+                        oldScreen.initiateLeavingTransition(transition)
+                    }
                     toBeRemoved.add(old)
 
                     GoToResult(screen, transition, true)
@@ -103,7 +107,7 @@ object ScreenController {
 
                     // Make sure all that is getting dropped from the backstack is also animated away
                     for (toRemoveScreen in toRemove) {
-                        Handler(Looper.getMainLooper()).post {
+                        NavBitActivity.mainHandler.post {
                             toRemoveScreen.first.initiateLeavingTransition(transition)
                         }
                     }
@@ -116,7 +120,7 @@ object ScreenController {
                     var newlyAdded = false
                     val screen = foundScreen ?: run {
                         newlyAdded = true
-                        addNewScreen(context, mainContainer, screenData, type, screenHandler)
+                        addNewScreen(context , screenData, type, screenHandler)
                     }
 
                     GoToResult(screen, transition, newlyAdded)
@@ -126,23 +130,36 @@ object ScreenController {
 
         // Animate in the screen transition (must be done on the main thread)
         // ---------------------------------------------------
-        Handler(Looper.getMainLooper()).post {
-            result.screen.initiateAppearingTransition(result.transition, screenData, result.newlyAdded)
+        result.screen.initiateAppearingTransition(result.transition, screenData, result.newlyAdded) {
+
+            if (result.newlyAdded) {
+                //--------------------------------------------------------------------
+                // DANGER ZONE
+                //--------------------------------------------------------------------
+                // Moving the generated view to a container owned by main thread for display on screen
+                // Gives great performance with most work off the main thread
+                //
+                //    BUT IT IS NOT OFFICIALLY SUPPORTED BY ANDROID
+                //
+                // To be removed if it causes issues, going back to doing all with the views on the main thread
+                //--------------------------------------------------------------------
+
+                NavBitActivity.mainHandler.post {
+                    // Make sure the screen appears with the correct insets
+                    ViewCompat.getRootWindowInsets(mainContainer)?.let { startInsets ->
+                        ViewCompat.dispatchApplyWindowInsets(result.screen, startInsets)
+                    }
+
+                    // Then add it for display
+                    mainContainer.addView(result.screen)
+                }
+            }
         }
     }
 
-    private fun <T : NavBitScreenData> addNewScreen(context: Context, mainContainer: FrameLayout, screenData : T, type : ScreenType, screenHandler : NavBitScreenHandler<T>) : Screen<*> {
+    private fun <T : NavBitScreenData> addNewScreen(context: Context , screenData : T, type : ScreenType, screenHandler : NavBitScreenHandler<T>) : Screen<*> {
         val screen = screenHandler.startGenerateNewScreen(context, screenData, type)
         backstack.add(Pair(screen, type))
-
-        // Make sure the screen appears with the correct insets
-        ViewCompat.getRootWindowInsets(mainContainer)?.let { startInsets ->
-            ViewCompat.dispatchApplyWindowInsets(screen, startInsets)
-        }
-
-        // Then add it for display
-        mainContainer.addView(screen)
-
         return screen
     }
 
@@ -175,7 +192,7 @@ object ScreenController {
                 if (remove) {
                     totalDelay += timeSpacing
 
-                    Handler(Looper.getMainLooper()).postDelayed({
+                    NavBitActivity.mainHandler.postDelayed({
                         mainContainer.removeView(screen.first)
                     }, totalDelay)
                 }
@@ -257,7 +274,7 @@ object ScreenController {
 
             val newScreen = screenHandler.startGenerateNewScreen(container.context, oldData as T, screenType)
 
-            Handler(Looper.getMainLooper()).post {
+            NavBitActivity.mainHandler.post {
                 newScreen.restoreScreen(oldData)
             }
 

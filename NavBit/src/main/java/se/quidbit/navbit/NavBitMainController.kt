@@ -17,18 +17,17 @@ class NavBitMainController<T : NavBitInteraction, U : NavBitNavigationState, V :
     private val stateHandler: NavBitNavigationStateHandler<U, V>,
     private val screenHandler: NavBitScreenHandler<V>
 ) {
-    private var mainContainer : FrameLayout
+    // Set up the container
+    // --------------------------------------------------------
+    private var mainContainer : FrameLayout = FrameLayout(activity).apply {
+        layoutParams = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        )
+        setBackgroundResource(R.color.container_background)
+    }
 
     init {
-        // Set up the container
-        // --------------------------------------------------------
-        mainContainer = FrameLayout(activity).apply {
-            layoutParams = FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT
-            )
-            setBackgroundResource(R.color.container_background)
-        }
         activity.setContentView(mainContainer)
 
         ViewCompat.setOnApplyWindowInsetsListener(mainContainer) { _, insets ->
@@ -147,7 +146,7 @@ class NavBitMainController<T : NavBitInteraction, U : NavBitNavigationState, V :
         Log.e("NavBit", "$source $infoString")
 
         // If we are debugging, we can show the error directly on screen for simplicity
-        Handler(Looper.getMainLooper()).post {
+        NavBitActivity.mainHandler.post {
             if (BuildConfig.DEBUG) {
                 Toast.makeText(
                     activity,
@@ -173,7 +172,7 @@ class NavBitMainController<T : NavBitInteraction, U : NavBitNavigationState, V :
 
         // Get the new screen
         // ---------------------------------------------------
-        Handler(Looper.getMainLooper()).post{
+        NavBitActivity.backgroundHandler.post {
             ScreenController.goToScreen(activity, mainContainer, screenData, screenType, direction, screenHandler)
             ScreenController.cleanupScreens(activity.lifecycleScope, mainContainer)
         }

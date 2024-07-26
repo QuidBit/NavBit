@@ -40,7 +40,7 @@ data class ScreenTransition (
                 Settings.Global.TRANSITION_ANIMATION_SCALE,
                 1.0f
             )
-            return (250 * scale).toLong()
+            return (350 * scale).toLong()
         }
     }
 

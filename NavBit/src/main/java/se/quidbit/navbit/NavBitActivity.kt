@@ -1,6 +1,9 @@
 package se.quidbit.navbit
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.HandlerThread
+import android.os.Looper
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -15,9 +18,16 @@ abstract class NavBitActivity<T : NavBitInteraction, U : NavBitNavigationState, 
 )  : AppCompatActivity() {
 
     private lateinit var navBitMainController : NavBitMainController<T, U, V>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         instance = this
+
+        val backgroundThread = HandlerThread("NavBitThread")
+        backgroundThread.start()
+
+        backgroundHandler = Handler(backgroundThread.looper)
+        mainHandler = Handler(Looper.getMainLooper())
     }
 
     fun getScreenGenerator() : NavBitScreenHandler<V> {
@@ -81,6 +91,9 @@ abstract class NavBitActivity<T : NavBitInteraction, U : NavBitNavigationState, 
     // Access functions
     // ----------------------------------------------------
     companion object {
+        internal lateinit var backgroundHandler: Handler
+        internal lateinit var mainHandler : Handler
+
         private lateinit var instance : NavBitActivity<*,*,*>
         fun <T : NavBitInteraction, U : NavBitNavigationState, V : NavBitScreenData>getNavBitInstance() : NavBitActivity<T,U,V> {
             return instance as NavBitActivity<T, U, V>

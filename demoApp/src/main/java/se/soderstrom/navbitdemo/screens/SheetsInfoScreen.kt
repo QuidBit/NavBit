@@ -35,8 +35,8 @@ class SheetsInfoScreen(context : Context) : Screen<ScreenData.Info>(context) {
         return ScreenInsets(mainContent)
     }
 
-    override fun entering(data: ScreenData.Info, notifyReady: () -> Unit) {
-        notifyReady()
+    override fun entering(data: ScreenData.Info, releaseForDisplay: (workAfter : () -> Unit) -> Unit) {
+        releaseForDisplay{}
     }
 
     override fun updating(oldData: ScreenData.Info, data: ScreenData.Info) {}

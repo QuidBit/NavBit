@@ -35,8 +35,8 @@ class TimerScreen(context : Context) : Screen<ScreenData.Timer>(context) {
         return ScreenInsets(toolbar, null)
     }
 
-    override fun entering(data: ScreenData.Timer, notifyReady: () -> Unit) {
-        notifyReady()
+    override fun entering(data: ScreenData.Timer, releaseForDisplay: (workAfter : () -> Unit) -> Unit) {
+        releaseForDisplay{}
     }
 
     override fun updating(oldData: ScreenData.Timer, data: ScreenData.Timer) {}

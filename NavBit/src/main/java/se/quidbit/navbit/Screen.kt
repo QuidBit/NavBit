@@ -6,20 +6,17 @@ import android.animation.ObjectAnimator
 import android.content.Context
 import android.content.res.Resources
 import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.core.content.ContextCompat
-import androidx.core.view.doOnLayout
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
-import java.util.concurrent.atomic.AtomicInteger
 
 // ------------------------------------------------------------------------------------------------------------------
 // The Fragment type to be used by all views that we navigate between with transactions
@@ -34,6 +31,8 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
     private var exiting = false
 
     private lateinit var inputBlocker: InputBlocker
+
+    private var ownedByMainThread = false
 
     // -------------------------------------------------------------
     // Starting up
@@ -138,19 +137,31 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
         }
     }
 
+    // For use within any Screen implementations
+    fun screenHandler() : Handler {
+        return when (ownedByMainThread) {
+            true -> NavBitActivity.mainHandler
+            false -> NavBitActivity.backgroundHandler
+        }
+    }
+
     // -------------------------------------------------------------
     // Transitioning
     // -------------------------------------------------------------
 
     fun restoreScreen(newData : NavBitScreenData) {
         storeNewData(newData)
-        entering(data) {
-            startBackgroundWork()
-            this.visibility = View.VISIBLE
+        entering(data) { postReleaseWork ->
+            screenHandler().post {
+                startBackgroundWork()
+                this.visibility = View.VISIBLE
+
+                postReleaseWork()
+            }
         }
     }
 
-    fun initiateAppearingTransition(transition: ScreenTransition, newState: NavBitScreenData, newlyLoaded : Boolean) {
+    fun initiateAppearingTransition(transition: ScreenTransition, newState: NavBitScreenData, newlyLoaded : Boolean, moveToMainThreadForDisplay : () -> Unit) {
         exiting = false
 
         val startOutside = transition.direction == TransitionDirection.Forward || newlyLoaded
@@ -189,47 +200,53 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
         }
 
         // Populate the screen with the expected data
-        val readyCounter = AtomicInteger(0)
         when (transition.direction) {
             TransitionDirection.Forward -> {
                 storeNewData(newState)
-                entering(data) {
-                    checkReadyForAppearingTransition(readyCounter, transition)
+                entering(data) { afterRelease ->
+                    performAppearingTransition(transition, moveToMainThreadForDisplay)
+
+                    screenHandler().post {
+                        afterRelease()
+                    }
                 }
             }
 
             TransitionDirection.Backward -> {
                 val oldData = storeNewData(newState, true)
 
-                returning(oldData, data) {
-                    checkReadyForAppearingTransition(readyCounter, transition)
+                // The screen has been moved to the main container as it has already been displayed once
+                // so any manipulation must be done on the main thread
+                NavBitActivity.mainHandler.post {
+                    returning(oldData, data) {
+                        performAppearingTransition(transition, moveToMainThreadForDisplay)
+                    }
                 }
             }
         }
-
-        this.doOnLayout {
-            checkReadyForAppearingTransition(readyCounter, transition)
-        }
     }
 
-    private fun checkReadyForAppearingTransition(
-        readyCounter: AtomicInteger,
-        transition: ScreenTransition
+    private fun performAppearingTransition(
+        transition: ScreenTransition,
+        moveToMainThreadForDisplay : () -> Unit
     ) {
-        if (readyCounter.incrementAndGet() != 2) {
-            return
-        }
-
         this.visibility = View.VISIBLE
         inputBlocker.block(false)
 
         startBackgroundWork()
 
-        val newAnimation = transition.asEnteringAnimation(this)
+        // Add the screen to the main container for display
+        moveToMainThreadForDisplay()
+        ownedByMainThread = true
 
-        transitionAnimation?.cancel()
-        transitionAnimation = newAnimation
-        transitionAnimation?.start()
+        // Any further interactions must be done on the main thread
+        NavBitActivity.mainHandler.post {
+            val newAnimation = transition.asEnteringAnimation(this)
+
+            transitionAnimation?.cancel()
+            transitionAnimation = newAnimation
+            transitionAnimation?.start()
+        }
     }
 
     // -------------------------------------------------------------
@@ -304,7 +321,7 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
         storeNewData(updatedData, true)?.let { oldData ->
 
             // Make any view changes on the main thread
-            Handler(Looper.getMainLooper()).post {
+            NavBitActivity.mainHandler.post {
                 updating(oldData, data)
             }
         }
@@ -314,7 +331,7 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
     //------------------------------------------------
 
     // Entering the fragment (user going forwards)
-    abstract fun entering(data: T, notifyReady: () -> Unit)
+    abstract fun entering(data: T, releaseForDisplay: (workAfter : () -> Unit) -> Unit)
 
     // Updated state on the current fragment
     abstract fun updating(oldData: T, data: T)

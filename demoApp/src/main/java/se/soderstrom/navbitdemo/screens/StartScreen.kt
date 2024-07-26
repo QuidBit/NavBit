@@ -18,6 +18,7 @@ import se.soderstrom.navbitdemo.navbit.ScreenData
 class StartScreen(context : Context) : Screen<ScreenData.Start>(context) {
 
     private lateinit var incrementText : TextView
+    private lateinit var clearButton : MaterialCardView
 
     override fun getLayoutIds(type: ScreenType): ScreenLayoutIds {
         return ScreenLayoutIds(R.layout.screen_start)
@@ -36,7 +37,7 @@ class StartScreen(context : Context) : Screen<ScreenData.Start>(context) {
             EventBus.getDefault().post(Interaction.Increment)
         }
 
-        val clearButton = view.findViewById<MaterialCardView>(R.id.clear_button)
+        clearButton = view.findViewById(R.id.clear_button)
         clearButton.setOnClickListener {
             EventBus.getDefault().post(Interaction.ClearCheck)
         }
@@ -49,9 +50,9 @@ class StartScreen(context : Context) : Screen<ScreenData.Start>(context) {
         return ScreenInsets()
     }
 
-    override fun entering(data: ScreenData.Start, notifyReady: () -> Unit) {
+    override fun entering(data: ScreenData.Start, releaseForDisplay: (workAfter : () -> Unit) -> Unit) {
         updateData(data)
-        notifyReady()
+        releaseForDisplay {}
     }
 
     override fun updating(oldData: ScreenData.Start, data: ScreenData.Start) {
@@ -70,5 +71,10 @@ class StartScreen(context : Context) : Screen<ScreenData.Start>(context) {
     @SuppressLint("SetTextI18n")
     private fun updateData(data : ScreenData.Start) {
         incrementText.text = "Count: ${data.count}"
+
+        clearButton.alpha = when (data.count == 0) {
+            true -> 0.5f
+            false -> 1.0f
+        }
     }
 }

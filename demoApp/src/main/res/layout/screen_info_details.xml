@@ -44,10 +44,11 @@
         android:layout_marginBottom="16dp"
         app:cardBackgroundColor="@color/teal_700"
         app:cardCornerRadius="8dp">
+
         <TextView
+            android:id="@+id/expand_button_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Expand"
             android:textSize="18sp"
             android:textColor="@color/white"
             android:layout_margin="12dp"
