@@ -24,7 +24,7 @@ class TimerScreen(context : Context) : Screen<ScreenData.Timer>(context) {
         return ScreenLayoutIds(R.layout.screen_timer)
     }
 
-    override fun prepareLayout(view: View, type: ScreenType): ScreenInsets {
+    override fun prepareLayout(view: View, type: ScreenType, onPrepared: (ScreenInsets) -> Unit) {
         val toolbar = view.findViewById<MaterialToolbar>(R.id.toolbar)
         toolbar.setOnClickListener{
             EventBus.getDefault().post(Interaction.Back)
@@ -32,7 +32,7 @@ class TimerScreen(context : Context) : Screen<ScreenData.Timer>(context) {
 
         timeText = view.findViewById(R.id.timeText)
 
-        return ScreenInsets(toolbar, null)
+        onPrepared(ScreenInsets(toolbar, null))
     }
 
     override fun entering(data: ScreenData.Timer, releaseForDisplay: (workAfter : () -> Unit) -> Unit) {

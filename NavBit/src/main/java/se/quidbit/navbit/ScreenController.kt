@@ -26,7 +26,7 @@ object ScreenController {
         direction: TransitionDirection,
         screenHandler: NavBitScreenHandler<T>
     ) {
-        val result = when (direction) {
+        when (direction) {
             TransitionDirection.Forward -> {
 
                 // Animate away the current screen
@@ -41,9 +41,9 @@ object ScreenController {
 
                 // Add the new screen
                 // ----------------------------------------------------------
-                val screen = addNewScreen(context, screenData, type, screenHandler)
-
-                GoToResult(screen, transition, true)
+                addNewScreen(context, screenData, type, screenHandler) {
+                    completeGoToScreen(it, transition, true, mainContainer, screenData)
+                }
             }
             TransitionDirection.Backward -> {
                 if (!backStackContains<T>(screenData.tag(), type)) {
@@ -56,29 +56,29 @@ object ScreenController {
 
                     // Add a new screen at the end of the stack instead
                     // ------------------------------------------------------------------
-                    val screen = addNewScreen(context, screenData, type, screenHandler)
+                    addNewScreen(context, screenData, type, screenHandler) {
+                        // Remove and re-add the leaving screen to make sure it visually stays on top
+                        // ------------------------------------------------------------------
+                        NavBitActivity.mainHandler.post {
+                            mainContainer.removeView(oldScreen)
+                            mainContainer.addView(oldScreen)
+                        }
 
-                    // Remove and re-add the leaving screen to make sure it visually stays on top
-                    // ------------------------------------------------------------------
-                    NavBitActivity.mainHandler.post {
-                        mainContainer.removeView(oldScreen)
-                        mainContainer.addView(oldScreen)
+                        // Animate out the current screen
+                        // ------------------------------------------------------------------
+                        val transition = screenHandler.getScreenTransition(
+                            oldScreen.getData(),
+                            oldType,
+                            direction
+                        )
+
+                        NavBitActivity.mainHandler.post {
+                            oldScreen.initiateLeavingTransition(transition)
+                        }
+                        toBeRemoved.add(old)
+
+                        completeGoToScreen(it, transition, true, mainContainer, screenData)
                     }
-
-                    // Animate out the current screen
-                    // ------------------------------------------------------------------
-                    val transition = screenHandler.getScreenTransition(
-                        oldScreen.getData(),
-                        oldType,
-                        direction
-                    )
-
-                    NavBitActivity.mainHandler.post {
-                        oldScreen.initiateLeavingTransition(transition)
-                    }
-                    toBeRemoved.add(old)
-
-                    GoToResult(screen, transition, true)
                 } else {
                     // Search the backstack in reverse order for the screen we are backing to
 
@@ -117,22 +117,23 @@ object ScreenController {
 
                     // NOTE! HAVING TO ADD A NEW SCREEN HERE SHOULD NEVER HAPPEN
                     // Since we check backstack contains first, but lets include it for completeness/avoid crashing
-                    var newlyAdded = false
-                    val screen = foundScreen ?: run {
-                        newlyAdded = true
-                        addNewScreen(context , screenData, type, screenHandler)
-                    }
 
-                    GoToResult(screen, transition, newlyAdded)
+                    foundScreen?.let {
+                        completeGoToScreen(it, transition, false, mainContainer, screenData)
+                    } ?: run {
+                        addNewScreen(context , screenData, type, screenHandler) {
+                            completeGoToScreen(it, transition, true, mainContainer, screenData)
+                        }
+                    }
                 }
             }
         }
+    }
 
-        // Animate in the screen transition (must be done on the main thread)
-        // ---------------------------------------------------
-        result.screen.initiateAppearingTransition(result.transition, screenData, result.newlyAdded) {
+    private fun <T : NavBitScreenData> completeGoToScreen(screen : Screen<*>, transition: ScreenTransition, newlyAdded : Boolean, mainContainer: FrameLayout, screenData: T) {
+        screen.initiateAppearingTransition(transition, screenData, newlyAdded) {
 
-            if (result.newlyAdded) {
+            if (newlyAdded) {
                 //--------------------------------------------------------------------
                 // DANGER ZONE
                 //--------------------------------------------------------------------
@@ -147,20 +148,21 @@ object ScreenController {
                 NavBitActivity.mainHandler.post {
                     // Make sure the screen appears with the correct insets
                     ViewCompat.getRootWindowInsets(mainContainer)?.let { startInsets ->
-                        ViewCompat.dispatchApplyWindowInsets(result.screen, startInsets)
+                        ViewCompat.dispatchApplyWindowInsets(screen, startInsets)
                     }
 
                     // Then add it for display
-                    mainContainer.addView(result.screen)
+                    mainContainer.addView(screen)
                 }
             }
         }
     }
 
-    private fun <T : NavBitScreenData> addNewScreen(context: Context , screenData : T, type : ScreenType, screenHandler : NavBitScreenHandler<T>) : Screen<*> {
-        val screen = screenHandler.startGenerateNewScreen(context, screenData, type)
-        backstack.add(Pair(screen, type))
-        return screen
+    private fun <T : NavBitScreenData> addNewScreen(context: Context , screenData : T, type : ScreenType, screenHandler : NavBitScreenHandler<T>, onAdded : (Screen<*>) -> Unit) {
+        screenHandler.startGenerateNewScreen(context, screenData, type) { screen ->
+            backstack.add(Pair(screen, type))
+            onAdded(screen)
+        }
     }
 
     private fun <T : NavBitScreenData> backStackContains(screenTag : String, type : ScreenType) : Boolean {
@@ -261,9 +263,6 @@ object ScreenController {
             }
         }
         backstack.clear()
-
-        // Do not restore the current screen - It is opened using the normal process
-        //toBeRestored.removeFirst()
     }
 
     fun <T : NavBitScreenData>restoreScreens(container : FrameLayout, screenHandler: NavBitScreenHandler<T>) {
@@ -272,22 +271,16 @@ object ScreenController {
         for ((oldData, screenType) in toBeRestored.reversed()) {
             Log.i("NavBit", "    --- $oldData - $screenType")
 
-            val newScreen = screenHandler.startGenerateNewScreen(container.context, oldData as T, screenType)
+            screenHandler.startGenerateNewScreen(container.context, oldData as T, screenType) { newScreen ->
+                NavBitActivity.mainHandler.post {
+                    newScreen.restoreScreen(oldData)
+                }
 
-            NavBitActivity.mainHandler.post {
-                newScreen.restoreScreen(oldData)
+                backstack.add(Pair(newScreen, screenType))
+                container.addView(newScreen)
             }
-
-            backstack.add(Pair(newScreen, screenType))
-            container.addView(newScreen)
         }
 
         toBeRestored.clear()
     }
 }
-
-data class GoToResult (
-    val screen : Screen<*>,
-    val transition: ScreenTransition,
-    val newlyAdded : Boolean
-)

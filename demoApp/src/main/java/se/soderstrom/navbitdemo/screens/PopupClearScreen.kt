@@ -19,7 +19,7 @@ class PopupClearScreen(context : Context) : Screen<ScreenData.ClearCheck>(contex
         return ScreenLayoutIds(R.layout.screen_clear)
     }
 
-    override fun prepareLayout(view: View, type: ScreenType): ScreenInsets {
+    override fun prepareLayout(view: View, type: ScreenType, onPrepared: (ScreenInsets) -> Unit) {
         val yesButton = view.findViewById<MaterialCardView>(R.id.yesButton)
         yesButton.setOnClickListener{
             EventBus.getDefault().post(Interaction.ClearPerform)
@@ -30,7 +30,7 @@ class PopupClearScreen(context : Context) : Screen<ScreenData.ClearCheck>(contex
             EventBus.getDefault().post(Interaction.Back)
         }
 
-        return ScreenInsets()
+        onPrepared(ScreenInsets())
     }
 
     override fun entering(data: ScreenData.ClearCheck, releaseForDisplay: (workAfter : () -> Unit) -> Unit) {

@@ -38,9 +38,9 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
     // Starting up
     // -----------------------------------------
     abstract fun getLayoutIds(type : ScreenType) : ScreenLayoutIds
-    abstract fun prepareLayout(view: View, type : ScreenType) : ScreenInsets
+    abstract fun prepareLayout(view: View, type : ScreenType, onPrepared : (ScreenInsets) -> Unit)
 
-    fun initialize(type : ScreenType) {
+    fun initialize(type : ScreenType, onInitialized : () -> Unit) {
         val layoutIds = getLayoutIds(type)
 
         // Inflate layout
@@ -85,50 +85,53 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
 
         // Set up screen insets
         // ----------------------------------------------------
-        val screenInsets = prepareLayout(this, type)
+        prepareLayout(this, type) { screenInsets ->
 
-        // Prepare the correct insets for the screen type
-        val finalScreenInsets = when (type) {
-            // Use as defined
-            ScreenType.Full -> screenInsets
+            // Prepare the correct insets for the screen type
+            val finalScreenInsets = when (type) {
+                // Use as defined
+                ScreenType.Full -> screenInsets
 
-            ScreenType.Sheet -> {
-                // As the sheet never reaches the top, no topInset is needed
-                // Instead, a basic constant inset is added to the top to not overlap with the handle
-                val topPaddingId = screenInsets.topExtraPaddingId ?: R.dimen.sheet_padding_top
+                ScreenType.Sheet -> {
+                    // As the sheet never reaches the top, no topInset is needed
+                    // Instead, a basic constant inset is added to the top to not overlap with the handle
+                    val topPaddingId = screenInsets.topExtraPaddingId ?: R.dimen.sheet_padding_top
 
-                screenInsets.topView?.let {
-                    val topPadding = context.resources.getDimensionPixelSize(topPaddingId)
-                    it.setPadding(
-                        it.paddingLeft,
-                        topPadding,
-                        it.paddingRight,
-                        it.paddingBottom
+                    screenInsets.topView?.let {
+                        val topPadding = context.resources.getDimensionPixelSize(topPaddingId)
+                        it.setPadding(
+                            it.paddingLeft,
+                            topPadding,
+                            it.paddingRight,
+                            it.paddingBottom
+                        )
+                    }
+
+                    ScreenInsets(
+                        null,
+                        null,
+                        screenInsets.bottomView,
+                        screenInsets.bottomExtraPaddingId ?: R.dimen.sheet_padding_bottom
                     )
                 }
 
-                ScreenInsets(
-                    null,
-                    null,
-                    screenInsets.bottomView,
-                    screenInsets.bottomExtraPaddingId ?: R.dimen.sheet_padding_bottom
-                )
+                // No insets needed for a popup as it is centered, if it fits on screen it fits!
+                ScreenType.PopUp -> null
             }
 
-            // No insets needed for a popup as it is centered, if it fits on screen it fits!
-            ScreenType.PopUp -> null
+            finalScreenInsets?.setUpListeners()
+
+            // Set up input blocker
+            // ---------------------------------------------------------------------
+            // In order to consume all touch/input when the screen is leaving
+            inputBlocker = InputBlocker(context)
+            inputBlocker.z = 10f
+            addView(inputBlocker)
+
+            this.visibility = View.INVISIBLE
+
+            onInitialized()
         }
-
-        finalScreenInsets?.setUpListeners()
-
-        // Set up input blocker
-        // ---------------------------------------------------------------------
-        // In order to consume all touch/input when the screen is leaving
-        inputBlocker = InputBlocker(context)
-        inputBlocker.z = 10f
-        addView(inputBlocker)
-
-        this.visibility = View.INVISIBLE
     }
 
     private fun requestExit() {
@@ -150,7 +153,10 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
     // -------------------------------------------------------------
 
     fun restoreScreen(newData : NavBitScreenData) {
+        // This screen has been active before, so it is owned by the main thread
+        ownedByMainThread = true
         storeNewData(newData)
+
         entering(data) { postReleaseWork ->
             screenHandler().post {
                 startBackgroundWork()

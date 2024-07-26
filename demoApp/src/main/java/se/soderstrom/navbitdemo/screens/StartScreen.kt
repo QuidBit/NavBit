@@ -24,7 +24,7 @@ class StartScreen(context : Context) : Screen<ScreenData.Start>(context) {
         return ScreenLayoutIds(R.layout.screen_start)
     }
 
-    override fun prepareLayout(view: View, type: ScreenType): ScreenInsets {
+    override fun prepareLayout(view: View, type: ScreenType, onPrepared: (ScreenInsets) -> Unit) {
         val infoButton = view.findViewById<MaterialCardView>(R.id.info_button)
         infoButton.setOnClickListener{
             EventBus.getDefault().post(Interaction.ViewSheetsInfo)
@@ -47,7 +47,7 @@ class StartScreen(context : Context) : Screen<ScreenData.Start>(context) {
             EventBus.getDefault().post(Interaction.GoToTimer)
         }
 
-        return ScreenInsets()
+        onPrepared(ScreenInsets())
     }
 
     override fun entering(data: ScreenData.Start, releaseForDisplay: (workAfter : () -> Unit) -> Unit) {

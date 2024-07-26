@@ -20,7 +20,7 @@ class SheetsInfoScreen(context : Context) : Screen<ScreenData.Info>(context) {
         return ScreenLayoutIds(R.layout.screen_info)
     }
 
-    override fun prepareLayout(view: View, type: ScreenType): ScreenInsets {
+    override fun prepareLayout(view: View, type: ScreenType, onPrepared: (ScreenInsets) -> Unit) {
         val detailsButton = view.findViewById<MaterialCardView>(R.id.details_button)
         detailsButton.setOnClickListener{
             EventBus.getDefault().post(Interaction.ViewSheetsInfoDetails)
@@ -32,7 +32,7 @@ class SheetsInfoScreen(context : Context) : Screen<ScreenData.Info>(context) {
         }
 
         val mainContent = view.findViewById<LinearLayout>(R.id.main_content)
-        return ScreenInsets(mainContent)
+        onPrepared(ScreenInsets(mainContent))
     }
 
     override fun entering(data: ScreenData.Info, releaseForDisplay: (workAfter : () -> Unit) -> Unit) {
