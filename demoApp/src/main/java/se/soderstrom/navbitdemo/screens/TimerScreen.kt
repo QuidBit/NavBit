@@ -1,6 +1,8 @@
 package se.soderstrom.navbitdemo.screens
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.widget.TextView
 import com.google.android.material.appbar.MaterialToolbar
@@ -36,7 +38,9 @@ class TimerScreen(context : Context) : Screen<ScreenData.Timer>(context) {
     }
 
     override fun entering(data: ScreenData.Timer, releaseForDisplay: (workAfter : () -> Unit) -> Unit) {
-        releaseForDisplay{}
+        Handler(Looper.getMainLooper()).postDelayed({
+            releaseForDisplay{}
+        }, 2000)
     }
 
     override fun updating(oldData: ScreenData.Timer, data: ScreenData.Timer) {}

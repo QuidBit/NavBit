@@ -6,6 +6,7 @@ import android.animation.ObjectAnimator
 import android.content.Context
 import android.content.res.Resources
 import android.os.Handler
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
@@ -29,8 +30,10 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
     private var transitionAnimation: ObjectAnimator? = null
 
     private var exiting = false
+    private var covered = false
+    private var waitingForCover : TransitionType? = null
 
-    private lateinit var inputBlocker: InputBlocker
+    private var screenOverlay: ScreenOverlay? = null
 
     private var ownedByMainThread = false
 
@@ -64,7 +67,7 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
                 LayoutInflater.from(context).inflate(R.layout.popup, this, true)
                 val sheetContentArea = findViewById<FrameLayout>(R.id.popup_content_area)
 
-                val layoutId = layoutIds.popup ?:  throw IllegalStateException("Screen does not support Sheet type")
+                val layoutId = layoutIds.popup ?:  throw IllegalStateException("Screen does not support PopUp type")
                 LayoutInflater.from(context).inflate(layoutId, sheetContentArea, true)
             }
         }
@@ -121,14 +124,7 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
 
             finalScreenInsets?.setUpListeners()
 
-            // Set up input blocker
-            // ---------------------------------------------------------------------
-            // In order to consume all touch/input when the screen is leaving
-            inputBlocker = InputBlocker(context)
-            inputBlocker.z = 10f
-            addView(inputBlocker)
-
-            this.visibility = View.INVISIBLE
+            visibility = GONE
 
             onInitialized()
         }
@@ -160,15 +156,23 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
         entering(data) { postReleaseWork ->
             screenHandler().post {
                 startBackgroundWork()
-                this.visibility = View.VISIBLE
+                visibility = VISIBLE
 
                 postReleaseWork()
             }
         }
     }
 
-    fun initiateAppearingTransition(transition: ScreenTransition, newState: NavBitScreenData, newlyLoaded : Boolean, moveToMainThreadForDisplay : () -> Unit) {
+    fun initiateAppearingTransition(
+        transition: ScreenTransition,
+        newState: NavBitScreenData,
+        newlyLoaded : Boolean,
+        onDisplayed : () -> Unit,
+        moveToMainThreadForDisplay : () -> Unit,
+    ) {
         exiting = false
+        waitingForCover = null
+        covered = false
 
         val startOutside = transition.direction == TransitionDirection.Forward || newlyLoaded
 
@@ -205,12 +209,16 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
             }
         }
 
+        screenOverlay?.fadeInLoading()
+
         // Populate the screen with the expected data
         when (transition.direction) {
             TransitionDirection.Forward -> {
                 storeNewData(newState)
+
                 entering(data) { afterRelease ->
-                    performAppearingTransition(transition, moveToMainThreadForDisplay)
+
+                    performAppearingTransition(transition, moveToMainThreadForDisplay, onDisplayed)
 
                     screenHandler().post {
                         afterRelease()
@@ -224,8 +232,10 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
                 // The screen has been moved to the main container as it has already been displayed once
                 // so any manipulation must be done on the main thread
                 NavBitActivity.mainHandler.post {
+                    visibility = VISIBLE
+
                     returning(oldData, data) {
-                        performAppearingTransition(transition, moveToMainThreadForDisplay)
+                        performAppearingTransition(transition, { }, onDisplayed)
                     }
                 }
             }
@@ -234,11 +244,9 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
 
     private fun performAppearingTransition(
         transition: ScreenTransition,
-        moveToMainThreadForDisplay : () -> Unit
+        moveToMainThreadForDisplay : () -> Unit,
+        onDisplayed : () -> Unit
     ) {
-        this.visibility = View.VISIBLE
-        inputBlocker.block(false)
-
         startBackgroundWork()
 
         // Add the screen to the main container for display
@@ -247,31 +255,65 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
 
         // Any further interactions must be done on the main thread
         NavBitActivity.mainHandler.post {
-            val newAnimation = transition.asEnteringAnimation(this)
+
+            visibility = VISIBLE
+            screenOverlay?.blockInput(false)
+
+            // Set up Screen Overlay
+            // ---------------------------------------------------------------------
+            if (screenOverlay == null) {
+                screenOverlay = ScreenOverlay(context)
+                screenOverlay?.z = 10f
+                addView(screenOverlay)
+            }
+
+            // Start the entering
+            val newAnimation = transition.asEnteringAnimation(this).apply {
+                addListener(object : AnimatorListener {
+                    override fun onAnimationEnd(p0: Animator) {
+                        onDisplayed()
+                    }
+                    override fun onAnimationStart(p0: Animator) {}
+                    override fun onAnimationCancel(p0: Animator) {}
+                    override fun onAnimationRepeat(p0: Animator) {}
+                })
+            }
 
             transitionAnimation?.cancel()
             transitionAnimation = newAnimation
             transitionAnimation?.start()
+
+            screenOverlay?.fadeOutLoading()
         }
     }
 
     // -------------------------------------------------------------
 
     fun initiateLeavingTransition(transition: ScreenTransition) {
-        visibility = VISIBLE
-        inputBlocker.block(true)
         exiting = true
+        waitingForCover = null
+        covered = false
+
+        visibility = VISIBLE
+        screenOverlay?.blockInput(true)
         stopBackgroundWork()
 
-        val screen = this
         // Generate the new animation first to guarantee that the current position is retained
         val newAnimation = transition.asLeavingAnimation(this).apply {
             addListener(object : AnimatorListener {
                 override fun onAnimationEnd(p0: Animator) {
-                    if (exiting &&
-                        (transition.direction == TransitionDirection.Backward || transition.type.hideOnExit())
-                    ) {
-                        screen.visibility = INVISIBLE
+                    // Check so the screen has not been brought back during the animation
+                    if (exiting) {
+                        // When backing away, there can be no delays, so hide directly OR if we are covered
+                        if (transition.direction == TransitionDirection.Backward) {
+                            visibility = GONE
+                        }
+                        // If going forward to a screen, we have to wait until we get covered (i.e., it is ready to display)
+                        else if (covered) {
+                            finishLeaving(transition.type)
+                        } else {
+                            waitingForCover = transition.type
+                        }
                     }
                 }
                 override fun onAnimationStart(p0: Animator) {}
@@ -283,14 +325,29 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
         transitionAnimation?.cancel()
         transitionAnimation = newAnimation
         transitionAnimation?.start()
+
+        screenOverlay?.fadeInLoading()
+    }
+
+    fun notifyCovered() {
+        covered = true
+        waitingForCover?.let {
+            finishLeaving(it)
+        }
+    }
+
+    private fun finishLeaving(type : TransitionType) {
+        if (type.previousIsVisible()) {
+            screenOverlay?.fadeOutLoading()
+        } else {
+            visibility = GONE
+        }
     }
 
     // -------------------------------------------------------------
 
     fun isBackgroundScreen() : Boolean {
-        // NOTE: Should be improved with a more explicit state
-            // It might not be part of the background after the animation is finished since we look at the visibility
-        return visibility == View.VISIBLE && exiting
+        return visibility == View.VISIBLE && covered
     }
 
     fun getScreenTag(): String {

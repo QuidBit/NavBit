@@ -33,7 +33,7 @@ object ScreenController {
         type : ScreenType,
     ) {
         val id = preInitId(screenData, type)
-        Log.e("ScreenController", "[$id] - Pre-initialize")
+        Log.i("NavBit-ScreenController", "[$id] - Pre-initialize")
 
         // Check so it has not already been requested
         if (preInitializedScreens.containsKey(id)) {
@@ -43,18 +43,18 @@ object ScreenController {
         // It has not, so start!
         preInitializedScreens[id] = ScreenPreInitializedState.InProgress(null)
         screenHandler.startGenerateNewScreen(context, screenData as T, type) { screen ->
-            Log.e("ScreenController", "[$id] - Pre-initialize --READY")
+            Log.i("NavBit-ScreenController", "[$id] - Pre-initialize --READY")
 
             preInitializedScreens[id]?.let { state ->
                 when (state) {
                     is ScreenPreInitializedState.InProgress -> {
                         if (state.onDone != null) {
-                            Log.e("ScreenController", "[$id] - Pre-initialize----Use directly")
+                            Log.i("NavBit-ScreenController", "[$id] - Pre-initialize----Use directly")
                             state.onDone.invoke(screen)
                             preInitializedScreens.remove(screenData.tag())
                         } else {
                             // Store for later use
-                            Log.e("ScreenController", "[$id] - Pre-initialize ----Store for later")
+                            Log.i("NavBit-ScreenController", "[$id] - Pre-initialize ----Store for later")
                             preInitializedScreens[id] = ScreenPreInitializedState.Done(screen)
                         }
                     }
@@ -79,10 +79,14 @@ object ScreenController {
                 // -----------------------------------------------------------
                 val transition = screenHandler.getScreenTransition(screenData, type, direction)
 
-                backstack.lastOrNull()?.let { (oldScreen, _) ->
-                    NavBitActivity.mainHandler.post {
-                        oldScreen.initiateLeavingTransition(transition)
-                    }
+                val oldScreen = backstack.lastOrNull()?.first
+                NavBitActivity.mainHandler.post {
+                    oldScreen?.initiateLeavingTransition(transition)
+                }
+
+                // Notify the old screen that it is covered whenever the new screen is done
+                val onCompletion : () -> Unit = {
+                    oldScreen?.notifyCovered()
                 }
 
                 // Add the new screen
@@ -94,17 +98,17 @@ object ScreenController {
                     when (state) {
                         // It is done, so use it now
                         is ScreenPreInitializedState.Done -> {
-                            Log.e("ScreenController", "[$id] - GoTo --- DIRECTLY")
+                            Log.i("NavBit-ScreenController", "[$id] - GoTo --- DIRECTLY")
                             backstack.add(Pair(state.screen, type))
-                            completeGoToScreen(state.screen, transition, true, mainContainer, screenData)
+                            completeGoToScreen(state.screen, transition, true, mainContainer, screenData, onCompletion)
                             preInitializedScreens.remove(id)
                         }
                         // Wait for its completion
                         is ScreenPreInitializedState.InProgress -> {
-                            Log.e("ScreenController", "[$id] - GoTo --- Wait for ready...")
+                            Log.i("NavBit-ScreenController", "[$id] - GoTo --- Wait for ready...")
                             preInitializedScreens[id] = ScreenPreInitializedState.InProgress {
                                 backstack.add(Pair(it, type))
-                                completeGoToScreen(it, transition, true, mainContainer, screenData)
+                                completeGoToScreen(it, transition, true, mainContainer, screenData, onCompletion)
                                 preInitializedScreens.remove(id)
                             }
                         }
@@ -112,13 +116,15 @@ object ScreenController {
                 }
                 // Not available, so generate a new screen
                 ?: run {
-                    Log.e("ScreenController", "[$id] - GoTo --- Generate")
+                    Log.i("NavBit-ScreenController", "[$id] - GoTo --- Generate")
                     addNewScreen(context, screenData, type, screenHandler) {
-                        completeGoToScreen(it, transition, true, mainContainer, screenData)
+                        completeGoToScreen(it, transition, true, mainContainer, screenData, onCompletion)
                     }
                 }
             }
             TransitionDirection.Backward -> {
+                // NOTE: onCompletion is not used when going backwards, as those screens are removed directly without any delay
+                // (It is currently used to notify when the screen has been covered and can be removed)
                 if (!backStackContains<T>(screenData.tag(), type)) {
                     // We are backing to a screen that is not available
 
@@ -150,7 +156,7 @@ object ScreenController {
                         }
                         toBeRemoved.add(old)
 
-                        completeGoToScreen(it, transition, true, mainContainer, screenData)
+                        completeGoToScreen(it, transition, true, mainContainer, screenData) {}
                     }
                 } else {
                     // Search the backstack in reverse order for the screen we are backing to
@@ -192,10 +198,10 @@ object ScreenController {
                     // Since we check backstack contains first, but lets include it for completeness/avoid crashing
 
                     foundScreen?.let {
-                        completeGoToScreen(it, transition, false, mainContainer, screenData)
+                        completeGoToScreen(it, transition, false, mainContainer, screenData) {}
                     } ?: run {
                         addNewScreen(context , screenData, type, screenHandler) {
-                            completeGoToScreen(it, transition, true, mainContainer, screenData)
+                            completeGoToScreen(it, transition, true, mainContainer, screenData) {}
                         }
                     }
                 }
@@ -203,8 +209,15 @@ object ScreenController {
         }
     }
 
-    private fun <T : NavBitScreenData> completeGoToScreen(screen : Screen<*>, transition: ScreenTransition, newlyAdded : Boolean, mainContainer: FrameLayout, screenData: T) {
-        screen.initiateAppearingTransition(transition, screenData, newlyAdded) {
+    private fun <T : NavBitScreenData> completeGoToScreen(
+        screen : Screen<*>,
+        transition: ScreenTransition,
+        newlyAdded : Boolean,
+        mainContainer: FrameLayout,
+        screenData: T,
+        onCompletion: () -> Unit
+    ) {
+        screen.initiateAppearingTransition(transition, screenData, newlyAdded, onCompletion) {
 
             if (newlyAdded) {
                 //--------------------------------------------------------------------
@@ -257,26 +270,28 @@ object ScreenController {
 
         lifecycleScope.launch(Dispatchers.IO) {
             var totalDelay = 0L
+            var removedCount = 0
 
             delay(BASE_TRANSITION_LENGTH.toLong() + timeSpacing)
 
             // Clear all toBeRemoved that are no longer transitioning
             // ------------------------------------------------------------
             toBeRemoved.removeAll { screen ->
-                val remove = screen.first.visibility == View.INVISIBLE
+                val remove = screen.first.visibility == View.GONE
                 if (remove) {
                     totalDelay += timeSpacing
 
                     NavBitActivity.mainHandler.postDelayed({
                         mainContainer.removeView(screen.first)
                     }, totalDelay)
+                    removedCount += 1
                 }
 
                 remove
             }
 
             delay(totalDelay)
-            Log.i("NavBit", "Screens cleanup done - toBeRemoved: ${toBeRemoved.size}")
+            Log.i("NavBit", "Screens Cleanup done - Removed: $removedCount - (toBeRemoved left: ${toBeRemoved.size}, backstatck size : ${backstack.size})")
         }
     }
 

@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.res.Resources
 import android.view.View
 import android.provider.Settings
-import android.util.Log
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.LinearInterpolator
 
@@ -19,11 +18,11 @@ sealed class TransitionType {
         object Slide : Full()
     }
 
-    fun hideOnExit() : Boolean {
+    fun previousIsVisible() : Boolean {
         return when (this) {
             is Sheet,
-            is PopUp -> false
-            is Full -> true
+            is PopUp -> true
+            is Full -> false
         }
     }
 }

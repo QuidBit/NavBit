@@ -2,6 +2,8 @@ package se.soderstrom.navbitdemo.screens
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.widget.TextView
 import com.google.android.material.card.MaterialCardView
@@ -61,7 +63,9 @@ class StartScreen(context : Context) : Screen<ScreenData.Start>(context) {
 
     override fun returning(oldData: ScreenData.Start?, data: ScreenData.Start, notifyReady: () -> Unit) {
         updateData(data)
-        notifyReady()
+        Handler(Looper.getMainLooper()).postDelayed({
+            notifyReady()
+        }, 2000)
     }
 
     override fun getBackgroundWork(): BackgroundWork? {

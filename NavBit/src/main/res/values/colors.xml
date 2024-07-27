@@ -10,6 +10,8 @@
 
     <color name="sheet_popup_shadow_background">#4D808080</color>
 
+    <color name="progress_bar">#88222222</color>
+
     <!-- Same in dark mode -->
     <color name="popup_shadow_edge">#BA000000</color>
 </resources>

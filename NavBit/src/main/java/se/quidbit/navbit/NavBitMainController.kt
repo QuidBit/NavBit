@@ -91,7 +91,7 @@ class NavBitMainController<T : NavBitInteraction, U : NavBitNavigationState, V :
             is InteractionResult.CloseApp ->
                 activity.finish()
             is InteractionResult.NewState -> {
-                Log.i("NavBit", "New State: ${interactionResult.state.prettyString()}}")
+                Log.i("NavBit", " -New State: ${interactionResult.state.prettyString()}")
                 stateHandler.setCurrentState(interactionResult.state)
 
                 val screen = ScreenController.getCurrentScreen()
@@ -99,13 +99,13 @@ class NavBitMainController<T : NavBitInteraction, U : NavBitNavigationState, V :
 
                 when(val navigationResult = stateHandler.getNavigationResult<V>(screenData, activity, screenHandler)) {
                     is NavigationResult.ErrorRead ->
-                        showError("Navigation", "Error Reading [${navigationResult.error}]")
+                        showError("Navigation", " -Error Reading [${navigationResult.error}]")
                     is NavigationResult.Navigate -> {
-                        Log.i("NavBit", "Navigating ${interactionResult.direction} to Screen ${StringHelper.prettyPrintSealed(navigationResult.data.toString())} - ${navigationResult.type}")
+                        Log.i("NavBit", " -Navigating ${interactionResult.direction} to Screen ${StringHelper.prettyPrintSealed(navigationResult.data.toString())} - ${navigationResult.type}")
                         switchScreen(interactionResult.state, navigationResult.data, navigationResult.type, interactionResult.direction)
                     }
                     is NavigationResult.Update -> {
-                        Log.i("NavBit", "Updating Screen ${StringHelper.prettyPrintSealed(navigationResult.data.toString())}}")
+                        Log.i("NavBit", " -Updating Screen ${StringHelper.prettyPrintSealed(navigationResult.data.toString())}")
                         screen.notifyUpdatedData(navigationResult.data)
 
                         // Also update any visible screens behind the current one (sheet support)
