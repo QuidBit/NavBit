@@ -51,6 +51,11 @@ data class ScreenInsets (
             }
         }
     }
+
+    fun triggerRefresh() {
+        topView?.requestApplyInsets()
+        bottomView?.requestApplyInsets()
+    }
 }
 
 fun ViewGroup.setTopPadding(paddingID : Int) {

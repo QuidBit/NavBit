@@ -1,9 +1,11 @@
 package se.quidbit.navbit
 
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -17,15 +19,19 @@ class NavBitMainController<T : NavBitInteraction, U : NavBitNavigationState, V :
 ) {
     // Set up the container
     // --------------------------------------------------------
-    private var mainContainer : FrameLayout = FrameLayout(activity).apply {
-        layoutParams = FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.MATCH_PARENT,
-            FrameLayout.LayoutParams.MATCH_PARENT
-        )
-        setBackgroundResource(R.color.container_background)
-    }
+    private var mainContainer: FrameLayout
 
     init {
+        val inflater = LayoutInflater.from(activity)
+        mainContainer = inflater.inflate(R.layout.main_container, null) as FrameLayout
+
+        // To avoid the background progress bar showing up on normal startup
+        // -------------------------------------------------------------------
+        val progressBar = mainContainer.findViewById<ProgressBar>(R.id.progress_bar)
+        progressBar.visibility = View.VISIBLE
+        progressBar.fadeInLoading(300, 600)
+        // -------------------------------------------------------------------
+
         activity.setContentView(mainContainer)
 
         ViewCompat.setOnApplyWindowInsetsListener(mainContainer) { _, insets ->

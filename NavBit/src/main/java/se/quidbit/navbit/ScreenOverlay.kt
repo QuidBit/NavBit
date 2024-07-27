@@ -22,10 +22,10 @@ class ScreenOverlay @JvmOverloads constructor(
         progressBar = findViewById(R.id.progress_bar)
 
         screenCover.setOnClickListener {
-            Log.i("NavBit", "INPUT BLOCKED")
+            Log.i("NavBit", "Input Blocked")
         }
 
-        hideLoading()
+        progressBar.hideLoading()
         blockInput(false)
     }
 
@@ -36,34 +36,11 @@ class ScreenOverlay @JvmOverloads constructor(
 
     fun fadeInLoading() {
         val baseTransitionLength = ScreenTransition.getBaseTransitionLength(context).toLong()
-
-        progressBar.apply {
-            animate().cancel()
-            alpha = 0f
-            visibility = VISIBLE
-            animate()
-                .alpha(1f)
-                .setStartDelay(baseTransitionLength)
-                .setDuration(baseTransitionLength * 2)
-                .start()
-        }
+        progressBar.fadeInLoading(baseTransitionLength, baseTransitionLength * 2)
     }
 
     fun fadeOutLoading() {
         val baseTransitionLength = ScreenTransition.getBaseTransitionLength(context).toLong()
-
-        progressBar.apply {
-            animate().cancel()
-            animate()
-                .alpha(0f)
-                .setStartDelay(0)
-                .setDuration(baseTransitionLength / 2)
-                .start()
-        }
-    }
-
-    private fun hideLoading() {
-        progressBar.alpha = 0f
-        progressBar.visibility = INVISIBLE
+        progressBar.fadeOutLoading(0, baseTransitionLength / 2)
     }
 }

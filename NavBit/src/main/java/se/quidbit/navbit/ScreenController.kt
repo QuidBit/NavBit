@@ -1,6 +1,8 @@
 package se.quidbit.navbit
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
@@ -9,6 +11,7 @@ import androidx.lifecycle.LifecycleCoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicInteger
 
 sealed class ScreenPreInitializedState {
     class InProgress(val onDone : ((Screen<*>) -> Unit)?) : ScreenPreInitializedState()
@@ -353,22 +356,53 @@ object ScreenController {
         backstack.clear()
     }
 
-    fun <T : NavBitScreenData>restoreScreens(container : FrameLayout, screenHandler: NavBitScreenHandler<T>) {
+    fun <T : NavBitScreenData>restoreScreens(
+        container : FrameLayout,
+        screenHandler: NavBitScreenHandler<T>
+    ){
         Log.i("NavBit", "Restoring ${toBeRestored.size} screens")
 
+        val restored  = HashMap<Int, Pair<Screen<*>, ScreenType>>()
+
+        var currentScreen = 0
+
+        // Start the generation of each screen
         for ((oldData, screenType) in toBeRestored.reversed()) {
             Log.i("NavBit", "    --- $oldData - $screenType")
 
+            val i = currentScreen
+
             screenHandler.startGenerateNewScreen(container.context, oldData as T, screenType) { newScreen ->
                 NavBitActivity.mainHandler.post {
-                    newScreen.restoreScreen(oldData)
+                    newScreen.restoreScreen(oldData) {
+                        restored[i] = (Pair(newScreen, screenType))
+
+                        Log.i("NavBit", "Done? ${restored.size} / ${toBeRestored.size}")
+
+                        // Check if we have all that we need
+                        // ---------------------------------------
+                        if (restored.size == toBeRestored.size) {
+                            // Complete the restoration by adding all screens
+                            val sortedMap = restored.entries.sortedBy { it.key }
+                            val orderedScreens = ArrayList(sortedMap.map { it.value })
+
+                            var delay = 0L
+                            for (orderedScreen in orderedScreens) {
+                                Handler(Looper.getMainLooper()).postDelayed({
+                                    newScreen.screenHandler()
+                                    backstack.add(orderedScreen)
+                                    container.addView(orderedScreen.first)
+                                    newScreen.refreshScreenInsets()
+                                }, delay)
+                                delay += 50
+                            }
+
+                            toBeRestored.clear()
+                        }
+                    }
                 }
-
-                backstack.add(Pair(newScreen, screenType))
-                container.addView(newScreen)
             }
+            currentScreen += 1
         }
-
-        toBeRestored.clear()
     }
 }

@@ -6,7 +6,6 @@ import android.animation.ObjectAnimator
 import android.content.Context
 import android.content.res.Resources
 import android.os.Handler
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
@@ -32,6 +31,8 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
     private var exiting = false
     private var covered = false
     private var waitingForCover : TransitionType? = null
+
+    private var screenInsets : ScreenInsets? = null
 
     private var screenOverlay: ScreenOverlay? = null
 
@@ -88,19 +89,19 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
 
         // Set up screen insets
         // ----------------------------------------------------
-        prepareLayout(this, type) { screenInsets ->
+        prepareLayout(this, type) { rawInsets ->
 
             // Prepare the correct insets for the screen type
-            val finalScreenInsets = when (type) {
+            screenInsets = when (type) {
                 // Use as defined
-                ScreenType.Full -> screenInsets
+                ScreenType.Full -> rawInsets
 
                 ScreenType.Sheet -> {
                     // As the sheet never reaches the top, no topInset is needed
                     // Instead, a basic constant inset is added to the top to not overlap with the handle
-                    val topPaddingId = screenInsets.topExtraPaddingId ?: R.dimen.sheet_padding_top
+                    val topPaddingId = rawInsets.topExtraPaddingId ?: R.dimen.sheet_padding_top
 
-                    screenInsets.topView?.let {
+                    rawInsets.topView?.let {
                         val topPadding = context.resources.getDimensionPixelSize(topPaddingId)
                         it.setPadding(
                             it.paddingLeft,
@@ -113,8 +114,8 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
                     ScreenInsets(
                         null,
                         null,
-                        screenInsets.bottomView,
-                        screenInsets.bottomExtraPaddingId ?: R.dimen.sheet_padding_bottom
+                        rawInsets.bottomView,
+                        rawInsets.bottomExtraPaddingId ?: R.dimen.sheet_padding_bottom
                     )
                 }
 
@@ -122,8 +123,7 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
                 ScreenType.PopUp -> null
             }
 
-            finalScreenInsets?.setUpListeners()
-
+            screenInsets?.setUpListeners()
             visibility = GONE
 
             onInitialized()
@@ -148,7 +148,7 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
     // Transitioning
     // -------------------------------------------------------------
 
-    fun restoreScreen(newData : NavBitScreenData) {
+    fun restoreScreen(newData : NavBitScreenData, onRestored : () -> Unit) {
         // This screen has been active before, so it is owned by the main thread
         ownedByMainThread = true
         storeNewData(newData)
@@ -159,8 +159,13 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
                 visibility = VISIBLE
 
                 postReleaseWork()
+                onRestored()
             }
         }
+    }
+
+    fun refreshScreenInsets() {
+        screenInsets?.triggerRefresh()
     }
 
     fun initiateAppearingTransition(

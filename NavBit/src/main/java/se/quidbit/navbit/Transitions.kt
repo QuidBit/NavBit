@@ -115,14 +115,25 @@ data class ScreenTransition (
                         PropertyValuesHolder.ofFloat(View.ALPHA, view.alpha, 1.0f)
                     )
             }
-            TransitionType.Full.Fade ->
-                ObjectAnimator.ofPropertyValuesHolder(
-                    view,
-                    PropertyValuesHolder.ofFloat(View.SCALE_X, view.scaleX, 1.0f),
-                    PropertyValuesHolder.ofFloat(View.SCALE_Y, view.scaleY, 1.0f),
-                    PropertyValuesHolder.ofFloat(View.TRANSLATION_X, view.translationX, 0.0f),
-                    PropertyValuesHolder.ofFloat(View.ALPHA, 1.0f, 0.0f),
-                )
+            TransitionType.Full.Fade ->  when (direction) {
+                TransitionDirection.Forward ->
+                    ObjectAnimator.ofPropertyValuesHolder(
+                        view,
+                        PropertyValuesHolder.ofFloat(View.SCALE_X, view.scaleX, 1.0f),
+                        PropertyValuesHolder.ofFloat(View.SCALE_Y, view.scaleY, 1.0f),
+                        PropertyValuesHolder.ofFloat(View.TRANSLATION_X, view.translationX, 0.0f),
+                        PropertyValuesHolder.ofFloat(View.ALPHA, 1.0f, 1.0f),
+                    )
+
+                TransitionDirection.Backward ->
+                    ObjectAnimator.ofPropertyValuesHolder(
+                        view,
+                        PropertyValuesHolder.ofFloat(View.SCALE_X, view.scaleX, 1.0f),
+                        PropertyValuesHolder.ofFloat(View.SCALE_Y, view.scaleY, 1.0f),
+                        PropertyValuesHolder.ofFloat(View.TRANSLATION_X, view.translationX, 0.0f),
+                        PropertyValuesHolder.ofFloat(View.ALPHA, 1.0f, 0.0f),
+                    )
+                }
             TransitionType.Sheet -> when (direction) {
                 TransitionDirection.Forward ->
                     ObjectAnimator.ofPropertyValuesHolder(
