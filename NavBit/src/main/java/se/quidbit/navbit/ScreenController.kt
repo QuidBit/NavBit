@@ -258,7 +258,7 @@ object ScreenController {
         lifecycleScope.launch(Dispatchers.IO) {
             var totalDelay = 0L
 
-            delay(ScreenTransition.getTransitionLength(mainContainer.context) + timeSpacing)
+            delay(BASE_TRANSITION_LENGTH.toLong() + timeSpacing)
 
             // Clear all toBeRemoved that are no longer transitioning
             // ------------------------------------------------------------
