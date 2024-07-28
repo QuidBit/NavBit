@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
+import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -186,7 +187,7 @@ abstract class NavBitScreen<T : NavBitScreenData>(context: Context) : FrameLayou
     }
 
     fun hideSheetHandle(hide: Boolean) {
-        findViewById<ImageView>(R.id._nb_sheetHandle)?.showIfElseGone(!hide)
+        findViewById<CardView>(R.id._nb_sheetHandle)?.showIfElseGone(!hide)
     }
 
     // -------------------------------------------------------------
@@ -242,7 +243,12 @@ abstract class NavBitScreen<T : NavBitScreenData>(context: Context) : FrameLayou
                 }
             }
             TransitionType.Full.Fade -> {
-                alpha = 0.0f
+                // When going to a new screen, we want to fade it in (starting from alpha 0)
+                    // However, when backing, i.e. returning to a previous screen
+                    // we want to retain the alpha as the previous view is revealed by fading out the current view
+                if (transition.direction == TransitionDirection.Forward) {
+                    alpha = 0.0f
+                }
             }
             TransitionType.Sheet -> {
                 y = when (startOutside) {
