@@ -1,14 +1,14 @@
 package se.soderstrom.navbitdemo.navbit
 
 import android.content.Context
-import se.quidbit.navbit.NavBitNavigationState
-import se.quidbit.navbit.NavBitScreenData
-import se.quidbit.navbit.NavBitScreenHandler
-import se.quidbit.navbit.Screen
-import se.quidbit.navbit.ScreenDataResult
-import se.quidbit.navbit.ScreenType
-import se.quidbit.navbit.TransitionDirection
-import se.quidbit.navbit.TransitionType
+import se.quidbit.navbit.types.TransitionDirection
+import se.quidbit.navbit.types.TransitionType
+import se.quidbit.navbit.toimplement.NavBitNavigationState
+import se.quidbit.navbit.toimplement.NavBitScreenData
+import se.quidbit.navbit.toimplement.NavBitScreenHandler
+import se.quidbit.navbit.toimplement.NavBitScreen
+import se.quidbit.navbit.types.ScreenDataResult
+import se.quidbit.navbit.types.ScreenType
 import se.soderstrom.navbitdemo.screens.FastScreen
 import se.soderstrom.navbitdemo.screens.PopupClearScreen
 import se.soderstrom.navbitdemo.screens.SheetsInfoDetailsScreen
@@ -22,7 +22,7 @@ class ScreenHandler : NavBitScreenHandler<ScreenData>() {
         context: Context,
         screenData: ScreenData,
         type: ScreenType
-    ): Screen<*> {
+    ): NavBitScreen<*> {
         return when (screenData) {
             is ScreenData.Start -> StartScreen(context)
             is ScreenData.ClearCheck -> PopupClearScreen(context)

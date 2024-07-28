@@ -71,3 +71,7 @@ class InteractionHandler : NavBitInteractionHandler<Interaction>()
 class NavigationStateHandler : NavBitNavigationStateHandler()
 class ScreenHandler : NavBitScreenGenerator<ScreenData>()
 ```
+
+## Other Info
+ - When posting work inside Screens, use the functions  `screenPost()` and  `screenPostDelay()`, which make sure to run them on the appropriate thread (important for View manipulation)
+ - During slow transitions, a spinning wheel appears. If your Screen already has an animating progress bar present, make sure to name it `R.id.loading`. If present and visible, no spinning wheel is shown to preven.t a duplicate.

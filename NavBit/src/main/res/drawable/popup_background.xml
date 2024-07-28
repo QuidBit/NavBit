@@ -1,9 +1,0 @@
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <gradient
-        android:type="radial"
-        android:gradientRadius="50%"
-        android:centerColor="@color/sheet_popup_shadow_background"
-        android:endColor="@android:color/transparent"
-        android:centerX="50%"
-        android:centerY="50%" />
-</shape>

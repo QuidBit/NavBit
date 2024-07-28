@@ -5,16 +5,16 @@ import android.view.View
 import android.widget.LinearLayout
 import com.google.android.material.card.MaterialCardView
 import org.greenrobot.eventbus.EventBus
-import se.quidbit.navbit.BackgroundWork
-import se.quidbit.navbit.Screen
-import se.quidbit.navbit.ScreenInsets
-import se.quidbit.navbit.ScreenLayoutIds
-import se.quidbit.navbit.ScreenType
+import se.quidbit.navbit.types.BackgroundWork
+import se.quidbit.navbit.toimplement.NavBitScreen
+import se.quidbit.navbit.types.ScreenInsets
+import se.quidbit.navbit.types.ScreenLayoutIds
+import se.quidbit.navbit.types.ScreenType
 import se.soderstrom.navbitdemo.R
 import se.soderstrom.navbitdemo.navbit.Interaction
 import se.soderstrom.navbitdemo.navbit.ScreenData
 
-class SheetsInfoScreen(context : Context) : Screen<ScreenData.Info>(context) {
+class SheetsInfoScreen(context : Context) : NavBitScreen<ScreenData.Info>(context) {
 
     override fun getLayoutIds(type: ScreenType): ScreenLayoutIds {
         return ScreenLayoutIds(R.layout.screen_info)
@@ -35,14 +35,14 @@ class SheetsInfoScreen(context : Context) : Screen<ScreenData.Info>(context) {
         onPrepared(ScreenInsets(mainContent))
     }
 
-    override fun entering(data: ScreenData.Info, notifyReady: () -> Unit) {
-        notifyReady()
+    override fun entering(data: ScreenData.Info, notifyDone: () -> Unit) {
+        notifyDone()
     }
 
     override fun updating(oldData: ScreenData.Info, data: ScreenData.Info) {}
 
-    override fun returning(oldData: ScreenData.Info?, data: ScreenData.Info, notifyReady: () -> Unit) {
-        notifyReady()
+    override fun returning(oldData: ScreenData.Info?, data: ScreenData.Info, notifyDone: () -> Unit) {
+        notifyDone()
     }
 
     override fun getBackgroundWork(): BackgroundWork? {

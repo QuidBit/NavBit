@@ -1,6 +1,6 @@
 package se.soderstrom.navbitdemo.navbit
 
-import se.quidbit.navbit.NavBitNavigationState
+import se.quidbit.navbit.toimplement.NavBitNavigationState
 
 sealed class NavigationState : NavBitNavigationState() {
     class Start(var count : Int) : NavigationState()

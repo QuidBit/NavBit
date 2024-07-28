@@ -1,8 +1,8 @@
 package se.soderstrom.navbitdemo.navbit
 
 import android.content.Context
-import se.quidbit.navbit.NavBitNavigationStateHandler
-import se.quidbit.navbit.ScreenType
+import se.quidbit.navbit.toimplement.NavBitNavigationStateHandler
+import se.quidbit.navbit.types.ScreenType
 import se.soderstrom.navbitdemo.BaseActivity
 
 class NavigationStateHandler : NavBitNavigationStateHandler<NavigationState, ScreenData>() {

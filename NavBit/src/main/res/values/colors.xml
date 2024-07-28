@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Differs in light and dark mode -->
-    <color name="container_background">#EEEEEE</color>
-    <color name="screen_full_background">#FFFFFF</color>
-    <color name="screen_sheet_popup_background">#FFFFFF</color>
+    <color name="_nb_container_background">#EEEEEE</color>
+    <color name="_nb_screen_full_background">#FFFFFF</color>
+    <color name="_nb_screen_sheet_popup_background">#FFFFFF</color>
 
-    <color name="navigation_icons">#333333</color>
-    <color name="sheet_line">#CCCCCC</color>
+    <color name="_nb_navigation_icons">#333333</color>
+    <color name="_nb_sheet_line">#CCCCCC</color>
 
-    <color name="sheet_popup_shadow_background">#4D808080</color>
+    <color name="_nb_sheet_popup_shadow_background">#4D808080</color>
 
-    <color name="progress_bar">#88222222</color>
+    <color name="_nb_progress_bar">#88222222</color>
 
     <!-- Same in dark mode -->
-    <color name="popup_shadow_edge">#BA000000</color>
+    <color name="_nb_popup_shadow_edge">#BA000000</color>
 </resources>

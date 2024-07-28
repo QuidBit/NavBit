@@ -1,6 +1,6 @@
 package se.soderstrom.navbitdemo.navbit
 
-import se.quidbit.navbit.NavBitInteraction
+import se.quidbit.navbit.toimplement.NavBitInteraction
 
 sealed class Interaction : NavBitInteraction() {
     object Back : Interaction()

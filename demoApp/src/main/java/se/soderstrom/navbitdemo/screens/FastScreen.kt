@@ -1,23 +1,19 @@
 package se.soderstrom.navbitdemo.screens
 
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import android.view.View
-import android.widget.TextView
 import com.google.android.material.appbar.MaterialToolbar
 import org.greenrobot.eventbus.EventBus
-import se.quidbit.navbit.BackgroundWork
-import se.quidbit.navbit.Screen
-import se.quidbit.navbit.ScreenInsets
-import se.quidbit.navbit.ScreenLayoutIds
-import se.quidbit.navbit.ScreenType
-import se.quidbit.navbit.UIwork
+import se.quidbit.navbit.types.BackgroundWork
+import se.quidbit.navbit.types.ScreenLayoutIds
+import se.quidbit.navbit.toimplement.NavBitScreen
+import se.quidbit.navbit.types.ScreenInsets
+import se.quidbit.navbit.types.ScreenType
 import se.soderstrom.navbitdemo.R
 import se.soderstrom.navbitdemo.navbit.Interaction
 import se.soderstrom.navbitdemo.navbit.ScreenData
 
-class FastScreen(context : Context) : Screen<ScreenData.Fast>(context) {
+class FastScreen(context : Context) : NavBitScreen<ScreenData.Fast>(context) {
 
     override fun getLayoutIds(type: ScreenType): ScreenLayoutIds {
         return ScreenLayoutIds(R.layout.screen_fast)
@@ -32,14 +28,14 @@ class FastScreen(context : Context) : Screen<ScreenData.Fast>(context) {
         onPrepared(ScreenInsets(toolbar, null))
     }
 
-    override fun entering(data: ScreenData.Fast, notifyReady: () -> Unit) {
-        notifyReady()
+    override fun entering(data: ScreenData.Fast, notifyDone: () -> Unit) {
+        notifyDone()
     }
 
     override fun updating(oldData: ScreenData.Fast, data: ScreenData.Fast) {}
 
-    override fun returning(oldData: ScreenData.Fast?, data: ScreenData.Fast, notifyReady: () -> Unit) {
-        notifyReady()
+    override fun returning(oldData: ScreenData.Fast?, data: ScreenData.Fast, notifyDone: () -> Unit) {
+        notifyDone()
     }
 
     override fun getBackgroundWork(): BackgroundWork? { return null }

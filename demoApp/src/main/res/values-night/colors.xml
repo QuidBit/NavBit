@@ -6,4 +6,6 @@
     <color name="black">#FFFFFF</color>
     <color name="white">#000000</color>
     <color name="grey">#444444</color>
+
+    <color name="pattern_background">#15FFFFFF</color>
 </resources>

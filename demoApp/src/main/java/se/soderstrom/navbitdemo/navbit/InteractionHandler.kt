@@ -1,9 +1,9 @@
 package se.soderstrom.navbitdemo.navbit
 
 import android.app.Activity
-import se.quidbit.navbit.InteractionResult
-import se.quidbit.navbit.NavBitInteractionHandler
-import se.quidbit.navbit.TransitionDirection
+import se.quidbit.navbit.types.InteractionResult
+import se.quidbit.navbit.types.TransitionDirection
+import se.quidbit.navbit.toimplement.NavBitInteractionHandler
 
 class InteractionHandler : NavBitInteractionHandler<Interaction, NavigationState>() {
     override fun applyBackInteractionOnState(s: NavigationState): InteractionResult<NavigationState> {

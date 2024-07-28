@@ -1,6 +1,6 @@
 package se.soderstrom.navbitdemo.navbit
 
-import se.quidbit.navbit.NavBitScreenData
+import se.quidbit.navbit.toimplement.NavBitScreenData
 
 sealed class ScreenData : NavBitScreenData {
     class Start(var count : Int) : ScreenData()

@@ -2,22 +2,20 @@ package se.soderstrom.navbitdemo.screens
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import android.view.View
 import android.widget.TextView
 import com.google.android.material.card.MaterialCardView
 import org.greenrobot.eventbus.EventBus
-import se.quidbit.navbit.BackgroundWork
-import se.quidbit.navbit.Screen
-import se.quidbit.navbit.ScreenInsets
-import se.quidbit.navbit.ScreenLayoutIds
-import se.quidbit.navbit.ScreenType
+import se.quidbit.navbit.types.BackgroundWork
+import se.quidbit.navbit.toimplement.NavBitScreen
+import se.quidbit.navbit.types.ScreenInsets
+import se.quidbit.navbit.types.ScreenLayoutIds
+import se.quidbit.navbit.types.ScreenType
 import se.soderstrom.navbitdemo.R
 import se.soderstrom.navbitdemo.navbit.Interaction
 import se.soderstrom.navbitdemo.navbit.ScreenData
 
-class StartScreen(context : Context) : Screen<ScreenData.Start>(context) {
+class StartScreen(context : Context) : NavBitScreen<ScreenData.Start>(context) {
 
     private lateinit var incrementText : TextView
     private lateinit var clearButton : MaterialCardView
@@ -57,18 +55,18 @@ class StartScreen(context : Context) : Screen<ScreenData.Start>(context) {
         onPrepared(ScreenInsets())
     }
 
-    override fun entering(data: ScreenData.Start, notifyReady: () -> Unit) {
+    override fun entering(data: ScreenData.Start, notifyDone: () -> Unit) {
         updateData(data)
-        notifyReady()
+        notifyDone()
     }
 
     override fun updating(oldData: ScreenData.Start, data: ScreenData.Start) {
         updateData(data)
     }
 
-    override fun returning(oldData: ScreenData.Start?, data: ScreenData.Start, notifyReady: () -> Unit) {
+    override fun returning(oldData: ScreenData.Start?, data: ScreenData.Start, notifyDone: () -> Unit) {
         updateData(data)
-        notifyReady()
+        notifyDone()
     }
 
     override fun getBackgroundWork(): BackgroundWork? {

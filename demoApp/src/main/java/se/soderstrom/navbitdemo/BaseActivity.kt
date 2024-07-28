@@ -1,7 +1,7 @@
 package se.soderstrom.navbitdemo
 
 import android.os.Bundle
-import se.quidbit.navbit.NavBitActivity
+import se.quidbit.navbit.toimplement.NavBitActivity
 import se.soderstrom.navbitdemo.navbit.InteractionHandler
 import se.soderstrom.navbitdemo.navbit.Interaction
 import se.soderstrom.navbitdemo.navbit.NavigationState

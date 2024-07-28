@@ -1,23 +1,21 @@
 package se.soderstrom.navbitdemo.screens
 
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import android.view.View
 import android.widget.TextView
 import com.google.android.material.appbar.MaterialToolbar
 import org.greenrobot.eventbus.EventBus
-import se.quidbit.navbit.BackgroundWork
-import se.quidbit.navbit.Screen
-import se.quidbit.navbit.ScreenInsets
-import se.quidbit.navbit.ScreenLayoutIds
-import se.quidbit.navbit.ScreenType
-import se.quidbit.navbit.UIwork
+import se.quidbit.navbit.types.BackgroundWork
+import se.quidbit.navbit.toimplement.NavBitScreen
+import se.quidbit.navbit.types.ScreenInsets
+import se.quidbit.navbit.types.ScreenLayoutIds
+import se.quidbit.navbit.types.ScreenType
+import se.quidbit.navbit.types.UIwork
 import se.soderstrom.navbitdemo.R
 import se.soderstrom.navbitdemo.navbit.Interaction
 import se.soderstrom.navbitdemo.navbit.ScreenData
 
-class TimerScreen(context : Context) : Screen<ScreenData.Timer>(context) {
+class TimerScreen(context : Context) : NavBitScreen<ScreenData.Timer>(context) {
 
     private var seconds = 0
     private lateinit var timeText : TextView
@@ -37,16 +35,16 @@ class TimerScreen(context : Context) : Screen<ScreenData.Timer>(context) {
         onPrepared(ScreenInsets(toolbar, null))
     }
 
-    override fun entering(data: ScreenData.Timer, notifyReady: () -> Unit) {
+    override fun entering(data: ScreenData.Timer, notifyDone: () -> Unit) {
         //Handler(Looper.getMainLooper()).postDelayed({
-            notifyReady()
+            notifyDone()
         //}, 2000)
     }
 
     override fun updating(oldData: ScreenData.Timer, data: ScreenData.Timer) {}
 
-    override fun returning(oldData: ScreenData.Timer?, data: ScreenData.Timer, notifyReady: () -> Unit) {
-        notifyReady()
+    override fun returning(oldData: ScreenData.Timer?, data: ScreenData.Timer, notifyDone: () -> Unit) {
+        notifyDone()
     }
 
     override fun getBackgroundWork(): BackgroundWork? {

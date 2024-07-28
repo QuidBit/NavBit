@@ -6,16 +6,17 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import com.google.android.material.card.MaterialCardView
 import org.greenrobot.eventbus.EventBus
-import se.quidbit.navbit.BackgroundWork
-import se.quidbit.navbit.Screen
-import se.quidbit.navbit.ScreenInsets
-import se.quidbit.navbit.ScreenLayoutIds
-import se.quidbit.navbit.ScreenType
+import se.quidbit.navbit.showIfElseGone
+import se.quidbit.navbit.types.BackgroundWork
+import se.quidbit.navbit.toimplement.NavBitScreen
+import se.quidbit.navbit.types.ScreenInsets
+import se.quidbit.navbit.types.ScreenLayoutIds
+import se.quidbit.navbit.types.ScreenType
 import se.soderstrom.navbitdemo.R
 import se.soderstrom.navbitdemo.navbit.Interaction
 import se.soderstrom.navbitdemo.navbit.ScreenData
 
-class SheetsInfoDetailsScreen(context : Context) : Screen<ScreenData.InfoDetails>(context) {
+class SheetsInfoDetailsScreen(context : Context) : NavBitScreen<ScreenData.InfoDetails>(context) {
 
     lateinit var expandButtonText : TextView
     lateinit var expandText : TextView
@@ -41,17 +42,17 @@ class SheetsInfoDetailsScreen(context : Context) : Screen<ScreenData.InfoDetails
         onPrepared(ScreenInsets(mainContent))
     }
 
-    override fun entering(data: ScreenData.InfoDetails, notifyReady: () -> Unit) {
+    override fun entering(data: ScreenData.InfoDetails, notifyDone: () -> Unit) {
         updateData(data)
-        notifyReady()
+        notifyDone()
     }
 
     override fun updating(oldData: ScreenData.InfoDetails, data: ScreenData.InfoDetails) {
         updateData(data)
     }
 
-    override fun returning(oldData: ScreenData.InfoDetails?, data: ScreenData.InfoDetails, notifyReady: () -> Unit) {
-        notifyReady()
+    override fun returning(oldData: ScreenData.InfoDetails?, data: ScreenData.InfoDetails, notifyDone: () -> Unit) {
+        notifyDone()
     }
 
     override fun getBackgroundWork(): BackgroundWork? {
@@ -63,9 +64,6 @@ class SheetsInfoDetailsScreen(context : Context) : Screen<ScreenData.InfoDetails
             false -> "Expand"
             true -> "Collapse"
         }
-        expandText.visibility = when (data.expanded) {
-            false -> View.GONE
-            true -> View.VISIBLE
-        }
+        expandText.showIfElseGone(data.expanded)
     }
 }
