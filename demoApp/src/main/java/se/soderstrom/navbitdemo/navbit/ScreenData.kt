@@ -8,4 +8,6 @@ sealed class ScreenData : NavBitScreenData {
     object Info : ScreenData()
     class InfoDetails(var expanded : Boolean) : ScreenData()
     object Timer : ScreenData()
+    object Slow : ScreenData()
+    object Fast : ScreenData()
 }

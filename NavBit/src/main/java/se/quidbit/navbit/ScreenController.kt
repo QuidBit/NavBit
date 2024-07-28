@@ -360,6 +360,9 @@ object ScreenController {
         container : FrameLayout,
         screenHandler: NavBitScreenHandler<T>
     ){
+        // Hide during reconstruction
+        container.hide()
+
         Log.i("NavBit", "Restoring ${toBeRestored.size} screens")
 
         val restored  = HashMap<Int, Pair<Screen<*>, ScreenType>>()
@@ -386,18 +389,19 @@ object ScreenController {
                             val sortedMap = restored.entries.sortedBy { it.key }
                             val orderedScreens = ArrayList(sortedMap.map { it.value })
 
-                            var delay = 0L
                             for (orderedScreen in orderedScreens) {
-                                Handler(Looper.getMainLooper()).postDelayed({
-                                    newScreen.screenHandler()
-                                    backstack.add(orderedScreen)
-                                    container.addView(orderedScreen.first)
-                                    newScreen.refreshScreenInsets()
-                                }, delay)
-                                delay += 50
+                                backstack.add(orderedScreen)
+                                container.addView(orderedScreen.first)
+                                newScreen.refreshScreenInsets()
                             }
 
                             toBeRestored.clear()
+
+                            // All done, so show it!
+                            container.fadeIn(
+                                150,
+                                ScreenTransition.getBaseTransitionLength(container.context).toLong() / 2
+                            )
                         }
                     }
                 }

@@ -33,8 +33,8 @@ class PopupClearScreen(context : Context) : Screen<ScreenData.ClearCheck>(contex
         onPrepared(ScreenInsets())
     }
 
-    override fun entering(data: ScreenData.ClearCheck, releaseForDisplay: (workAfter : () -> Unit) -> Unit) {
-        releaseForDisplay{}
+    override fun entering(data: ScreenData.ClearCheck, notifyReady: () -> Unit) {
+        notifyReady()
     }
 
     override fun updating(oldData: ScreenData.ClearCheck, data: ScreenData.ClearCheck) {}

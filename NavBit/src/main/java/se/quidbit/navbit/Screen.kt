@@ -136,8 +136,24 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
         }
     }
 
+    // -------------------------------------------------------------
+    // Allow screens to post work asynchronously
+    // -------------------------------------------------------------
+    // Required since a finished Screen might be moved from background to main thread before the work is actually run
+
     // For use within any Screen implementations
-    fun screenHandler() : Handler {
+    fun screenPost(work: () -> Unit) {
+        currentHandler().post(work)
+    }
+
+    fun screenPostDelayed(delay : Long, work: () -> Unit) {
+        currentHandler().postDelayed ({
+            // Post again to use the currently correct handler after the delay (as it might have changed)
+            screenPost(work)
+        }, delay)
+    }
+
+    private fun currentHandler() : Handler {
         return when (ownedByMainThread) {
             true -> NavBitActivity.mainHandler
             false -> NavBitActivity.backgroundHandler
@@ -153,12 +169,10 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
         ownedByMainThread = true
         storeNewData(newData)
 
-        entering(data) { postReleaseWork ->
-            screenHandler().post {
+        entering(data) {
+            currentHandler().post {
                 startBackgroundWork()
                 visibility = VISIBLE
-
-                postReleaseWork()
                 onRestored()
             }
         }
@@ -221,13 +235,8 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
             TransitionDirection.Forward -> {
                 storeNewData(newState)
 
-                entering(data) { afterRelease ->
-
+                entering(data) {
                     performAppearingTransition(transition, moveToMainThreadForDisplay, onDisplayed)
-
-                    screenHandler().post {
-                        afterRelease()
-                    }
                 }
             }
 
@@ -399,7 +408,7 @@ abstract class Screen<T : NavBitScreenData>(context: Context) : FrameLayout(cont
     //------------------------------------------------
 
     // Entering the screen (user going forwards)
-    abstract fun entering(data: T, releaseForDisplay: (workAfter : () -> Unit) -> Unit)
+    abstract fun entering(data: T, notifyReady: () -> Unit)
 
     // Updated state on the current screen
     abstract fun updating(oldData: T, data: T)

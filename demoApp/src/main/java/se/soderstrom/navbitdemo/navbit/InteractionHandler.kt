@@ -13,6 +13,8 @@ class InteractionHandler : NavBitInteractionHandler<Interaction, NavigationState
             is NavigationState.Info -> NavigationState.Start(s.count)
             is NavigationState.InfoDetails -> NavigationState.Info(s.count)
             is NavigationState.Timer -> NavigationState.Start(s.count)
+            is NavigationState.Slow -> NavigationState.Start(s.count)
+            is NavigationState.Fast -> NavigationState.Slow(s.count)
         }
 
         return InteractionResult.NewState(newState, TransitionDirection.Backward)
@@ -57,6 +59,10 @@ class InteractionHandler : NavBitInteractionHandler<Interaction, NavigationState
                 is NavigationState.Start -> NavigationState.Timer(s.count)
                 else -> return InteractionResult.Unexpected()
             }
+            is Interaction.GoToSlow -> when (s) {
+                is NavigationState.Start -> NavigationState.Slow(s.count)
+                else -> return InteractionResult.Unexpected()
+            }
             is Interaction.Done -> when (s) {
                 is NavigationState.InfoDetails -> {
                     transition = TransitionDirection.Backward
@@ -70,6 +76,7 @@ class InteractionHandler : NavBitInteractionHandler<Interaction, NavigationState
             }
             is Interaction.Expand -> when (s) {
                 is NavigationState.InfoDetails -> NavigationState.InfoDetails(s.count, !s.expanded)
+                is NavigationState.Slow -> NavigationState.Fast(s.count)
                 else -> return InteractionResult.Unexpected()
             }
         }

@@ -9,9 +9,11 @@ import se.quidbit.navbit.ScreenDataResult
 import se.quidbit.navbit.ScreenType
 import se.quidbit.navbit.TransitionDirection
 import se.quidbit.navbit.TransitionType
+import se.soderstrom.navbitdemo.screens.FastScreen
 import se.soderstrom.navbitdemo.screens.PopupClearScreen
 import se.soderstrom.navbitdemo.screens.SheetsInfoDetailsScreen
 import se.soderstrom.navbitdemo.screens.SheetsInfoScreen
+import se.soderstrom.navbitdemo.screens.SlowScreen
 import se.soderstrom.navbitdemo.screens.StartScreen
 import se.soderstrom.navbitdemo.screens.TimerScreen
 
@@ -27,6 +29,8 @@ class ScreenHandler : NavBitScreenHandler<ScreenData>() {
             is ScreenData.Info -> SheetsInfoScreen(context)
             is ScreenData.InfoDetails -> SheetsInfoDetailsScreen(context)
             is ScreenData.Timer -> TimerScreen(context)
+            is ScreenData.Slow -> SlowScreen(context)
+            is ScreenData.Fast -> FastScreen(context)
         }
     }
 
@@ -38,6 +42,8 @@ class ScreenHandler : NavBitScreenHandler<ScreenData>() {
             is ScreenData.Info -> ScreenData.Info
             is ScreenData.InfoDetails -> ScreenData.InfoDetails(t.expanded)
             is ScreenData.Timer -> ScreenData.Timer
+            is ScreenData.Fast -> ScreenData.Fast
+            is ScreenData.Slow -> ScreenData.Slow
         }
     }
 
@@ -63,6 +69,8 @@ class ScreenHandler : NavBitScreenHandler<ScreenData>() {
                 ScreenData.InfoDetails(s.expanded)
             }
             is NavigationState.Timer -> ScreenData.Timer
+            is NavigationState.Fast -> ScreenData.Fast
+            is NavigationState.Slow -> ScreenData.Slow
         }
 
         return ScreenDataResult.Success(screenData, screenType)

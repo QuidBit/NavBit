@@ -1,10 +1,10 @@
 package se.quidbit.navbit
 
+import android.view.View
 import android.widget.FrameLayout.INVISIBLE
 import android.widget.FrameLayout.VISIBLE
-import android.widget.ProgressBar
 
-fun ProgressBar.fadeInLoading(delay : Long, length : Long) {
+fun View.fadeIn(delay : Long, length : Long) {
     animate().cancel()
     alpha = 0f
     visibility = VISIBLE
@@ -15,7 +15,7 @@ fun ProgressBar.fadeInLoading(delay : Long, length : Long) {
         .start()
 }
 
-fun ProgressBar.fadeOutLoading(delay : Long, length : Long) {
+fun View.fadeOut(delay : Long, length : Long) {
     animate().cancel()
     animate()
         .alpha(0f)
@@ -24,7 +24,12 @@ fun ProgressBar.fadeOutLoading(delay : Long, length : Long) {
         .start()
 }
 
-fun ProgressBar.hideLoading() {
+fun View.hide() {
+    alpha = 0f
+    visibility = INVISIBLE
+}
+
+fun View.show() {
     alpha = 0f
     visibility = INVISIBLE
 }

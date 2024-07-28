@@ -76,6 +76,28 @@
                     android:layout_gravity="center"/>
 
             </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/slow_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="16dp"
+                app:cardBackgroundColor="@color/teal_200"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="4dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Go to Slow Screen"
+                    android:textSize="15sp"
+                    android:textColor="@color/black"
+                    android:layout_margin="8dp"
+                    android:layout_gravity="center"/>
+
+            </com.google.android.material.card.MaterialCardView>
+
         </LinearLayout>
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="wrap_content"

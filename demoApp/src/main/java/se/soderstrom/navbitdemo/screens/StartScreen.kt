@@ -49,12 +49,17 @@ class StartScreen(context : Context) : Screen<ScreenData.Start>(context) {
             EventBus.getDefault().post(Interaction.GoToTimer)
         }
 
+        val slowButton = view.findViewById<MaterialCardView>(R.id.slow_button)
+        slowButton.setOnClickListener {
+            EventBus.getDefault().post(Interaction.GoToSlow)
+        }
+
         onPrepared(ScreenInsets())
     }
 
-    override fun entering(data: ScreenData.Start, releaseForDisplay: (workAfter : () -> Unit) -> Unit) {
+    override fun entering(data: ScreenData.Start, notifyReady: () -> Unit) {
         updateData(data)
-        releaseForDisplay {}
+        notifyReady()
     }
 
     override fun updating(oldData: ScreenData.Start, data: ScreenData.Start) {
@@ -63,9 +68,7 @@ class StartScreen(context : Context) : Screen<ScreenData.Start>(context) {
 
     override fun returning(oldData: ScreenData.Start?, data: ScreenData.Start, notifyReady: () -> Unit) {
         updateData(data)
-        Handler(Looper.getMainLooper()).postDelayed({
-            notifyReady()
-        }, 2000)
+        notifyReady()
     }
 
     override fun getBackgroundWork(): BackgroundWork? {

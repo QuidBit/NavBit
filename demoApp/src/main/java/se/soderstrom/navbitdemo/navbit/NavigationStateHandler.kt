@@ -26,6 +26,8 @@ class NavigationStateHandler : NavBitNavigationStateHandler<NavigationState, Scr
             is NavigationState.InfoDetails -> state.count
             is NavigationState.Start -> state.count
             is NavigationState.Timer -> state.count
+            is NavigationState.Fast -> state.count
+            is NavigationState.Slow -> state.count
         }
 
         val sharedPreferences = BaseActivity.getNavBit().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)

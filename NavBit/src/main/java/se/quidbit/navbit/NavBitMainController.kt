@@ -23,21 +23,22 @@ class NavBitMainController<T : NavBitInteraction, U : NavBitNavigationState, V :
 
     init {
         val inflater = LayoutInflater.from(activity)
-        mainContainer = inflater.inflate(R.layout.main_container, null) as FrameLayout
+
+        val base = inflater.inflate(R.layout.base, null) as FrameLayout
+        mainContainer = base.findViewById(R.id.main_container)
 
         // To avoid the background progress bar showing up on normal startup
         // -------------------------------------------------------------------
-        val progressBar = mainContainer.findViewById<ProgressBar>(R.id.progress_bar)
-        progressBar.visibility = View.VISIBLE
-        progressBar.fadeInLoading(300, 600)
+        val progressBar = base.findViewById<ProgressBar>(R.id.progress_bar)
+        progressBar.fadeIn(300, 600)
         // -------------------------------------------------------------------
 
-        activity.setContentView(mainContainer)
+        activity.setContentView(base)
 
-        ViewCompat.setOnApplyWindowInsetsListener(mainContainer) { _, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(base) { _, insets ->
             // Pass the insets to each child view
-            for (i in 0 until mainContainer.childCount) {
-                val child = mainContainer.getChildAt(i)
+            for (i in 0 until base.childCount) {
+                val child = base.getChildAt(i)
                 ViewCompat.dispatchApplyWindowInsets(child, insets)
             }
             insets

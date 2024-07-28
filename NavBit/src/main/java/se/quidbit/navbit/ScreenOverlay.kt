@@ -25,7 +25,7 @@ class ScreenOverlay @JvmOverloads constructor(
             Log.i("NavBit", "Input Blocked")
         }
 
-        progressBar.hideLoading()
+        progressBar.hide()
         blockInput(false)
     }
 
@@ -36,11 +36,11 @@ class ScreenOverlay @JvmOverloads constructor(
 
     fun fadeInLoading() {
         val baseTransitionLength = ScreenTransition.getBaseTransitionLength(context).toLong()
-        progressBar.fadeInLoading(baseTransitionLength, baseTransitionLength * 2)
+        progressBar.fadeIn(baseTransitionLength, baseTransitionLength * 2)
     }
 
     fun fadeOutLoading() {
         val baseTransitionLength = ScreenTransition.getBaseTransitionLength(context).toLong()
-        progressBar.fadeOutLoading(0, baseTransitionLength / 2)
+        progressBar.fadeOut(0, baseTransitionLength / 2)
     }
 }

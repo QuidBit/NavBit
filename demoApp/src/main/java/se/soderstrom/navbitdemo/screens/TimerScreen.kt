@@ -37,10 +37,10 @@ class TimerScreen(context : Context) : Screen<ScreenData.Timer>(context) {
         onPrepared(ScreenInsets(toolbar, null))
     }
 
-    override fun entering(data: ScreenData.Timer, releaseForDisplay: (workAfter : () -> Unit) -> Unit) {
-        Handler(Looper.getMainLooper()).postDelayed({
-            releaseForDisplay{}
-        }, 2000)
+    override fun entering(data: ScreenData.Timer, notifyReady: () -> Unit) {
+        //Handler(Looper.getMainLooper()).postDelayed({
+            notifyReady()
+        //}, 2000)
     }
 
     override fun updating(oldData: ScreenData.Timer, data: ScreenData.Timer) {}
