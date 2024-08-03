@@ -6,10 +6,10 @@ import se.quidbit.navbit.types.NavigationResult
 import se.quidbit.navbit.types.ScreenDataResult
 import se.quidbit.navbit.types.ScreenType
 
-abstract class NavBitNavigationStateHandler <T : NavBitNavigationState, U : NavBitScreenData> {
-    private lateinit var state: T
+abstract class NavBitNavigationStateHandler <S : NavBitNavigationState, D : NavBitScreenData> {
+    private lateinit var state: S
 
-    fun setCurrentState(state : T) {
+    fun setCurrentState(state : S) {
         this.state = state
         storeStartupNavigationState(state)
     }
@@ -27,14 +27,11 @@ abstract class NavBitNavigationStateHandler <T : NavBitNavigationState, U : NavB
         }
     }
 
-    fun getCurrentState() : T {
-        // Dangerous cast here!
-        // However, it is safe as long as this function is only called with the same type as was used to find the screen
-        // Making them guaranteed to match, so it has to be enforced within the library
-        return state.deepCopy() as T
+    fun getCurrentState() : S {
+        return state
     }
 
-    fun <T : NavBitScreenData>getNavigationResult(oldScreenData: U, baseActivity: AppCompatActivity, screenGenerator : NavBitScreenHandler<U>) : NavigationResult<U> {
+    fun getNavigationResult(oldScreenData: D, baseActivity: AppCompatActivity, screenGenerator : NavBitScreenHandler<S, D>) : NavigationResult<D> {
 
         // Check if we are navigating elsewhere, or simply updating a current screen
         val (newScreenData, newScreenType) = when (val screenResult =
@@ -64,11 +61,11 @@ abstract class NavBitNavigationStateHandler <T : NavBitNavigationState, U : NavB
 
     // -------------------------------------------------------------------------------
 
-    abstract fun fallbackStartupScreenData(context: Context) : U
-    abstract fun loadStartupNavigationState() : T
-    abstract fun storeStartupNavigationState(state : T)
+    abstract fun fallbackStartupScreenData(context: Context) : D
+    abstract fun loadStartupNavigationState() : S
+    abstract fun storeStartupNavigationState(state : S)
 
-    abstract fun getScreenToPreload(state : T) : Pair<U, ScreenType>?
+    abstract fun getScreenToPreload(state : S) : Pair<D, ScreenType>?
 }
 
 enum class StartState {

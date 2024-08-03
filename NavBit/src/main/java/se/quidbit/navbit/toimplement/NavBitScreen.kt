@@ -35,8 +35,8 @@ import se.quidbit.navbit.types.TransitionDirection
 // -----------------------------------------------------------------------------------------------------------------
 // Note: All functions are abstract for clarity, forcing all function the screen can/should implement being clearly visible
 
-abstract class NavBitScreen<T : NavBitScreenData>(context: Context) : FrameLayout(context) {
-    private lateinit var data: T
+abstract class NavBitScreen<D : NavBitScreenData>(context: Context) : FrameLayout(context) {
+    private lateinit var data: D
 
     private var transitionAnimation: ObjectAnimator? = null
 
@@ -206,7 +206,7 @@ abstract class NavBitScreen<T : NavBitScreenData>(context: Context) : FrameLayou
     internal fun restoreScreen(newData : NavBitScreenData, onRestored : () -> Unit) {
         // This screen has been active before, so it is owned by the main thread
         ownedByMainThread = true
-        storeNewData(newData)
+        setNewData(newData)
 
         entering(data) {
             currentHandler().post {
@@ -223,7 +223,7 @@ abstract class NavBitScreen<T : NavBitScreenData>(context: Context) : FrameLayou
 
     internal fun initiateAppearingTransition(
         transition: ScreenTransition,
-        newState: NavBitScreenData,
+        newData: NavBitScreenData,
         newlyLoaded : Boolean,
         onDisplayed : () -> Unit,
         moveToMainThreadForDisplay : () -> Unit,
@@ -277,7 +277,7 @@ abstract class NavBitScreen<T : NavBitScreenData>(context: Context) : FrameLayou
         // Populate the screen with the expected data
         when (transition.direction) {
             TransitionDirection.Forward -> {
-                storeNewData(newState)
+                setNewData(newData)
 
                 entering(data) {
                     performAppearingTransition(transition, moveToMainThreadForDisplay, onDisplayed)
@@ -285,14 +285,14 @@ abstract class NavBitScreen<T : NavBitScreenData>(context: Context) : FrameLayou
             }
 
             TransitionDirection.Backward -> {
-                val oldData = storeNewData(newState, true)
+                setNewData(newData)
 
                 // The screen has been moved to the main container as it has already been displayed once
                 // so any manipulation must be done on the main thread
                 NavBitActivity.mainHandler.post {
                     visibility = VISIBLE
 
-                    returning(oldData, data) {
+                    returning(data) {
                         performAppearingTransition(transition, { }, onDisplayed)
                     }
                 }
@@ -415,26 +415,17 @@ abstract class NavBitScreen<T : NavBitScreenData>(context: Context) : FrameLayou
         return data.tag()
     }
 
+    // --------------------------------------------------------------------------------------------------
+    // Dangerous casts here!
+    // However, it is safe as long as this function is only called with the same type as was used to find the screen
+    // Making them guaranteed to match, so it has to be enforced within the library
+    // --------------------------------------------------------------------------------------------------
+
     internal fun <X : NavBitScreenData>getData(): X {
-        // Dangerous cast here!
-        // However, it is safe as long as this function is only called with the same type as was used to find the screen
-        // Making them guaranteed to match, so it has to be enforced within the library
         return data as X
     }
-
-    private fun storeNewData(state: NavBitScreenData, returnOld: Boolean = false): T? {
-        // Dangerous cast here!
-        // However, it is safe as long as this function is only called with the same type as was used to find the screen
-        // Making them guaranteed to match, so it has to be enforced within the library
-        val newData = state as T
-        val oldData = if (returnOld && this::data.isInitialized) {
-            NavBitActivity.getNavBitInstance<NavBitInteraction, NavBitNavigationState, T>().getScreenGenerator().screenDataDeepCopy(data)
-        } else {
-            null
-        }
-
-        data = NavBitActivity.getNavBitInstance<NavBitInteraction, NavBitNavigationState, T>().getScreenGenerator().screenDataDeepCopy(newData)
-        return oldData
+    private fun setNewData(newData: NavBitScreenData) {
+        data = newData as D
     }
 
     // -------------------------------------------------------------
@@ -442,12 +433,11 @@ abstract class NavBitScreen<T : NavBitScreenData>(context: Context) : FrameLayou
     // -----------------------------------------
     internal fun notifyUpdatedData(updatedData: NavBitScreenData) {
 
-        storeNewData(updatedData, true)?.let { oldData ->
+        setNewData(updatedData)
 
-            // Make any view changes on the main thread
-            NavBitActivity.mainHandler.post {
-                updating(oldData, data)
-            }
+        // Make any view changes on the main thread
+        NavBitActivity.mainHandler.post {
+            updating(data)
         }
     }
 
@@ -455,14 +445,14 @@ abstract class NavBitScreen<T : NavBitScreenData>(context: Context) : FrameLayou
     //------------------------------------------------
 
     // Entering the screen (user going forwards)
-    abstract fun entering(data: T, notifyDone: () -> Unit)
+    abstract fun entering(data: D, notifyDone: () -> Unit)
 
     // Updated state on the current screen
-    abstract fun updating(oldData: T, data: T)
+    abstract fun updating(data: D)
 
     // Returning to the screen (user going backwards)
     // NOTE: The screen might not have been loaded before, in which there is no oldData available
-    abstract fun returning(oldData: T?, data: T, notifyDone: () -> Unit)
+    abstract fun returning(data: D, notifyDone: () -> Unit)
 
     // Background work - Used to correctly start/stop any background work done by the screen
     // ------------------------------------------------------------------------------

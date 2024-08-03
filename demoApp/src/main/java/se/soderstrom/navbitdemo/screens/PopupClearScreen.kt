@@ -37,9 +37,9 @@ class PopupClearScreen(context : Context) : NavBitScreen<ScreenData.ClearCheck>(
         notifyDone()
     }
 
-    override fun updating(oldData: ScreenData.ClearCheck, data: ScreenData.ClearCheck) {}
+    override fun updating(data: ScreenData.ClearCheck) {}
 
-    override fun returning(oldData: ScreenData.ClearCheck?, data: ScreenData.ClearCheck, notifyDone: () -> Unit) {
+    override fun returning(data: ScreenData.ClearCheck, notifyDone: () -> Unit) {
         notifyDone()
     }
 

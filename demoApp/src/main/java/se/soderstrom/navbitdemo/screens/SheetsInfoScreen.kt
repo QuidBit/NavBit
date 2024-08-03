@@ -39,9 +39,9 @@ class SheetsInfoScreen(context : Context) : NavBitScreen<ScreenData.Info>(contex
         notifyDone()
     }
 
-    override fun updating(oldData: ScreenData.Info, data: ScreenData.Info) {}
+    override fun updating(data: ScreenData.Info) {}
 
-    override fun returning(oldData: ScreenData.Info?, data: ScreenData.Info, notifyDone: () -> Unit) {
+    override fun returning(data: ScreenData.Info, notifyDone: () -> Unit) {
         notifyDone()
     }
 

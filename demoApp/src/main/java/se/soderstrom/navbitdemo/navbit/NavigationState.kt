@@ -10,17 +10,4 @@ sealed class NavigationState : NavBitNavigationState() {
     class Timer(var count : Int) : NavigationState()
     class Slow(var count : Int) : NavigationState()
     class Fast(var count : Int) : NavigationState()
-
-
-    override fun deepCopy(): NavigationState {
-        return when (this) {
-            is Start -> Start(count)
-            is ClearCheck -> ClearCheck(count)
-            is Info -> Info(count)
-            is InfoDetails -> InfoDetails(count, expanded)
-            is Timer -> Timer(count)
-            is Fast -> Fast(count)
-            is Slow -> Slow(count)
-        }
-    }
 }

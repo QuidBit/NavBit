@@ -42,9 +42,9 @@ class SlowScreen(context : Context) : NavBitScreen<ScreenData.Slow>(context) {
         }, 2000)
     }
 
-    override fun updating(oldData: ScreenData.Slow, data: ScreenData.Slow) {}
+    override fun updating(data: ScreenData.Slow) {}
 
-    override fun returning(oldData: ScreenData.Slow?, data: ScreenData.Slow, notifyDone: () -> Unit) {
+    override fun returning(data: ScreenData.Slow, notifyDone: () -> Unit) {
         Handler(Looper.getMainLooper()).postDelayed({
             notifyDone()
         }, 2000)

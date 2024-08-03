@@ -17,7 +17,7 @@ import se.soderstrom.navbitdemo.screens.SlowScreen
 import se.soderstrom.navbitdemo.screens.StartScreen
 import se.soderstrom.navbitdemo.screens.TimerScreen
 
-class ScreenHandler : NavBitScreenHandler<ScreenData>() {
+class ScreenHandler : NavBitScreenHandler<NavigationState, ScreenData>() {
     override fun generateNewScreen(
         context: Context,
         screenData: ScreenData,
@@ -34,24 +34,10 @@ class ScreenHandler : NavBitScreenHandler<ScreenData>() {
         }
     }
 
-    override fun screenDataDeepCopy(t: NavBitScreenData): ScreenData {
-        val t = t as ScreenData
-        return when(t) {
-            is ScreenData.Start -> ScreenData.Start(t.count)
-            is ScreenData.ClearCheck -> ScreenData.ClearCheck
-            is ScreenData.Info -> ScreenData.Info
-            is ScreenData.InfoDetails -> ScreenData.InfoDetails(t.expanded)
-            is ScreenData.Timer -> ScreenData.Timer
-            is ScreenData.Fast -> ScreenData.Fast
-            is ScreenData.Slow -> ScreenData.Slow
-        }
-    }
-
     override fun screenDataFromNavigationState(
-        s: NavBitNavigationState,
+        s: NavigationState,
         context: Context
     ): ScreenDataResult<ScreenData> {
-        val s = s as NavigationState
         var screenType = ScreenType.Full
 
         val screenData = when (s) {

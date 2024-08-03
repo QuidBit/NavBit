@@ -47,11 +47,11 @@ class SheetsInfoDetailsScreen(context : Context) : NavBitScreen<ScreenData.InfoD
         notifyDone()
     }
 
-    override fun updating(oldData: ScreenData.InfoDetails, data: ScreenData.InfoDetails) {
+    override fun updating(data: ScreenData.InfoDetails) {
         updateData(data)
     }
 
-    override fun returning(oldData: ScreenData.InfoDetails?, data: ScreenData.InfoDetails, notifyDone: () -> Unit) {
+    override fun returning(data: ScreenData.InfoDetails, notifyDone: () -> Unit) {
         notifyDone()
     }
 

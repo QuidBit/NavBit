@@ -2,7 +2,7 @@ package se.quidbit.navbit.types
 
 import se.quidbit.navbit.toimplement.NavBitScreenData
 
-sealed class ScreenDataResult<T : NavBitScreenData> {
-    data class ErrorRead<T : NavBitScreenData>(val error : ReadError) : ScreenDataResult<T>()
-    data class Success<T : NavBitScreenData>(val data : T, val type : ScreenType) : ScreenDataResult<T>()
+sealed class ScreenDataResult<D : NavBitScreenData> {
+    data class ErrorRead<D : NavBitScreenData>(val error : ReadError) : ScreenDataResult<D>()
+    data class Success<D : NavBitScreenData>(val data : D, val type : ScreenType) : ScreenDataResult<D>()
 }

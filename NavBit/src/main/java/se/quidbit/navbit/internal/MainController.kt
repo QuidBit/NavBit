@@ -26,11 +26,11 @@ import se.quidbit.navbit.types.ScreenType
 import se.quidbit.navbit.types.TransitionDirection
 import se.quidbit.navbit.toimplement.StartState
 
-internal class MainController<T : NavBitInteraction, U : NavBitNavigationState, V : NavBitScreenData>(
+internal class MainController<I : NavBitInteraction, S : NavBitNavigationState, D : NavBitScreenData>(
     private val activity: AppCompatActivity,
-    private val interactionHandler: NavBitInteractionHandler<T, U>,
-    private val stateHandler: NavBitNavigationStateHandler<U, V>,
-    private val screenHandler: NavBitScreenHandler<V>
+    private val interactionHandler: NavBitInteractionHandler<I, S>,
+    private val stateHandler: NavBitNavigationStateHandler<S, D>,
+    private val screenHandler: NavBitScreenHandler<S,D>
 ) {
     // Set up the container
     // --------------------------------------------------------
@@ -94,7 +94,7 @@ internal class MainController<T : NavBitInteraction, U : NavBitNavigationState, 
     // Interaction Handling
     // --------------------------------------------------------
 
-    fun handleInteraction(interaction: T) {
+    fun handleInteraction(interaction: I) {
         Log.i("NavBit", "Interaction Received: ${StringHelper.prettyPrintSealedClassString(interaction.toString())} - ${stateHandler.getCurrentState().prettyString()}")
 
         // Handle the interactions
@@ -121,9 +121,9 @@ internal class MainController<T : NavBitInteraction, U : NavBitNavigationState, 
                 stateHandler.setCurrentState(interactionResult.state)
 
                 val screen = ScreenController.getCurrentScreen()
-                val screenData = screen.getData<V>()
+                val screenData = screen.getData<D>()
 
-                when(val navigationResult = stateHandler.getNavigationResult<V>(screenData, activity, screenHandler)) {
+                when(val navigationResult = stateHandler.getNavigationResult(screenData, activity, screenHandler)) {
                     is NavigationResult.ErrorRead ->
                         showError("Navigation", " -Error Reading [${navigationResult.error}]")
                     is NavigationResult.Navigate -> {
@@ -192,7 +192,7 @@ internal class MainController<T : NavBitInteraction, U : NavBitNavigationState, 
     // --------------------------------------------------------
     // Screen Handling
     // --------------------------------------------------------
-    private fun switchScreen(state : U, screenData: V, screenType : ScreenType, direction: TransitionDirection) {
+    private fun switchScreen(state : S, screenData: D, screenType : ScreenType, direction: TransitionDirection) {
 
         //Start by hiding any visible keyboard as it should not retain between screens
         // ---------------------------------------------------

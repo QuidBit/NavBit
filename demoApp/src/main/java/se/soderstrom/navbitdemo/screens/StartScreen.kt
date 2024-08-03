@@ -60,11 +60,11 @@ class StartScreen(context : Context) : NavBitScreen<ScreenData.Start>(context) {
         notifyDone()
     }
 
-    override fun updating(oldData: ScreenData.Start, data: ScreenData.Start) {
+    override fun updating(data: ScreenData.Start) {
         updateData(data)
     }
 
-    override fun returning(oldData: ScreenData.Start?, data: ScreenData.Start, notifyDone: () -> Unit) {
+    override fun returning(data: ScreenData.Start, notifyDone: () -> Unit) {
         updateData(data)
         notifyDone()
     }

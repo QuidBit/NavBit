@@ -13,13 +13,13 @@ import org.greenrobot.eventbus.ThreadMode
 import se.quidbit.navbit.internal.InternalInteraction
 import se.quidbit.navbit.internal.MainController
 
-abstract class NavBitActivity<T : NavBitInteraction, U : NavBitNavigationState, V : NavBitScreenData>(
-    val interactionHandler: NavBitInteractionHandler<T, U>,
-    private val navigationStateHandler: NavBitNavigationStateHandler<U, V>,
-    private val screenHandler: NavBitScreenHandler<V>
+abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState, D : NavBitScreenData>(
+    val interactionHandler: NavBitInteractionHandler<I, S>,
+    private val navigationStateHandler: NavBitNavigationStateHandler<S, D>,
+    private val screenHandler: NavBitScreenHandler<S,D>
 )  : AppCompatActivity() {
 
-    private lateinit var mainController : MainController<T, U, V>
+    private lateinit var mainController : MainController<I, S, D>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,11 +32,11 @@ abstract class NavBitActivity<T : NavBitInteraction, U : NavBitNavigationState, 
         mainHandler = Handler(Looper.getMainLooper())
     }
 
-    internal fun getScreenGenerator() : NavBitScreenHandler<V> {
+    internal fun getScreenGenerator() : NavBitScreenHandler<S,D> {
         return screenHandler
     }
 
-    fun getCurrentState() : U {
+    fun getCurrentState() : S {
         return navigationStateHandler.getCurrentState()
     }
 
@@ -62,7 +62,7 @@ abstract class NavBitActivity<T : NavBitInteraction, U : NavBitNavigationState, 
     }
 
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
-    internal fun onMessageEvent(interaction: T) {
+    internal fun onMessageEvent(interaction: I) {
         mainController.handleInteraction(interaction)
     }
 
@@ -97,8 +97,8 @@ abstract class NavBitActivity<T : NavBitInteraction, U : NavBitNavigationState, 
         internal lateinit var mainHandler : Handler
 
         private lateinit var instance : NavBitActivity<*, *, *>
-        fun <T : NavBitInteraction, U : NavBitNavigationState, V : NavBitScreenData>getNavBitInstance() : NavBitActivity<T, U, V> {
-            return instance as NavBitActivity<T, U, V>
+        fun <I : NavBitInteraction, S : NavBitNavigationState, D : NavBitScreenData>getNavBitInstance() : NavBitActivity<I, S, D> {
+            return instance as NavBitActivity<I, S, D>
         }
     }
 }

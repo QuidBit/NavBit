@@ -73,5 +73,13 @@ class ScreenHandler : NavBitScreenGenerator<ScreenData>()
 ```
 
 ## Other Info
- - When posting work inside Screens, use the functions  `screenPost()` and  `screenPostDelay()`, which make sure to run them on the appropriate thread (important for View manipulation)
- - During slow transitions, a spinning wheel appears. If your Screen already has an animating progress bar present, make sure to name it `R.id.loading`. If present and visible, no spinning wheel is shown to preven.t a duplicate.
+
+### Asynchronous Work
+When posting work inside a `Screen`, use the functions  `screenPost()` and  `screenPostDelay()`, which make sure to run them on the appropriate thread (important for View manipulation)
+
+### Loading Screens
+
+During slow transitions, a spinning wheel appears. If your `Screen` already has an animating loading symbol, make sure to name it `R.id.loading`. If that ID is present and visible, no spinning wheel is shown to prevent duplicates.
+
+ ### Partial Screen Updates
+ When you have a heavy screen and only want to update part of it when the state is updated, you can include a custom `NavBitUpdates` in your state, as well as inside the `ScreenData`. By creating a `NavBitScreenUpdates` with a custom `enum class` (`NavBitUpdates<YourClass>`), you can define different types of updates fitting for your screen. Then when you modify the `NavigationState`, you should appropriately include what you changed using `add()`. Then during the screen updating, you can call `consume()` and get which parts have been modified, and update the screen accordingly.

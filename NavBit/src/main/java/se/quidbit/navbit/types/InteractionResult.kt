@@ -2,10 +2,10 @@ package se.quidbit.navbit.types
 
 import se.quidbit.navbit.toimplement.NavBitNavigationState
 
-sealed class InteractionResult <T : NavBitNavigationState> {
-    class Ignore<T : NavBitNavigationState> : InteractionResult<T>()
-    class Unexpected<T : NavBitNavigationState> : InteractionResult<T>()
-    class ErrorRead<T : NavBitNavigationState>(var error : ReadError) : InteractionResult<T>()
-    class NewState<T : NavBitNavigationState>(var state : T, var direction : TransitionDirection) : InteractionResult<T>()
-    class CloseApp<T : NavBitNavigationState> : InteractionResult<T>()
+sealed class InteractionResult <S : NavBitNavigationState> {
+    class Ignore<S : NavBitNavigationState> : InteractionResult<S>()
+    class Unexpected<S : NavBitNavigationState> : InteractionResult<S>()
+    class ErrorRead<S : NavBitNavigationState>(var error : ReadError) : InteractionResult<S>()
+    class NewState<S : NavBitNavigationState>(var state : S, var direction : TransitionDirection) : InteractionResult<S>()
+    class CloseApp<S : NavBitNavigationState> : InteractionResult<S>()
 }

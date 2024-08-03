@@ -32,9 +32,9 @@ class FastScreen(context : Context) : NavBitScreen<ScreenData.Fast>(context) {
         notifyDone()
     }
 
-    override fun updating(oldData: ScreenData.Fast, data: ScreenData.Fast) {}
+    override fun updating(data: ScreenData.Fast) {}
 
-    override fun returning(oldData: ScreenData.Fast?, data: ScreenData.Fast, notifyDone: () -> Unit) {
+    override fun returning(data: ScreenData.Fast, notifyDone: () -> Unit) {
         notifyDone()
     }
 

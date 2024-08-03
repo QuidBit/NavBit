@@ -36,14 +36,12 @@ class TimerScreen(context : Context) : NavBitScreen<ScreenData.Timer>(context) {
     }
 
     override fun entering(data: ScreenData.Timer, notifyDone: () -> Unit) {
-        //Handler(Looper.getMainLooper()).postDelayed({
-            notifyDone()
-        //}, 2000)
+        notifyDone()
     }
 
-    override fun updating(oldData: ScreenData.Timer, data: ScreenData.Timer) {}
+    override fun updating(data: ScreenData.Timer) {}
 
-    override fun returning(oldData: ScreenData.Timer?, data: ScreenData.Timer, notifyDone: () -> Unit) {
+    override fun returning(data: ScreenData.Timer, notifyDone: () -> Unit) {
         notifyDone()
     }
 

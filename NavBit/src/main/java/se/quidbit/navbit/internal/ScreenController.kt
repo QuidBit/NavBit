@@ -13,6 +13,7 @@ import se.quidbit.navbit.types.ScreenType
 import se.quidbit.navbit.types.TransitionDirection
 import se.quidbit.navbit.types.TransitionType
 import se.quidbit.navbit.toimplement.NavBitActivity
+import se.quidbit.navbit.toimplement.NavBitNavigationState
 import se.quidbit.navbit.toimplement.NavBitScreenData
 import se.quidbit.navbit.toimplement.NavBitScreenHandler
 import se.quidbit.navbit.toimplement.NavBitScreen
@@ -34,9 +35,9 @@ internal object ScreenController {
         return "${data.tag()}${type}"
     }
 
-    fun <T : NavBitScreenData> preInitializeScreen(
+    fun <S : NavBitNavigationState, D : NavBitScreenData> preInitializeScreen(
         context : Context,
-        screenHandler: NavBitScreenHandler<T>,
+        screenHandler: NavBitScreenHandler<S,D>,
         screenData : NavBitScreenData,
         type : ScreenType,
     ) {
@@ -50,7 +51,7 @@ internal object ScreenController {
 
         // It has not, so start!
         preInitializedScreens[id] = ScreenPreInitializedState.InProgress(null)
-        screenHandler.startGenerateNewScreen(context, screenData as T, type) { screen ->
+        screenHandler.startGenerateNewScreen(context, screenData as D, type) { screen ->
             Log.i("NavBit-ScreenController", "[$id] - Pre-initialize --READY")
 
             preInitializedScreens[id]?.let { state ->
@@ -72,13 +73,13 @@ internal object ScreenController {
         }
     }
 
-    fun <T : NavBitScreenData> goToScreen(
+    fun <S : NavBitNavigationState, D : NavBitScreenData> goToScreen(
         context : Context,
         mainContainer : FrameLayout,
-        screenData : T,
+        screenData : D,
         type : ScreenType,
         direction: TransitionDirection,
-        screenHandler: NavBitScreenHandler<T>
+        screenHandler: NavBitScreenHandler<S, D>
     ) {
         when (direction) {
             TransitionDirection.Forward -> {
@@ -140,7 +141,7 @@ internal object ScreenController {
             TransitionDirection.Backward -> {
                 // NOTE: onCompletion is not used when going backwards, as those screens are removed directly without any delay
                 // (It is currently used to notify when the screen has been covered and can be removed)
-                if (!backStackContains<T>(screenData.tag(), type)) {
+                if (!backStackContains<D>(screenData.tag(), type)) {
                     // We are backing to a screen that is not available
 
                     // Take the current screen
@@ -190,7 +191,7 @@ internal object ScreenController {
                     val toRemove = mutableListOf<Pair<NavBitScreen<*>, ScreenType>>()
 
                     backstack.takeLastWhile { screen ->
-                        if (screen.first.getData<T>().tag() == screenData.tag()) {
+                        if (screen.first.getData<D>().tag() == screenData.tag()) {
                             foundNavBitScreen = screen.first
                         } else {
                             toRemove.add(screen)
@@ -223,12 +224,12 @@ internal object ScreenController {
         }
     }
 
-    private fun <T : NavBitScreenData> completeGoToScreen(
+    private fun <D : NavBitScreenData> completeGoToScreen(
         navBitScreen : NavBitScreen<*>,
         transition: ScreenTransition,
         newlyAdded : Boolean,
         mainContainer: FrameLayout,
-        screenData: T,
+        screenData: D,
         onCompletion: () -> Unit
     ) {
         navBitScreen.initiateAppearingTransition(transition, screenData, newlyAdded, onCompletion) {
@@ -258,16 +259,16 @@ internal object ScreenController {
         }
     }
 
-    private fun <T : NavBitScreenData> addNewScreen(context: Context, screenData : T, type : ScreenType, screenHandler : NavBitScreenHandler<T>, onAdded : (NavBitScreen<*>) -> Unit) {
+    private fun <S : NavBitNavigationState, D : NavBitScreenData> addNewScreen(context: Context, screenData : D, type : ScreenType, screenHandler : NavBitScreenHandler<S, D>, onAdded : (NavBitScreen<*>) -> Unit) {
         screenHandler.startGenerateNewScreen(context, screenData, type) { screen ->
             backstack.add(Pair(screen, type))
             onAdded(screen)
         }
     }
 
-    private fun <T : NavBitScreenData> backStackContains(screenTag : String, type : ScreenType) : Boolean {
+    private fun <D : NavBitScreenData> backStackContains(screenTag : String, type : ScreenType) : Boolean {
         for (screen in backstack) {
-            if (screen.first.getData<T>().tag() == screenTag && screen.second == type) {
+            if (screen.first.getData<D>().tag() == screenTag && screen.second == type) {
                 return true
             }
         }
@@ -368,9 +369,9 @@ internal object ScreenController {
         backstack.clear()
     }
 
-    fun <T : NavBitScreenData>restoreScreens(
+    fun <S : NavBitNavigationState, D : NavBitScreenData>restoreScreens(
         container : FrameLayout,
-        screenHandler: NavBitScreenHandler<T>
+        screenHandler: NavBitScreenHandler<S, D>
     ){
         // Hide during reconstruction
         container.hide()
@@ -387,7 +388,7 @@ internal object ScreenController {
 
             val i = currentScreen
 
-            screenHandler.startGenerateNewScreen(container.context, oldData as T, screenType) { newScreen ->
+            screenHandler.startGenerateNewScreen(container.context, oldData as D, screenType) { newScreen ->
                 NavBitActivity.mainHandler.post {
                     newScreen.restoreScreen(oldData) {
                         restored[i] = (Pair(newScreen, screenType))
