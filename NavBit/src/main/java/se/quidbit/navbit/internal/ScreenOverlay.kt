@@ -7,6 +7,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.widget.ProgressBar
 import se.quidbit.navbit.R
+import se.quidbit.navbit.fadeIn
+import se.quidbit.navbit.fadeOut
 
 internal class ScreenOverlay @JvmOverloads constructor(
     context: Context,

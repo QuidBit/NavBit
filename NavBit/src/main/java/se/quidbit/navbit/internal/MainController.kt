@@ -12,6 +12,7 @@ import androidx.core.view.ViewCompat
 import androidx.lifecycle.lifecycleScope
 import se.quidbit.navbit.BuildConfig
 import se.quidbit.navbit.R
+import se.quidbit.navbit.fadeIn
 import se.quidbit.navbit.types.InteractionResult
 import se.quidbit.navbit.toimplement.NavBitActivity
 import se.quidbit.navbit.toimplement.NavBitInteraction

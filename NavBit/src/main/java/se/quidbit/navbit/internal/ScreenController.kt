@@ -9,6 +9,7 @@ import androidx.lifecycle.LifecycleCoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import se.quidbit.navbit.fadeIn
 import se.quidbit.navbit.types.ScreenType
 import se.quidbit.navbit.types.TransitionDirection
 import se.quidbit.navbit.types.TransitionType
@@ -46,6 +47,7 @@ internal object ScreenController {
 
         // Check so it has not already been requested
         if (preInitializedScreens.containsKey(id)) {
+            Log.i("NavBit-ScreenController", "[$id] -    ALREADY REQUESTED")
             return
         }
 
