@@ -10,6 +10,13 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import se.quidbit.navbit.BuildConfig
 import se.quidbit.navbit.R
 import se.quidbit.navbit.fadeIn
@@ -26,6 +33,8 @@ import se.quidbit.navbit.types.ScreenDataResult
 import se.quidbit.navbit.types.ScreenType
 import se.quidbit.navbit.types.TransitionDirection
 import se.quidbit.navbit.toimplement.StartState
+import java.util.concurrent.BlockingQueue
+import java.util.concurrent.LinkedBlockingQueue
 
 internal class MainController<I : NavBitInteraction, S : NavBitNavigationState, D : NavBitScreenData>(
     private val activity: AppCompatActivity,
@@ -33,6 +42,13 @@ internal class MainController<I : NavBitInteraction, S : NavBitNavigationState, 
     private val stateHandler: NavBitNavigationStateHandler<S, D>,
     private val screenHandler: NavBitScreenHandler<S,D>
 ) {
+    // Interaction handling
+    // --------------------------------------------------------
+    @Volatile
+    private var isProcessingInteraction = false
+    private val interactionQueue : BlockingQueue<I> = LinkedBlockingQueue()
+    private var interactionJob : Job? = null
+
     // Set up the container
     // --------------------------------------------------------
     private var mainContainer: FrameLayout
@@ -59,6 +75,9 @@ internal class MainController<I : NavBitInteraction, S : NavBitNavigationState, 
             }
             insets
         }
+
+        // Start the interaction processing
+        // --------------------------------------------------------
 
         // Make sure we have a valid app state before starting
         // --------------------------------------------------------
@@ -95,8 +114,42 @@ internal class MainController<I : NavBitInteraction, S : NavBitNavigationState, 
     // Interaction Handling
     // --------------------------------------------------------
 
-    fun handleInteraction(interaction: I) {
-        Log.i("NavBit", "Interaction Received: ${StringHelper.prettyPrintSealedClassString(interaction.toString())} - ${stateHandler.getCurrentState().prettyString()}")
+    fun startInteractionProcessing() {
+        if (interactionJob == null || interactionJob?.isCompleted == true) {
+            interactionJob = CoroutineScope(Dispatchers.IO).launch {
+                // Process interactions until cancel has been called
+                while (isActive) {
+                    val interaction = interactionQueue.take()
+                    isProcessingInteraction = true
+                    processInteraction(interaction)
+                    isProcessingInteraction = false
+                }
+            }
+        }
+    }
+
+    fun stopInteractionProcessing() {
+        interactionJob?.let { job ->
+            if (!isProcessingInteraction) {
+                job.cancel()
+            } else {
+                runBlocking {
+                    job.cancelAndJoin()
+                }
+            }
+            interactionJob = null
+        }
+    }
+
+    // --------------------------------------------------------
+
+    fun addInteraction(interaction: I) {
+        Log.i("NavBit", "Interaction - Received: ${StringHelper.prettyPrintSealedClassString(interaction.toString())} - ${stateHandler.getCurrentState().prettyString()}")
+        interactionQueue.add(interaction)
+    }
+
+    private fun processInteraction(interaction: I) {
+        Log.i("NavBit", "Interaction - Process: ${StringHelper.prettyPrintSealedClassString(interaction.toString())} - ${stateHandler.getCurrentState().prettyString()}")
 
         // Handle the interactions
         // ---------------------------------------------------------------------------------

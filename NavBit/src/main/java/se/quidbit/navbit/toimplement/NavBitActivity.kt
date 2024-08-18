@@ -56,14 +56,14 @@ abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState, 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 // Backing is always allowed regardless if we are mid screen switching
-                mainController.handleInteraction(interactionHandler.getBackInteraction())
+                mainController.addInteraction(interactionHandler.getBackInteraction())
             }
         })
     }
 
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
     internal fun onMessageEvent(interaction: I) {
-        mainController.handleInteraction(interaction)
+        mainController.addInteraction(interaction)
     }
 
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
@@ -71,7 +71,7 @@ abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState, 
         val appInteraction = when (interaction) {
             InternalInteraction.Back -> interactionHandler.getBackInteraction()
         }
-        mainController.handleInteraction(appInteraction)
+        mainController.addInteraction(appInteraction)
     }
 
 
@@ -83,6 +83,16 @@ abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState, 
     public override fun onStop() {
         super.onStop()
         EventBus.getDefault().unregister(this)
+    }
+
+    public override fun onResume() {
+        super.onResume()
+        mainController.startInteractionProcessing()
+    }
+
+    public override fun onPause() {
+        super.onPause()
+        mainController.stopInteractionProcessing()
     }
 
     public override fun onDestroy() {
