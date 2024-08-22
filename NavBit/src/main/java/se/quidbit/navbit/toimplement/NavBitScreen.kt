@@ -432,12 +432,23 @@ abstract class NavBitScreen<D : NavBitScreenData>(context: Context) : FrameLayou
     // Updating
     // -----------------------------------------
     internal fun notifyUpdatedData(updatedData: NavBitScreenData) {
-
         setNewData(updatedData)
+        updateScreenWithCurrentData()
+    }
 
-        // Make any view changes on the main thread
-        NavBitActivity.mainHandler.post {
-            updating(data)
+    private fun updateScreenWithCurrentData() {
+        // Make any updates to views on the main thread
+        // -----------------------------------------------------
+        // NOTE: If the screen is not owned by the main thread yet, it means that the entering (or returning to a new screen) has not completed
+        // So delay any updating to a later time and check if it is ready by then
+        if (ownedByMainThread) {
+            NavBitActivity.mainHandler.post {
+                updating(data)
+            }
+        } else {
+            NavBitActivity.backgroundHandler.postDelayed({
+                updateScreenWithCurrentData()
+            }, 1000)
         }
     }
 
