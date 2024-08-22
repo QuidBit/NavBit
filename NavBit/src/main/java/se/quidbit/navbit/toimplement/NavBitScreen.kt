@@ -293,7 +293,7 @@ abstract class NavBitScreen<D : NavBitScreenData>(context: Context) : FrameLayou
                     visibility = VISIBLE
 
                     returning(data) {
-                        performAppearingTransition(transition, { }, onDisplayed)
+                        performAppearingTransition(transition, moveToMainThreadForDisplay, onDisplayed)
                     }
                 }
             }

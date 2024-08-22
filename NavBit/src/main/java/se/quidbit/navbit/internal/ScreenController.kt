@@ -154,12 +154,6 @@ internal object ScreenController {
                     // Add a new screen at the end of the stack instead
                     // ------------------------------------------------------------------
                     addNewScreen(context, screenData, type, screenHandler) {
-                        // Remove and re-add the leaving screen to make sure it visually stays on top
-                        // ------------------------------------------------------------------
-                        NavBitActivity.mainHandler.post {
-                            mainContainer.removeView(oldScreen)
-                            mainContainer.addView(oldScreen)
-                        }
 
                         // Animate out the current screen
                         // ------------------------------------------------------------------
@@ -174,7 +168,9 @@ internal object ScreenController {
                         }
                         toBeRemoved.add(old)
 
-                        completeGoToScreen(it, transition, true, mainContainer, screenData) {}
+                        completeGoToScreen(it, transition, true, mainContainer, screenData) {
+                            oldScreen.notifyCovered()
+                        }
                     }
                 } else {
                     // Search the backstack in reverse order for the screen we are backing to
@@ -255,7 +251,11 @@ internal object ScreenController {
                     }
 
                     // Then add it for display
-                    mainContainer.addView(navBitScreen)
+                    val viewIndex = when (transition.direction) {
+                        TransitionDirection.Forward -> -1 // on Top
+                        TransitionDirection.Backward -> mainContainer.childCount - 1 // one below
+                    }
+                    mainContainer.addView(navBitScreen, viewIndex)
                 }
             }
         }
@@ -404,6 +404,12 @@ internal object ScreenController {
 
                             for (orderedScreen in orderedScreens) {
                                 backstack.add(orderedScreen)
+
+                                // Make sure the screen appears with the correct insets
+                                ViewCompat.getRootWindowInsets(container)?.let { startInsets ->
+                                    ViewCompat.dispatchApplyWindowInsets(orderedScreen.first, startInsets)
+                                }
+
                                 container.addView(orderedScreen.first)
                                 newScreen.refreshScreenInsets()
                             }
