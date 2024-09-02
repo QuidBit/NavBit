@@ -37,7 +37,7 @@ android {
 }
 
 fun versionName(): String {
-    return "2.2.2"
+    return "2.2.6"
 }
 
 val githubProperties = Properties().apply {

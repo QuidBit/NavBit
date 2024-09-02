@@ -10,8 +10,17 @@ abstract class NavBitNavigationStateHandler <S : NavBitNavigationState, D : NavB
     private lateinit var state: S
 
     fun setCurrentState(state : S) {
+        val newState = if (!this::state.isInitialized) {
+            true
+        } else {
+            state.javaClass != this.state.javaClass
+        }
+
         this.state = state
         storeStartupNavigationState(state)
+        if (newState) {
+            onNavigatingToNewState(state)
+        }
     }
 
     fun initialize() : StartState {
@@ -64,6 +73,7 @@ abstract class NavBitNavigationStateHandler <S : NavBitNavigationState, D : NavB
     abstract fun fallbackStartupScreenData(context: Context) : D
     abstract fun loadStartupNavigationState() : S
     abstract fun storeStartupNavigationState(state : S)
+    abstract fun onNavigatingToNewState(state : S)
 
     abstract fun getScreenToPreload(state : S) : Pair<D, ScreenType>?
 }

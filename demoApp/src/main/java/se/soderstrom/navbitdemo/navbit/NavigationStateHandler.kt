@@ -43,4 +43,8 @@ class NavigationStateHandler : NavBitNavigationStateHandler<NavigationState, Scr
             else -> null
         }
     }
+
+    override fun onNavigatingToNewState(state: NavigationState) {
+
+    }
 }
