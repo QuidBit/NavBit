@@ -40,39 +40,7 @@ abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState, 
         return navigationStateHandler.getCurrentState()
     }
 
-    fun initializeNavBit() {
-        window.statusBarColor = ContextCompat.getColor(this, android.R.color.transparent)
-        actionBar?.hide()
 
-        mainController = MainController(
-        this,
-            interactionHandler,
-            navigationStateHandler,
-            screenHandler
-        )
-
-        // Handle back presses
-        // --------------------------------------------------------
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                // Backing is always allowed regardless if we are mid screen switching
-                mainController.addInteraction(interactionHandler.getBackInteraction())
-            }
-        })
-    }
-
-    @Subscribe(threadMode = ThreadMode.BACKGROUND)
-    internal fun onMessageEvent(interaction: I) {
-        mainController.addInteraction(interaction)
-    }
-
-    @Subscribe(threadMode = ThreadMode.BACKGROUND)
-    internal fun onMessageEvent(interaction: InternalInteraction) {
-        val appInteraction = when (interaction) {
-            InternalInteraction.Back -> interactionHandler.getBackInteraction()
-        }
-        mainController.addInteraction(appInteraction)
-    }
 
 
     public override fun onStart() {

@@ -1,14 +1,10 @@
-package se.soderstrom.navbitdemo.navbit
+package se.soderstrom.navbitdemo.newnavbit
 
 import android.content.Context
-import se.quidbit.navbit.toimplement.NavBitNavigationStateHandler
-import se.quidbit.navbit.types.ScreenType
+import se.quidbit.navbit.updated.toimplement.NewBitNavigationStateHandler
 import se.soderstrom.navbitdemo.BaseActivity
 
-class NavigationStateHandler : NavBitNavigationStateHandler<NavigationState, ScreenData>() {
-    override fun fallbackStartupScreenData(context: Context): ScreenData {
-        return ScreenData.Start(0)
-    }
+class NewNavigationStateHandler : NewBitNavigationStateHandler<NavigationState>() {
 
     override fun loadStartupNavigationState(): NavigationState {
         // Load any previously stored count
@@ -34,14 +30,6 @@ class NavigationStateHandler : NavBitNavigationStateHandler<NavigationState, Scr
         val editor = sharedPreferences.edit()
         editor.putInt("count", count)
         editor.apply()
-    }
-
-    override fun getScreenToPreload(state: NavigationState): Pair<ScreenData, ScreenType>? {
-        return when (state) {
-            is NavigationState.Start -> Pair(ScreenData.Timer, ScreenType.Full)
-            is NavigationState.Info -> Pair(ScreenData.InfoDetails(false), ScreenType.Sheet)
-            else -> null
-        }
     }
 
     override fun onNavigatingToNewState(state: NavigationState) {

@@ -155,8 +155,7 @@ internal class MainController<I : NavBitInteraction, S : NavBitNavigationState, 
         // ---------------------------------------------------------------------------------
         val interactionResult = interactionHandler.applyInteractionOnState(
             interaction,
-            stateHandler.getCurrentState(),
-            activity
+            stateHandler.getCurrentState()
         )
 
         when(interactionResult) {

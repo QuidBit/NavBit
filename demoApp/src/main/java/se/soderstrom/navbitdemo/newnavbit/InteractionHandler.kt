@@ -1,11 +1,11 @@
-package se.soderstrom.navbitdemo.navbit
+package se.soderstrom.navbitdemo.newnavbit
 
 import android.app.Activity
 import se.quidbit.navbit.types.InteractionResult
 import se.quidbit.navbit.types.TransitionDirection
-import se.quidbit.navbit.toimplement.NavBitInteractionHandler
+import se.quidbit.navbit.updated.toimplement.NewBitInteractionHandler
 
-class InteractionHandler : NavBitInteractionHandler<Interaction, NavigationState>() {
+class InteractionHandler : NewBitInteractionHandler<Interaction, NavigationState>() {
     override fun applyBackInteractionOnState(s: NavigationState): InteractionResult<NavigationState> {
         val newState = when (s) {
             is NavigationState.Start -> return InteractionResult.CloseApp()
@@ -23,7 +23,7 @@ class InteractionHandler : NavBitInteractionHandler<Interaction, NavigationState
     override fun applyInteractionOnState(
         i: Interaction,
         s: NavigationState,
-        activity: Activity
+        activity : Activity
     ): InteractionResult<NavigationState> {
         // The default transition for any interaction is going forwards
         // If that is not the case (like on completed input), the value should be overridden on that interaction below
@@ -71,11 +71,11 @@ class InteractionHandler : NavBitInteractionHandler<Interaction, NavigationState
                 else -> return InteractionResult.Unexpected()
             }
             is Interaction.Increment -> when (s) {
-                is NavigationState.Start -> NavigationState.Start(s.count + 1)
+                is NavigationState.Start -> s.copy(count = s.count + 1)
                 else -> return InteractionResult.Unexpected()
             }
             is Interaction.Expand -> when (s) {
-                is NavigationState.InfoDetails -> NavigationState.InfoDetails(s.count, !s.expanded)
+                is NavigationState.InfoDetails -> s.copy(expanded = !s.expanded)
                 is NavigationState.Slow -> NavigationState.Fast(s.count)
                 else -> return InteractionResult.Unexpected()
             }

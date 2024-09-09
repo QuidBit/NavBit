@@ -32,7 +32,5 @@ abstract class NavBitScreenHandler<S : NavBitNavigationState, D : NavBitScreenDa
 
     protected abstract fun generateNewScreen(context: Context, screenData: D, type : ScreenType) : NavBitScreen<*>
 
-    // A manual copy since sealed/data classes don't have deep copy...
-    // SO MAKE SURE EVERY SINGLE PROPERTY IS CREATED AS A NEW OBJECT
-    // Otherwise, things break when things actually point to the same object in memory
+
 }

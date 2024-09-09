@@ -1,35 +1,20 @@
 package se.soderstrom.navbitdemo
 
-import android.os.Bundle
-import se.quidbit.navbit.toimplement.NavBitActivity
-import se.soderstrom.navbitdemo.navbit.InteractionHandler
-import se.soderstrom.navbitdemo.navbit.Interaction
-import se.soderstrom.navbitdemo.navbit.NavigationState
-import se.soderstrom.navbitdemo.navbit.NavigationStateHandler
-import se.soderstrom.navbitdemo.navbit.ScreenData
-import se.soderstrom.navbitdemo.navbit.ScreenHandler
+import se.quidbit.navbit.updated.toimplement.NewBitActivity
+import se.soderstrom.navbitdemo.newnavbit.InteractionHandler
+import se.soderstrom.navbitdemo.newnavbit.Interaction
+import se.soderstrom.navbitdemo.newnavbit.NavigationState
+import se.soderstrom.navbitdemo.newnavbit.NewNavigationStateHandler
+import se.soderstrom.navbitdemo.newnavbit.NewScreenHandler
 
-class BaseActivity : NavBitActivity<Interaction, NavigationState, ScreenData>(
-    interactionHandler,
-    stateHandler,
-    screenHandler
+class BaseActivity : NewBitActivity<Interaction, NavigationState>(
+    InteractionHandler(),
+    NewNavigationStateHandler(),
+    NewScreenHandler(),
 ) {
     companion object {
-        // Retain all handlers between rotations
-            // Especially important for the stateHandler so the app state is not lost
-        val interactionHandler = InteractionHandler()
-        val stateHandler = NavigationStateHandler()
-        val screenHandler = ScreenHandler()
-
-        // Allow easy access to NavBit from anywhere in the app
-        fun getNavBit() : NavBitActivity<Interaction, NavigationState, ScreenData> {
+        fun getNavBit() : NewBitActivity<Interaction, NavigationState> {
             return getNavBitInstance()
         }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        initializeNavBit()
     }
 }
