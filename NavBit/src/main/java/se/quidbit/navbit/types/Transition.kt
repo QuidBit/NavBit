@@ -23,5 +23,12 @@ sealed class TransitionType {
 
 enum class TransitionDirection {
     Forward,
-    Backward
+    Backward;
+
+    fun opposite() : TransitionDirection {
+        return when (this) {
+            Forward -> Backward
+            Backward -> Forward
+        }
+    }
 }

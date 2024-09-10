@@ -1,6 +1,8 @@
 package se.quidbit.navbit.updated.internal
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -10,7 +12,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import se.quidbit.navbit.BuildConfig
 import se.quidbit.navbit.internal.StringHelper
-import se.quidbit.navbit.toimplement.NavBitActivity
 import se.quidbit.navbit.toimplement.NavBitInteraction
 import se.quidbit.navbit.toimplement.NavBitNavigationState
 import se.quidbit.navbit.types.InteractionResult
@@ -27,11 +28,11 @@ internal class NewBitController<I : NavBitInteraction, S : NavBitNavigationState
     startState : S
 ) : ViewModel() {
 
-    private val _navState = MutableStateFlow(startState)
-    val navState: StateFlow<S> = _navState
+    private val _navState = MutableStateFlow(NavigationStates(null, startState))
+    val  navState: StateFlow<NavigationStates<S>> = _navState
 
     fun processInteraction(activity: ComponentActivity, interaction: I) {
-        val currentState = _navState.value
+        val currentState = _navState.value.current
 
         when (val interactionResult = interactionHandler.applyInteractionOnState(interaction, currentState, activity)) {
             is InteractionResult.Ignore -> {
@@ -45,7 +46,7 @@ internal class NewBitController<I : NavBitInteraction, S : NavBitNavigationState
             is InteractionResult.CloseApp ->
                 activity.finish()
             is InteractionResult.NewState ->
-                _navState.value = interactionResult.state
+                _navState.value = NavigationStates(_navState.value.current, interactionResult.state)
         }
     }
 
@@ -55,7 +56,7 @@ internal class NewBitController<I : NavBitInteraction, S : NavBitNavigationState
         Log.e("NavBit", "$source $infoString")
 
         // If we are debugging, we can show the error directly on screen for simplicity
-        NavBitActivity.mainHandler.post {
+        Handler(Looper.getMainLooper()).post {
             if (BuildConfig.DEBUG) {
                 Toast.makeText(
                     context,
@@ -66,3 +67,8 @@ internal class NewBitController<I : NavBitInteraction, S : NavBitNavigationState
         }
     }
 }
+
+data class NavigationStates<S: NavBitNavigationState> (
+    val old : S?,
+    val current : S
+)

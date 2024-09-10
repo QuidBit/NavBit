@@ -31,6 +31,8 @@ import se.quidbit.navbit.updated.types.InteractionReceiver
 import se.soderstrom.navbitdemo.newnavbit.Interaction
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 
 @Composable
 fun StartScreen(i: InteractionReceiver<Interaction>, count: Int) {
@@ -42,7 +44,9 @@ fun StartScreen(i: InteractionReceiver<Interaction>, count: Int) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Static UI components that do not depend on count
-        WelcomeText()
+           key(Unit) {
+            WelcomeText()
+        }
 
         // Buttons that do not depend on count
         InfoButtonSection(i)
@@ -164,33 +168,55 @@ fun IncrementSection(i : InteractionReceiver<Interaction>, count: Int) {
 
 @Composable
 fun AnimatedIncrementText(count: Int) {
-    AnimatedContent(
-        targetState = count,
-        transitionSpec = {
-            fadeIn(animationSpec = tween(durationMillis = 1000)) togetherWith
-            fadeOut(animationSpec = tween(durationMillis = 1000))
-        },
-        label = ""
-    ) { targetCount ->
+    Row(
+        modifier = Modifier.padding(16.dp)
+    ) {
         Text(
-            text = "Increment Value: $targetCount",
+            text = "Incremented Value: ",
             fontSize = 15.sp,
-            color = Color.Black,
-            modifier = Modifier.padding(16.dp)
+            color = Color.Black
         )
+
+        AnimatedContent(
+            targetState = count,
+            transitionSpec = {
+                slideInVertically(
+                    animationSpec = tween(durationMillis = 1000),
+                    initialOffsetY = { fullHeight -> fullHeight } // Start from below
+                ) togetherWith
+                slideOutVertically(
+                    animationSpec = tween(durationMillis = 1000),
+                    targetOffsetY = { fullHeight -> -fullHeight } // Slide out upwards
+                )
+            },
+            label = ""
+        ) { targetCount ->
+            Text(
+                text = "$targetCount",
+                fontSize = 15.sp,
+                color = Color.Black
+            )
+        }
     }
 }
-
 
 @Composable
 fun ClearButton(count: Int, onClear: () -> Unit) {
     val isEnabled = count > 0
+
+    // Animate the background color
+    val backgroundColor by animateColorAsState(
+        targetValue = if (isEnabled) Color.Red else Color.LightGray,
+        animationSpec = tween(durationMillis = 300),
+        label = ""
+    )
+
     Card(
         modifier = Modifier
             .wrapContentSize()
             .clickable(enabled = isEnabled, onClick = onClear),
         colors = CardDefaults.cardColors(
-            containerColor = if (isEnabled) Color.Red else Color.LightGray
+            containerColor = backgroundColor // Use the animated background color
         ),
         elevation = CardDefaults.cardElevation(4.dp),
         shape = MaterialTheme.shapes.small
@@ -203,6 +229,7 @@ fun ClearButton(count: Int, onClear: () -> Unit) {
         )
     }
 }
+
 
 @Preview(showBackground = true, name = "Portrait Mode with count = 0")
 @Composable

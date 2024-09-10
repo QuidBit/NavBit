@@ -72,6 +72,7 @@ class InteractionHandler : NewBitInteractionHandler<Interaction, NavigationState
             }
             is Interaction.Increment -> when (s) {
                 is NavigationState.Start -> s.copy(count = s.count + 1)
+                is NavigationState.Info -> s.copy(count = s.count + 1)
                 else -> return InteractionResult.Unexpected()
             }
             is Interaction.Expand -> when (s) {
