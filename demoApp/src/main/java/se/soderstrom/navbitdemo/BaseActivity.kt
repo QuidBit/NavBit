@@ -1,19 +1,19 @@
 package se.soderstrom.navbitdemo
 
-import se.quidbit.navbit.updated.toimplement.NewBitActivity
-import se.soderstrom.navbitdemo.newnavbit.InteractionHandler
-import se.soderstrom.navbitdemo.newnavbit.Interaction
-import se.soderstrom.navbitdemo.newnavbit.NavigationState
-import se.soderstrom.navbitdemo.newnavbit.NewNavigationStateHandler
-import se.soderstrom.navbitdemo.newnavbit.NewScreenHandler
+import se.quidbit.navbit.toimplement.NavBitActivity
+import se.soderstrom.navbitdemo.navbit.InteractionHandler
+import se.soderstrom.navbitdemo.navbit.Interaction
+import se.soderstrom.navbitdemo.navbit.NavigationState
+import se.soderstrom.navbitdemo.navbit.NavigationStateHandler
+import se.soderstrom.navbitdemo.navbit.ScreenHandler
 
-class BaseActivity : NewBitActivity<Interaction, NavigationState>(
+class BaseActivity : NavBitActivity<Interaction, NavigationState>(
     InteractionHandler(),
-    NewNavigationStateHandler(),
-    NewScreenHandler(),
+    NavigationStateHandler(),
+    ScreenHandler(),
 ) {
     companion object {
-        fun getNavBit() : NewBitActivity<Interaction, NavigationState> {
+        fun getNavBit() : NavBitActivity<Interaction, NavigationState> {
             return getNavBitInstance()
         }
     }

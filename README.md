@@ -1,22 +1,23 @@
 # NavBit
-NavBit is a Android library that serves as the core backbone of your app. It efficiently handles navigation between views, managing app states, and updating the UI seamlessly, ensuring a smooth and responsive user experience.
+NavBit is a Android library that serves as the core backbone of your app. It efficiently handles managing app states, updating on changes from outside sources, navigation between screens (including sheets and popups), ensuring a smooth and responsive user experience. 
+
+Built on Compose, in which all UI is defined using Composables.
 
 ## Structure
 
-An app built with NavBit contains three pieces of data:
+An app built with NavBit contains two pieces of data:
  - `Interaction` - What the user can do
  - `NavigationState` - The different states the app can be in
- - `ScreenData` - The different type of screens that can be shown
 
- These three are in turn manipulated using the three handler classes:
+ All logic is then handled in three different classes:
  - `InteractionHandler`
  - `NavigationStateHandler`
- - `ScreenDataHandler`
+ - `ScreenHandler`
 
 ## Flow
 
 In general, the flow of the app is:
-    `Interaction` -> `NavigationState` -> `ScreenData`
+    `Interaction` -> `NavigationState` -> `@Composable`
 
 The app can emit Interactions when for example a user touches a button.
 
@@ -25,61 +26,40 @@ This Interaction is then handled by NavBit:
 
 Depending on the new state, the screen is either updated or transitioned to a new screen.
 
-The new `NavigationState` data is used to generate the `ScreenData`, what is to be displayed, which is then shown.
+The new `NavigationState` data is used to generate the corresponding `@Composable`, which is then shown.
 
 ## Example Usage
 
 The main activity of the app needs to extend `NavBitActivity`:
 
 ```
-class BaseActivity : NavBitActivity<Interaction, NavigationState, ScreenData>(
-    interactionHandler,
-    stateHandler,
-    screenHandler
+class BaseActivity : NavBitActivity<Interaction, NavigationState> (
+    InteractionHandler(),
+    NavigationStateHandler(),
+    ScreenHandler(),
 ) {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        initializeNavBit()
-    }
-
+    // Allow easy access to NavBit from anywhere in the app
     companion object {
-        // Retain all handlers between rotations (in which this activity is recreated)
-            // Especially important for the stateHandler so the app state is not lost
-        val interactionHandler = InteractionHandler()
-        val stateHandler = NavigationStateHandler()
-        val screenHandler = ScreenHandler()
-
-        // Allow easy access to NavBit from anywhere in the app
-        fun getNavBit() : NavBitActivity<Interaction, NavigationState, ScreenData> {
+        fun getNavBit() : NavBitActivity<Interaction, NavigationState> {
             return getNavBitInstance()
         }
     }
 }
 ```
-In order to extend `NavBitActivity`, six classes needs be implemented, defining all the data and logic of the application:
+In order to extend `NavBitActivity`, five classes needs be implemented, defining all the data and logic of the application:
 
 ***Data***
 ```
 class Interaction : NavBitInteraction()
 class NavigationState : NavBitNavigationState()
-class ScreenData : NavBitScreenData()
 ```
 **Handlers**
 ```
 class InteractionHandler : NavBitInteractionHandler<Interaction>()
-class NavigationStateHandler : NavBitNavigationStateHandler()
-class ScreenHandler : NavBitScreenGenerator<ScreenData>()
+class NavigationStateHandler : NavBitNavigationStateHandler<NavigationState>()
+class ScreenHandler : NavBitScreenHandler<Interaction, NavigationState>()
 ```
 
-## Other Info
+## Other info
 
-### Asynchronous Work
-When posting work inside a `Screen`, use the functions  `screenPost()` and  `screenPostDelay()`, which make sure to run them on the appropriate thread (important for View manipulation)
-
-### Loading Screens
-
-During slow transitions, a spinning wheel appears. If your `Screen` already has an animating loading symbol, make sure to name it `R.id.loading`. If that ID is present and visible, no spinning wheel is shown to prevent duplicates.
-
- ### Partial Screen Updates
- When you have a heavy screen and only want to update part of it when the state is updated, you can include a custom `NavBitUpdates` in your state, as well as inside the `ScreenData`. By creating a `NavBitScreenUpdates` with a custom `enum class` (`NavBitUpdates<YourClass>`), you can define different types of updates fitting for your screen. Then when you modify the `NavigationState`, you should appropriately include what you changed using `add()`. Then during the screen updating, you can call `consume()` and get which parts have been modified, and update the screen accordingly.
+A demo app is included, showing general navigation and state handling, as well generating and updating screens.

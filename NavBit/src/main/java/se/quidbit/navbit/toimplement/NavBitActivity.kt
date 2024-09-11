@@ -1,79 +1,114 @@
 package se.quidbit.navbit.toimplement
 
 import android.os.Bundle
-import android.os.Handler
-import android.os.HandlerThread
-import android.os.Looper
+import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import org.greenrobot.eventbus.EventBus
-import org.greenrobot.eventbus.Subscribe
-import org.greenrobot.eventbus.ThreadMode
-import se.quidbit.navbit.internal.InternalInteraction
-import se.quidbit.navbit.internal.MainController
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import se.quidbit.navbit.internal.MainHolder
+import se.quidbit.navbit.internal.MasterController
+import se.quidbit.navbit.internal.MasterControllerFactory
+import se.quidbit.navbit.types.QueuedInteraction
+import se.quidbit.navbit.types.InteractionReceiver
+import java.util.concurrent.BlockingQueue
+import java.util.concurrent.LinkedBlockingQueue
 
-abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState, D : NavBitScreenData>(
-    val interactionHandler: NavBitInteractionHandler<I, S>,
-    private val navigationStateHandler: NavBitNavigationStateHandler<S, D>,
-    private val screenHandler: NavBitScreenHandler<S,D>
-)  : AppCompatActivity() {
+abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState>(
+    private val interactionHandler: NavBitInteractionHandler<I, S>,
+    private val navigationStateHandler: NavBitNavigationStateHandler<S>,
+    private val screenHandler: NavBitScreenHandler<I, S>
+)  : ComponentActivity() {
 
-    private lateinit var mainController : MainController<I, S, D>
+    private lateinit var viewModel : MasterController<I, S>
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        instance = this
+    // Interaction handling
+    // --------------------------------------------------------
+    // NOTE: Interactions are processed sequentially one by one to avoid concurrent issues on modifying state/data
 
-        val backgroundThread = HandlerThread("NavBitThread")
-        backgroundThread.start()
+    @Volatile
+    private var isProcessingInteraction = false
+    private val interactionQueue : BlockingQueue<QueuedInteraction<I>> = LinkedBlockingQueue()
+    private var interactionJob : Job? = null
 
-        backgroundHandler = Handler(backgroundThread.looper)
-        mainHandler = Handler(Looper.getMainLooper())
-    }
+    private lateinit var interactionReceiver : InteractionReceiver<I>
 
-    internal fun getScreenGenerator() : NavBitScreenHandler<S,D> {
-        return screenHandler
-    }
-
-    fun getCurrentState() : S {
-        return navigationStateHandler.getCurrentState()
-    }
-
-    public override fun onStart() {
-        super.onStart()
-        EventBus.getDefault().register(this)
-    }
-
-    public override fun onStop() {
-        super.onStop()
-        EventBus.getDefault().unregister(this)
-    }
+    // --------------
 
     public override fun onResume() {
         super.onResume()
-        mainController.startInteractionProcessing()
+        startInteractionProcessing()
     }
 
     public override fun onPause() {
         super.onPause()
-        mainController.stopInteractionProcessing()
+         stopInteractionProcessing()
     }
 
-    public override fun onDestroy() {
-        super.onDestroy()
-        mainController.onDestroy()
+    private fun startInteractionProcessing() {
+        if (interactionJob == null || interactionJob?.isCompleted == true) {
+            interactionJob = CoroutineScope(Dispatchers.IO).launch {
+                // Process interactions until cancel has been called
+                while (isActive) {
+                    val interaction = interactionQueue.take()
+                    isProcessingInteraction = true
+                    viewModel.processInteraction(this@NavBitActivity, interaction)
+                    isProcessingInteraction = false
+                }
+            }
+        }
     }
 
-    // Access functions
-    // ----------------------------------------------------
+    private fun stopInteractionProcessing() {
+        interactionJob?.let { job ->
+            if (!isProcessingInteraction) {
+                job.cancel()
+            } else {
+                runBlocking {
+                    job.cancelAndJoin()
+                }
+            }
+            interactionJob = null
+        }
+    }
+
+    // --------------------------------------------------------
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        instance = this
+        interactionReceiver = InteractionReceiver(interactionQueue)
+
+        enableEdgeToEdge()
+        setContent {
+            // Prepare the main state and controller of the app
+            viewModel = viewModel(
+                factory =  MasterControllerFactory(interactionHandler, navigationStateHandler)
+            )
+
+            // Display the screen
+            MainHolder(this, interactionReceiver, viewModel, screenHandler)
+
+            // Setup back press handling
+            onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    interactionQueue.add(QueuedInteraction.Back())
+                }
+            })
+        }
+    }
+
     companion object {
-        internal lateinit var backgroundHandler: Handler
-        internal lateinit var mainHandler : Handler
-
-        private lateinit var instance : NavBitActivity<*, *, *>
-        fun <I : NavBitInteraction, S : NavBitNavigationState, D : NavBitScreenData>getNavBitInstance() : NavBitActivity<I, S, D> {
-            return instance as NavBitActivity<I, S, D>
+        private lateinit var instance : NavBitActivity<*, *>
+        fun <I : NavBitInteraction, S : NavBitNavigationState> getNavBitInstance() : NavBitActivity<I, S> {
+            return instance as NavBitActivity<I, S>
         }
     }
 }
