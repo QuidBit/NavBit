@@ -180,12 +180,7 @@ internal class MainController<I : NavBitInteraction, S : NavBitNavigationState, 
                     is NavigationResult.ErrorRead ->
                         showError("Navigation", " -Error Reading [${navigationResult.error}]")
                     is NavigationResult.Navigate -> {
-                        Log.i("NavBit", " -Navigating ${interactionResult.direction} to Screen ${
-                            StringHelper.prettyPrintSealedClassString(
-                                navigationResult.data.toString()
-                            )
-                        } - ${navigationResult.type}")
-                        switchScreen(interactionResult.state, navigationResult.data, navigationResult.type, interactionResult.direction)
+                        switchScreen(interactionResult.state, navigationResult.data, navigationResult.type, TransitionDirection.Forward)
                     }
                     is NavigationResult.Update -> {
                         Log.i("NavBit", " -Updating Screen ${

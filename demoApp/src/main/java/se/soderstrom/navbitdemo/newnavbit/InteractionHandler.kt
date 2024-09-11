@@ -2,7 +2,6 @@ package se.soderstrom.navbitdemo.newnavbit
 
 import android.app.Activity
 import se.quidbit.navbit.types.InteractionResult
-import se.quidbit.navbit.types.TransitionDirection
 import se.quidbit.navbit.updated.toimplement.NewBitInteractionHandler
 
 class InteractionHandler : NewBitInteractionHandler<Interaction, NavigationState>() {
@@ -10,14 +9,14 @@ class InteractionHandler : NewBitInteractionHandler<Interaction, NavigationState
         val newState = when (s) {
             is NavigationState.Start -> return InteractionResult.CloseApp()
             is NavigationState.ClearCheck -> NavigationState.Start(s.count)
+            is NavigationState.ClearCheckAgain -> NavigationState.ClearCheck(s.count)
             is NavigationState.Info -> NavigationState.Start(s.count)
             is NavigationState.InfoDetails -> NavigationState.Info(s.count)
-            is NavigationState.Timer -> NavigationState.Start(s.count)
-            is NavigationState.Slow -> NavigationState.Start(s.count)
-            is NavigationState.Fast -> NavigationState.Slow(s.count)
+            is NavigationState.ScreenA -> NavigationState.Start(s.count)
+            is NavigationState.ScreenB -> NavigationState.ScreenA(s.count)
         }
 
-        return InteractionResult.NewState(newState, TransitionDirection.Backward)
+        return InteractionResult.NewState(newState)
     }
 
     override fun applyInteractionOnState(
@@ -25,12 +24,7 @@ class InteractionHandler : NewBitInteractionHandler<Interaction, NavigationState
         s: NavigationState,
         activity : Activity
     ): InteractionResult<NavigationState> {
-        // The default transition for any interaction is going forwards
-        // If that is not the case (like on completed input), the value should be overridden on that interaction below
-        var transition = TransitionDirection.Forward
-
         val newState = when (i) {
-            is Interaction.Back -> return applyBackInteractionOnState(s)
             is Interaction.ClearCheck ->  when (s) {
                 is NavigationState.Start -> {
                     if (s.count > 0)
@@ -38,11 +32,11 @@ class InteractionHandler : NewBitInteractionHandler<Interaction, NavigationState
                     else
                         return InteractionResult.Ignore()
                 }
+                is NavigationState.ClearCheck -> NavigationState.ClearCheckAgain(s.count)
                 else -> return InteractionResult.Unexpected()
             }
             is Interaction.ClearPerform ->  when (s) {
-                is NavigationState.ClearCheck -> {
-                    transition = TransitionDirection.Backward
+                is NavigationState.ClearCheckAgain -> {
                     NavigationState.Start(0)
                 }
                 else -> return InteractionResult.Unexpected()
@@ -55,37 +49,28 @@ class InteractionHandler : NewBitInteractionHandler<Interaction, NavigationState
                 is NavigationState.Info -> NavigationState.InfoDetails(s.count, false)
                 else -> return InteractionResult.Unexpected()
             }
-            is Interaction.GoToTimer -> when (s) {
-                is NavigationState.Start -> NavigationState.Timer(s.count)
-                else -> return InteractionResult.Unexpected()
-            }
-            is Interaction.GoToSlow -> when (s) {
-                is NavigationState.Start -> NavigationState.Slow(s.count)
+            is Interaction.GoToNext -> when (s) {
+                is NavigationState.Start -> NavigationState.ScreenA(s.count)
+                is NavigationState.ScreenA -> NavigationState.ScreenB(s.count)
                 else -> return InteractionResult.Unexpected()
             }
             is Interaction.Done -> when (s) {
-                is NavigationState.InfoDetails -> {
-                    transition = TransitionDirection.Backward
-                    NavigationState.Start(s.count)
-                }
+                is NavigationState.InfoDetails -> NavigationState.Start(s.count)
+                is NavigationState.ScreenB -> NavigationState.Start(s.count)
                 else -> return InteractionResult.Unexpected()
             }
             is Interaction.Increment -> when (s) {
                 is NavigationState.Start -> s.copy(count = s.count + 1)
                 is NavigationState.Info -> s.copy(count = s.count + 1)
+                is NavigationState.ScreenA -> s.copy(count = s.count + 1)
                 else -> return InteractionResult.Unexpected()
             }
             is Interaction.Expand -> when (s) {
                 is NavigationState.InfoDetails -> s.copy(expanded = !s.expanded)
-                is NavigationState.Slow -> NavigationState.Fast(s.count)
                 else -> return InteractionResult.Unexpected()
             }
         }
 
-        return InteractionResult.NewState(newState, transition)
-    }
-
-    override fun getBackInteraction(): Interaction {
-        return Interaction.Back
+        return InteractionResult.NewState(newState)
     }
 }

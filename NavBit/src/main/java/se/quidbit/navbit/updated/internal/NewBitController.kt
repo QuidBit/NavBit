@@ -16,37 +16,48 @@ import se.quidbit.navbit.toimplement.NavBitInteraction
 import se.quidbit.navbit.toimplement.NavBitNavigationState
 import se.quidbit.navbit.types.InteractionResult
 import se.quidbit.navbit.updated.toimplement.NewBitInteractionHandler
+import se.quidbit.navbit.updated.toimplement.NewBitNavigationStateHandler
 
-internal class NewBitControllerFactory<I : NavBitInteraction, S : NavBitNavigationState>(private val interactionHandler: NewBitInteractionHandler<I, S>, private val startState: S) :
-    ViewModelProvider.NewInstanceFactory()
-{
-    override fun <T : ViewModel> create(modelClass: Class<T>): T = NewBitController(interactionHandler, startState) as T
+internal class NewBitControllerFactory<I : NavBitInteraction, S : NavBitNavigationState> (
+    private val interactionHandler: NewBitInteractionHandler<I, S>,
+    private val navigationStateHandler: NewBitNavigationStateHandler<S>
+) : ViewModelProvider.NewInstanceFactory() {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T = NewBitController(interactionHandler, navigationStateHandler) as T
 }
 
 internal class NewBitController<I : NavBitInteraction, S : NavBitNavigationState> (
     private val interactionHandler : NewBitInteractionHandler<I, S>,
-    startState : S
+    private val navigationStateHandler: NewBitNavigationStateHandler<S>
 ) : ViewModel() {
 
-    private val _navState = MutableStateFlow(NavigationStates(null, startState))
+    private val _navState = MutableStateFlow(NavigationStates(null, navigationStateHandler.loadStartupNavigationState()))
     val  navState: StateFlow<NavigationStates<S>> = _navState
 
-    fun processInteraction(activity: ComponentActivity, interaction: I) {
+    fun processInteraction(activity: ComponentActivity, interaction : QueuedInteraction<I>) {
         val currentState = _navState.value.current
 
-        when (val interactionResult = interactionHandler.applyInteractionOnState(interaction, currentState, activity)) {
+        val interactionResult = when(interaction) {
+            is QueuedInteraction.Back -> interactionHandler.applyBackInteractionOnState(currentState)
+            is QueuedInteraction.Custom -> interactionHandler.applyInteractionOnState(interaction.interaction, currentState, activity)
+        }
+
+        when (interactionResult) {
             is InteractionResult.Ignore -> {
                 // Used when the view should not be updated by an interaction,
                 // for example ignoring no longer relevant API calls coming in
             }
             is InteractionResult.Unexpected ->
-                showError(activity, currentState,"Interaction", "Unexpected: [${StringHelper.prettyPrintSealedClassString(interaction.toString())}]")
+                showError(activity, currentState,"Interaction", "Unexpected: [${ StringHelper.prettyPrintSealedClassString(interaction.toString())}")
             is InteractionResult.ErrorRead ->
                 showError(activity, currentState,"Interaction", "Error Reading: [${interactionResult.error}]")
             is InteractionResult.CloseApp ->
                 activity.finish()
-            is InteractionResult.NewState ->
-                _navState.value = NavigationStates(_navState.value.current, interactionResult.state)
+            is InteractionResult.NewState -> {
+                val newState = interactionResult.state
+                navigationStateHandler.onNavigatingToNewState(newState)
+                Log.i("NavBit", "New State: $newState")
+                _navState.value = NavigationStates(_navState.value.current, newState)
+            }
         }
     }
 

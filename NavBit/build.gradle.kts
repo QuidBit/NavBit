@@ -74,6 +74,7 @@ publishing {
 
 dependencies {
     implementation("androidx.compose.animation:animation-android:1.7.0")
+    implementation("androidx.compose.material3:material3-android:1.3.0")
     val composeBom = platform("androidx.compose:compose-bom:2024.09.00")
     val lifecycleVersion = "2.8.5"
 

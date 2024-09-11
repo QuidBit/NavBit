@@ -1,19 +1,22 @@
 package se.soderstrom.navbitdemo.newscreen
 
 import android.content.res.Configuration
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,19 +29,21 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import se.quidbit.navbit.updated.types.InteractionReceiver
+import se.soderstrom.navbitdemo.newnavbit.Interaction
 
 @Composable
 fun SheetsInfoDetailsScreen(
-    onCloseClick: () -> Unit,
-    onExpandClick: () -> Unit,
-    expanded: Boolean,
+    i : InteractionReceiver<Interaction>,
+    expanded: Boolean
 ) {
     val configuration = LocalConfiguration.current
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -46,7 +51,7 @@ fun SheetsInfoDetailsScreen(
             fontSize = 20.sp,
             color = Color.Black,
             modifier = Modifier
-                .padding(vertical = 16.dp),
+                .padding(vertical = 24.dp),
             textAlign = TextAlign.Center
         )
 
@@ -56,81 +61,65 @@ fun SheetsInfoDetailsScreen(
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.padding(vertical = 16.dp)
             ) {
-                DoneButton(onCloseClick)
-                Spacer(modifier = Modifier.width(32.dp))
-                ExpandButton(expanded, onExpandClick)
+                DoneButton { i.send(Interaction.Done) }
+                ExpandButton(expanded) { i.send(Interaction.Expand) }
             }
         } else {
             // In portrait mode, place the buttons in a Column
-            DoneButton(onCloseClick)
-            Spacer(modifier = Modifier.height(32.dp))
-            ExpandButton(expanded, onExpandClick)
+            DoneButton { i.send(Interaction.Done) }
+            ExpandButton(expanded) { i.send(Interaction.Expand)}
         }
 
-        if (expanded) {
+        AnimatedVisibility(
+            visible = expanded,
+            enter = expandVertically(),
+            exit = shrinkVertically()
+        ) {
             Text(
-                text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at lorem vel sapien mattis malesuada. Integer imperdiet vulputate dignissim. Donec quis accumsan felis. Donec et accumsan est. Phasellus tristique tellus sit amet turpis sodales tempor. Donec eleifend turpis hendrerit neque scelerisque, eu feugiat mi pretium. Sed fermentum arcu sed mi consectetur, ut ultrices est fringilla. Mauris ac elementum libero. Aliquam rhoncus leo eros, eu interdum purus laoreet sit amet.",
+                text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at lorem vel sapien mattis malesuada. Integer imperdiet vulputate dignissim. Donec quis accumsan felis. Donec et accumsan est. Phasellus tristique tellus sit amet turpis sodales tempor. Donec eleifend turpis hendrerit neque scelerisque, eu feugiat mi pretium. Sed fermentum arcu sed mi consectetur, ut ultrices est fringilla. Mauris ac elementum libero. Aliquam rhoncus leo eros, eu interdum purus laoreet sit amet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at lorem vel sapien mattis malesuada. Integer imperdiet vulputate dignissim. Donec quis accumsan felis. Donec et accumsan est. Phasellus tristique tellus sit amet turpis sodales tempor. Donec eleifend turpis hendrerit neque scelerisque, eu feugiat mi pretium. Sed fermentum arcu sed mi consectetur, ut ultrices est fringilla. Mauris ac elementum libero. Aliquam rhoncus leo eros, eu interdum purus laoreet sit amet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at lorem vel sapien mattis malesuada. Integer imperdiet vulputate dignissim. Donec quis accumsan felis. Donec et accumsan est. Phasellus tristique tellus sit amet turpis sodales tempor. Donec eleifend turpis hendrerit neque scelerisque, eu feugiat mi pretium. Sed fermentum arcu sed mi consectetur, ut ultrices est fringilla. Mauris ac elementum libero. Aliquam rhoncus leo eros, eu interdum purus laoreet sit amet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at lorem vel sapien mattis malesuada. Integer imperdiet vulputate dignissim. Donec quis accumsan felis. Donec et accumsan est. Phasellus tristique tellus sit amet turpis sodales tempor. Donec eleifend turpis hendrerit neque scelerisque, eu feugiat mi pretium. Sed fermentum arcu sed mi consectetur, ut ultrices est fringilla. Mauris ac elementum libero. Aliquam rhoncus leo eros, eu interdum purus laoreet sit amet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at lorem vel sapien mattis malesuada. Integer imperdiet vulputate dignissim. Donec quis accumsan felis. Donec et accumsan est. Phasellus tristique tellus sit amet turpis sodales tempor. Donec eleifend turpis hendrerit neque scelerisque, eu feugiat mi pretium. Sed fermentum arcu sed mi consectetur, ut ultrices est fringilla. Mauris ac elementum libero. Aliquam rhoncus leo eros, eu interdum purus laoreet sit amet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at lorem vel sapien mattis malesuada. Integer imperdiet vulputate dignissim. Donec quis accumsan felis. Donec et accumsan est. Phasellus tristique tellus sit amet turpis sodales tempor. Donec eleifend turpis hendrerit neque scelerisque, eu feugiat mi pretium. Sed fermentum arcu sed mi consectetur, ut ultrices est fringilla. Mauris ac elementum libero. Aliquam rhoncus leo eros, eu interdum purus laoreet sit amet.",
                 fontSize = 18.sp,
                 color = Color.Black,
                 modifier = Modifier
-                    .padding(24.dp),
+                    .padding(bottom = 24.dp, start = 24.dp, end = 24.dp),
                 textAlign = TextAlign.Center
             )
         }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        Box(modifier = Modifier.height(0.dp)) // Bottom Inset placeholder
     }
 }
 
 @Composable
 fun DoneButton(onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .wrapContentSize()
-            .clickable(onClick = onClick)
-            .padding(vertical = 16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Black),
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
         shape = MaterialTheme.shapes.medium,
-        elevation = CardDefaults.cardElevation(4.dp)
+        elevation = ButtonDefaults.buttonElevation(4.dp),
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 24.dp),
     ) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.padding(12.dp)
-        ) {
-            Text(
-                text = "Close",
-                fontSize = 18.sp,
-                color = Color.White,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        Text(
+            text = "Close",
+            fontSize = 18.sp,
+            color = Color.White,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
 
 @Composable
 fun ExpandButton(expanded: Boolean, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .wrapContentSize()
-            .clickable(onClick = onClick)
-            .padding(vertical = 16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF018786)),
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF018786)),
         shape = MaterialTheme.shapes.medium,
-        elevation = CardDefaults.cardElevation(4.dp)
+        elevation = ButtonDefaults.buttonElevation(4.dp),
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 24.dp),
     ) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.padding(12.dp)
-        ) {
-            Text(
-                text = if (expanded) "Collapse" else "Expand",
-                fontSize = 18.sp,
-                color = Color.White,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        Text(
+            text = if (expanded) "Collapse" else "Expand",
+            fontSize = 18.sp,
+            color = Color.White,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
 
@@ -138,9 +127,8 @@ fun ExpandButton(expanded: Boolean, onClick: () -> Unit) {
 @Composable
 fun SheetsInfoDetailsPreview() {
     SheetsInfoDetailsScreen(
-        onCloseClick = { /* Handle Close action */ },
-        onExpandClick = { /* Handle Expand/Collapse action */ },
-        expanded = true
+        InteractionReceiver(),
+        true
     )
 }
 
@@ -148,8 +136,7 @@ fun SheetsInfoDetailsPreview() {
 @Composable
 fun SheetsInfoDetailsScreenPreview() {
     SheetsInfoDetailsScreen(
-        onCloseClick = { /* Handle Close action */ },
-        onExpandClick = { /* Handle Expand/Collapse action */ },
+        InteractionReceiver(),
         expanded = true
     )
 }

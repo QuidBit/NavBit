@@ -11,6 +11,7 @@ import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -24,6 +25,8 @@ import se.quidbit.navbit.toimplement.NavBitInteraction
 import se.quidbit.navbit.toimplement.NavBitNavigationState
 import se.quidbit.navbit.updated.types.ScreenComposable
 import se.quidbit.navbit.updated.types.ScreenTransitionSet
+
+const val TRANSITION_TIME_MS = 500
 
 @Composable
 internal fun <I : NavBitInteraction, S : NavBitNavigationState>
@@ -64,7 +67,7 @@ internal fun <I : NavBitInteraction, S : NavBitNavigationState>
     // Create the content transform equivalent
     val slotAOffset by transition.animateIntOffset(
         label = "slotAOffset",
-        transitionSpec = { tween(durationMillis = 500) }
+        transitionSpec = { tween(durationMillis = TRANSITION_TIME_MS) }
     ) { isAnim ->
         if (isAnim && screenSlots.currentSlot != ScreenSlot.SlotA) holderTransition.offset(direction, screenWidth.toInt(), screenHeight.toInt())
         else IntOffset(0, 0)
@@ -72,7 +75,7 @@ internal fun <I : NavBitInteraction, S : NavBitNavigationState>
 
     val slotBOffset by transition.animateIntOffset(
         label = "slotBOffset",
-        transitionSpec = { tween(durationMillis = 500) }
+        transitionSpec = { tween(durationMillis = TRANSITION_TIME_MS) }
     ) { isAnim ->
         if (isAnim && screenSlots.currentSlot != ScreenSlot.SlotB) holderTransition.offset(direction, screenWidth.toInt(), screenHeight.toInt())
         else IntOffset(0, 0)
@@ -80,7 +83,7 @@ internal fun <I : NavBitInteraction, S : NavBitNavigationState>
 
     val slotAAlpha by transition.animateFloat(
         label = "slotAAlpha",
-        transitionSpec = { tween(durationMillis = 500) }
+        transitionSpec = { tween(durationMillis = TRANSITION_TIME_MS) }
     ) { isAnim ->
         if (isAnim && screenSlots.currentSlot != ScreenSlot.SlotA) holderTransition.alpha(direction)
         else 1f
@@ -88,7 +91,7 @@ internal fun <I : NavBitInteraction, S : NavBitNavigationState>
 
     val slotBAlpha by transition.animateFloat(
         label = "slotBAlpha",
-        transitionSpec = { tween(durationMillis = 500) }
+        transitionSpec = { tween(durationMillis = TRANSITION_TIME_MS) }
     ) { isAnim ->
         if (isAnim && screenSlots.currentSlot != ScreenSlot.SlotB) holderTransition.alpha(direction.opposite())
         else 1f
@@ -96,7 +99,7 @@ internal fun <I : NavBitInteraction, S : NavBitNavigationState>
 
     val slotAScale by transition.animateFloat(
         label = "slotAScale",
-        transitionSpec = { tween(durationMillis = 500) }
+        transitionSpec = { tween(durationMillis = TRANSITION_TIME_MS) }
     ) { isAnim ->
         if (isAnim && screenSlots.currentSlot != ScreenSlot.SlotA) holderTransition.scale(direction)
         else 1f
@@ -104,7 +107,7 @@ internal fun <I : NavBitInteraction, S : NavBitNavigationState>
 
     val slotBScale by transition.animateFloat(
         label = "slotBScale",
-        transitionSpec = { tween(durationMillis = 500) }
+        transitionSpec = { tween(durationMillis = TRANSITION_TIME_MS) }
     ) { isAnim ->
         if (isAnim && screenSlots.currentSlot != ScreenSlot.SlotB) holderTransition.scale(direction.opposite())
         else 1f
@@ -113,24 +116,24 @@ internal fun <I : NavBitInteraction, S : NavBitNavigationState>
     // Define the z-index values based on which slot is currently active
     val slotAZIndex by transition.animateFloat(
         label = "slotAZIndex",
-        transitionSpec = { tween(durationMillis = 500) }
+        transitionSpec = { tween(durationMillis = TRANSITION_TIME_MS) }
     ) { _animating ->
         if (screenSlots.currentSlot == ScreenSlot.SlotA) 1f else 0f
     }
 
     val slotBZIndex by transition.animateFloat(
         label = "slotBZIndex",
-        transitionSpec = { tween(durationMillis = 500) }
+        transitionSpec = { tween(durationMillis = TRANSITION_TIME_MS) }
     ) { _animating ->
         if (screenSlots.currentSlot == ScreenSlot.SlotB) 1f else 0f
     }
 
     // Box to contain the screen slots
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.wrapContentSize()) {
         screenSlots.contentSlotA?.let {
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .wrapContentSize()
                     .offset { slotAOffset }
                     .alpha(slotAAlpha)
                     .scale(slotAScale)
@@ -143,7 +146,7 @@ internal fun <I : NavBitInteraction, S : NavBitNavigationState>
         screenSlots.contentSlotB?.let {
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .wrapContentSize()
                     .offset { slotBOffset }
                     .alpha(slotBAlpha)
                     .scale(slotBScale)

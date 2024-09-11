@@ -14,25 +14,23 @@ class NewNavigationStateHandler : NewBitNavigationStateHandler<NavigationState>(
         return NavigationState.Start(count)
     }
 
-    override fun storeStartupNavigationState(state: NavigationState) {
-        // Save the counter for app restarts
+    override fun onNavigatingToNewState(state: NavigationState) {
+        // ---------------------------------------------------------
+        // Store the state for app restarts
+        // ---------------------------------------------------------
         val count = when (state) {
+            is NavigationState.Start -> state.count
             is NavigationState.ClearCheck -> state.count
+            is NavigationState.ClearCheckAgain -> state.count
             is NavigationState.Info -> state.count
             is NavigationState.InfoDetails -> state.count
-            is NavigationState.Start -> state.count
-            is NavigationState.Timer -> state.count
-            is NavigationState.Fast -> state.count
-            is NavigationState.Slow -> state.count
+            is NavigationState.ScreenA -> state.count
+            is NavigationState.ScreenB -> state.count
         }
 
         val sharedPreferences = BaseActivity.getNavBit().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
         editor.putInt("count", count)
         editor.apply()
-    }
-
-    override fun onNavigatingToNewState(state: NavigationState) {
-
     }
 }

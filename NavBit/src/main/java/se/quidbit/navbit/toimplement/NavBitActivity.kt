@@ -40,9 +40,6 @@ abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState, 
         return navigationStateHandler.getCurrentState()
     }
 
-
-
-
     public override fun onStart() {
         super.onStart()
         EventBus.getDefault().register(this)

@@ -1,6 +1,5 @@
 package se.quidbit.navbit.toimplement
 
-import android.app.Activity
 import se.quidbit.navbit.types.InteractionResult
 
 abstract class NavBitInteractionHandler<I : NavBitInteraction,  S : NavBitNavigationState> {

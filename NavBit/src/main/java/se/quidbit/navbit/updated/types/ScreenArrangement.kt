@@ -2,19 +2,42 @@ package se.quidbit.navbit.updated.types
 
 import androidx.compose.runtime.Composable
 
-data class ScreenArrangement (
-    val main : ScreenComposable,
-    val overlays : List<OverlayScreen> = ArrayList()
+data class ScreenArrangement(
+    val main: ScreenComposable,
+    val overlays: List<OverlayScreen> = ArrayList()
 ) {
-    companion object {
-        fun main(id : String, compose : @Composable () -> Unit) : ScreenArrangement {
-            return ScreenArrangement(ScreenComposable(id, compose))
-        }
-    }
+    // Constructor for the main screen only
+    constructor(id: String, compose: @Composable () -> Unit) : this(
+        ScreenComposable(id, compose)
+    )
+
+    // Constructor for one overlay
+    constructor(
+        id: String, compose: @Composable () -> Unit,
+        firstType: ScreenOverlayType, firstId: String, firstCompose: @Composable () -> Unit
+    ) : this(
+        ScreenComposable(id, compose),
+        listOf(
+            OverlayScreen(firstType, ScreenComposable(firstId, firstCompose))
+        )
+    )
+
+    // Constructor for two overlays
+    constructor(
+        id: String, compose: @Composable () -> Unit,
+        firstType: ScreenOverlayType, firstId: String, firstCompose: @Composable () -> Unit,
+        secondType: ScreenOverlayType, secondId: String, secondCompose: @Composable () -> Unit
+    ) : this(
+        ScreenComposable(id, compose),
+        listOf(
+            OverlayScreen(firstType, ScreenComposable(firstId, firstCompose)),
+            OverlayScreen(secondType, ScreenComposable(secondId, secondCompose))
+        )
+    )
 }
 
 data class OverlayScreen (
-    val overlayTYpe : ScreenOverlayType,
+    val overlayType : ScreenOverlayType,
     val screen : ScreenComposable
 )
 

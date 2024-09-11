@@ -18,6 +18,7 @@ import se.quidbit.navbit.toimplement.NavBitNavigationState
 import se.quidbit.navbit.updated.internal.MainHolder
 import se.quidbit.navbit.updated.internal.NewBitController
 import se.quidbit.navbit.updated.internal.NewBitControllerFactory
+import se.quidbit.navbit.updated.internal.QueuedInteraction
 import se.quidbit.navbit.updated.types.InteractionReceiver
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
@@ -34,10 +35,10 @@ abstract class NewBitActivity<I : NavBitInteraction, S : NavBitNavigationState>(
     // --------------------------------------------------------
     @Volatile
     private var isProcessingInteraction = false
-    private val interactionQueue : BlockingQueue<I> = LinkedBlockingQueue()
+    private val interactionQueue : BlockingQueue<QueuedInteraction<I>> = LinkedBlockingQueue()
     private var interactionJob : Job? = null
 
-    private val interactionReceiver = InteractionReceiver(interactionQueue)
+    private lateinit var interactionReceiver : InteractionReceiver<I>
 
     // --------------
 
@@ -81,13 +82,15 @@ abstract class NewBitActivity<I : NavBitInteraction, S : NavBitNavigationState>(
     // --------------------------------------------------------
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         instance = this
+        interactionReceiver = InteractionReceiver(interactionQueue)
 
         enableEdgeToEdge()
         setContent {
             // Prepare the main state and controller of the app
             viewModel = viewModel(
-                factory =  NewBitControllerFactory(interactionHandler, navigationStateHandler.loadStartupNavigationState())
+                factory =  NewBitControllerFactory(interactionHandler, navigationStateHandler)
             )
 
             // Display the screen
@@ -96,7 +99,7 @@ abstract class NewBitActivity<I : NavBitInteraction, S : NavBitNavigationState>(
             // Setup back press handling
             onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
-                    viewModel.processInteraction(this@NewBitActivity, interactionHandler.getBackInteraction())
+                    interactionQueue.add(QueuedInteraction.Back())
                 }
             })
         }

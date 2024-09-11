@@ -1,5 +1,6 @@
 package se.soderstrom.navbitdemo.newscreen
 
+import android.app.Activity
 import android.content.res.Configuration
 import android.util.Log
 import androidx.compose.animation.AnimatedContent
@@ -31,8 +32,14 @@ import se.quidbit.navbit.updated.types.InteractionReceiver
 import se.soderstrom.navbitdemo.newnavbit.Interaction
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.ui.draw.clip
+import se.quidbit.navbit.updated.toimplement.NewBitActivity
+import se.soderstrom.navbitdemo.newnavbit.NavigationState
 
 @Composable
 fun StartScreen(i: InteractionReceiver<Interaction>, count: Int) {
@@ -85,9 +92,7 @@ fun InfoButtonSection(i: InteractionReceiver<Interaction>) {
         ) {
             InfoButton("View Info") { i.send(Interaction.ViewSheetsInfo) }
             Spacer(modifier = Modifier.width(16.dp))
-            InfoButton("Go to Timer") {}
-            Spacer(modifier = Modifier.width(16.dp))
-            InfoButton("Go to Slow Screen") {}
+            InfoButton("Go to Screen") { i.send(Interaction.GoToNext) }
         }
     } else {
         // Column layout for portrait orientation
@@ -97,9 +102,7 @@ fun InfoButtonSection(i: InteractionReceiver<Interaction>) {
         ) {
             InfoButton("View Info") { i.send(Interaction.ViewSheetsInfo) }
             Spacer(modifier = Modifier.height(24.dp))
-            InfoButton("Go to Timer") {}
-            Spacer(modifier = Modifier.height(24.dp))
-            InfoButton("Go to Slow Screen") {}
+            InfoButton("Go to Screen") { i.send(Interaction.GoToNext) }
         }
     }
 }
@@ -107,20 +110,16 @@ fun InfoButtonSection(i: InteractionReceiver<Interaction>) {
 
 @Composable
 fun InfoButton(text: String, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .wrapContentSize()
-            .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF03DAC5)
-        ),
-        elevation = CardDefaults.cardElevation(4.dp)
+    Button (
+        onClick = onClick,
+        modifier = Modifier.wrapContentSize(),
+        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF03DAC5)),
+        elevation = ButtonDefaults.elevatedButtonElevation(8.dp),
     ) {
         Text(
             text = text,
             fontSize = 15.sp,
             color = Color.Black,
-            modifier = Modifier.padding(8.dp)
         )
     }
 }
@@ -181,11 +180,11 @@ fun AnimatedIncrementText(count: Int) {
             targetState = count,
             transitionSpec = {
                 slideInVertically(
-                    animationSpec = tween(durationMillis = 1000),
+                    animationSpec = tween(durationMillis = 500),
                     initialOffsetY = { fullHeight -> fullHeight } // Start from below
                 ) togetherWith
                 slideOutVertically(
-                    animationSpec = tween(durationMillis = 1000),
+                    animationSpec = tween(durationMillis = 500),
                     targetOffsetY = { fullHeight -> -fullHeight } // Slide out upwards
                 )
             },
@@ -211,25 +210,21 @@ fun ClearButton(count: Int, onClear: () -> Unit) {
         label = ""
     )
 
-    Card(
-        modifier = Modifier
-            .wrapContentSize()
-            .clickable(enabled = isEnabled, onClick = onClear),
-        colors = CardDefaults.cardColors(
-            containerColor = backgroundColor // Use the animated background color
+    Button(
+        onClick = onClear,
+        enabled = isEnabled,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = backgroundColor
         ),
-        elevation = CardDefaults.cardElevation(4.dp),
-        shape = MaterialTheme.shapes.small
+        elevation = ButtonDefaults.buttonElevation(4.dp),
     ) {
         Text(
             text = "Clear Count",
             fontSize = 15.sp,
             color = Color.Black,
-            modifier = Modifier.padding(8.dp)
         )
     }
 }
-
 
 @Preview(showBackground = true, name = "Portrait Mode with count = 0")
 @Composable

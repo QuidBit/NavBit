@@ -22,10 +22,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import se.quidbit.navbit.updated.types.InteractionReceiver
+import se.soderstrom.navbitdemo.newnavbit.Interaction
 import se.soderstrom.navbitdemo.parts.ActionButton
 
 @Composable
-fun SheetsInfoScreen(onDetailsClick: () -> Unit, onCloseClick: () -> Unit) {
+fun SheetsInfoScreen(i : InteractionReceiver<Interaction>) {
     val configuration = LocalConfiguration.current
 
     Box(
@@ -50,14 +52,14 @@ fun SheetsInfoScreen(onDetailsClick: () -> Unit, onCloseClick: () -> Unit) {
                     horizontalArrangement = Arrangement.Center,
                     modifier = Modifier.padding(16.dp)
                 ) {
-                    ActionButton(text = "Details", backgroundColor = Color(0xFF018786), onClick = onDetailsClick)
+                    ActionButton(text = "Details", backgroundColor = Color(0xFF018786), onClick = {i.send(Interaction.ViewSheetsInfoDetails) })
                     Spacer(modifier = Modifier.width(32.dp))
-                    ActionButton(text = "Close", backgroundColor = Color.Black, onClick = onCloseClick)
+                    ActionButton(text = "Close", backgroundColor = Color.Black, onClick = { i.sendBack()})
                 }
             } else {
-                ActionButton(text = "Details", backgroundColor = Color(0xFF018786), onClick = onDetailsClick)
+                ActionButton(text = "Details", backgroundColor = Color(0xFF018786), onClick = {i.send(Interaction.ViewSheetsInfoDetails) })
                 Spacer(modifier = Modifier.height(32.dp))
-                ActionButton(text = "Close", backgroundColor = Color.Black, onClick = onCloseClick)
+                ActionButton(text = "Close", backgroundColor = Color.Black, onClick = { i.sendBack()})
             }
         }
     }
@@ -66,17 +68,11 @@ fun SheetsInfoScreen(onDetailsClick: () -> Unit, onCloseClick: () -> Unit) {
 @Preview(showBackground = true, widthDp = 360, heightDp = 640, name = "Portrait Preview")
 @Composable
 fun PortraitPreview() {
-    SheetsInfoScreen(
-        onDetailsClick = { /* Handle Details Click */ },
-        onCloseClick = { /* Handle Close Click */ }
-    )
+    SheetsInfoScreen(InteractionReceiver())
 }
 
 @Preview(showBackground = true, widthDp = 640, heightDp = 360, name = "Landscape Preview")
 @Composable
 fun LandscapePreview() {
-    SheetsInfoScreen(
-        onDetailsClick = { /* Handle Details Click */ },
-        onCloseClick = { /* Handle Close Click */ }
-    )
+    SheetsInfoScreen(InteractionReceiver())
 }

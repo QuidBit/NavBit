@@ -3,9 +3,13 @@ package se.quidbit.navbit.updated.types
 import androidx.compose.ui.unit.IntOffset
 import se.quidbit.navbit.types.TransitionDirection
 
+val TransitionSlideBack = ScreenTransitionSet(TransitionDirection.Backward, StandardTransitions.SlideTransition)
+val TransitionSlideForward = ScreenTransitionSet(TransitionDirection.Forward, StandardTransitions.SlideTransition)
+val TransitionFade = ScreenTransitionSet(TransitionDirection.Forward, StandardTransitions.FadeTransition)
+
 data class ScreenTransitionSet (
-    val direction: TransitionDirection = TransitionDirection.Forward,
-    val transition: NewScreenTransition = StandardTransitions.FadeTransition
+    val direction: TransitionDirection,
+    val transition: NewScreenTransition
 )
 
 abstract class NewScreenTransition {
@@ -28,8 +32,8 @@ object StandardTransitions {
 
     object FadeTransition : NewScreenTransition() {
         override fun offset(direction : TransitionDirection, width: Int, height: Int): IntOffset { return IntOffset(0, 0) }
-        override fun alpha(direction : TransitionDirection): Float { return 0f }
-        override fun scale(direction : TransitionDirection): Float { return 1f }
+        override fun alpha(direction : TransitionDirection): Float { return 0.8f }
+        override fun scale(direction : TransitionDirection): Float { return 0f }
     }
 }
 

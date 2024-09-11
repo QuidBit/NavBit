@@ -22,7 +22,7 @@ import se.soderstrom.navbitdemo.newnavbit.Interaction
 import se.soderstrom.navbitdemo.parts.ActionButton
 
 @Composable
-fun PopupClearScreen(i : InteractionReceiver<Interaction>) {
+fun PopupClearAgainScreen(i : InteractionReceiver<Interaction>) {
     Column(
         modifier = Modifier
             .wrapContentSize()
@@ -30,7 +30,7 @@ fun PopupClearScreen(i : InteractionReceiver<Interaction>) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Clear the counter?",
+            text = "Are you sure?",
             fontSize = 20.sp,
             color = Color.Black,
             modifier = Modifier
@@ -46,8 +46,8 @@ fun PopupClearScreen(i : InteractionReceiver<Interaction>) {
         ) {
             ActionButton(
                 text = "Yes",
-                backgroundColor = Color(0xFF018786),
-                onClick = {i.send(Interaction.ClearCheck)}
+                backgroundColor = Color.Red,
+                onClick = {i.send(Interaction.ClearPerform)}
             )
             Spacer(modifier = Modifier.width(32.dp))
             ActionButton(
@@ -61,6 +61,6 @@ fun PopupClearScreen(i : InteractionReceiver<Interaction>) {
 
 @Preview(showBackground = true, widthDp = 360, heightDp = 400, name = "Landscape Preview")
 @Composable
-fun PopupPreview() {
-    PopupClearScreen(InteractionReceiver())
+fun PopupAgainPreview() {
+    PopupClearAgainScreen(InteractionReceiver())
 }
