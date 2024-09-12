@@ -13,7 +13,7 @@ class BaseActivity : NavBitActivity<Interaction, NavigationState>(
     ScreenHandler(),
 ) {
     companion object {
-        fun getNavBit() : NavBitActivity<Interaction, NavigationState> {
+        fun instance() : NavBitActivity<Interaction, NavigationState> {
             return getNavBitInstance()
         }
     }

@@ -43,7 +43,7 @@ android {
 }
 
 fun versionName(): String {
-    return "3.0.0"
+    return "3.0.0-beta.2"
 }
 
 val githubProperties = Properties().apply {
@@ -73,7 +73,7 @@ publishing {
 }
 
 dependencies {
-    implementation("androidx.compose.animation:animation-android:1.7.0")
+    implementation("androidx.compose.animation:animation-android:1.7.1")
     implementation("androidx.compose.material3:material3-android:1.3.0")
     val composeBom = platform("androidx.compose:compose-bom:2024.09.00")
     val lifecycleVersion = "2.8.5"
@@ -94,8 +94,6 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
-
-    implementation("org.greenrobot:eventbus:3.3.1")
 }
 
 tasks.withType<PublishToMavenRepository>().configureEach {

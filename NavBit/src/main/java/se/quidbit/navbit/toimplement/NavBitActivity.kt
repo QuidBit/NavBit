@@ -17,30 +17,35 @@ import se.quidbit.navbit.internal.MainHolder
 import se.quidbit.navbit.internal.MasterController
 import se.quidbit.navbit.internal.MasterControllerFactory
 import se.quidbit.navbit.types.QueuedInteraction
-import se.quidbit.navbit.types.InteractionReceiver
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
 
 abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState>(
     private val interactionHandler: NavBitInteractionHandler<I, S>,
     private val navigationStateHandler: NavBitNavigationStateHandler<S>,
-    private val screenHandler: NavBitScreenHandler<I, S>
+    private val screenHandler: NavBitScreenHandler<S>
 )  : ComponentActivity() {
 
-    private lateinit var viewModel : MasterController<I, S>
+    private var masterController : MasterController<I, S>? = null
 
+    // --------------------------------------------------------
     // Interaction handling
     // --------------------------------------------------------
     // NOTE: Interactions are processed sequentially one by one to avoid concurrent issues on modifying state/data
 
     @Volatile
     private var isProcessingInteraction = false
-    private val interactionQueue : BlockingQueue<QueuedInteraction<I>> = LinkedBlockingQueue()
     private var interactionJob : Job? = null
 
-    private lateinit var interactionReceiver : InteractionReceiver<I>
+    private val interactionQueue : BlockingQueue<QueuedInteraction<I>> = LinkedBlockingQueue()
 
-    // --------------
+    fun send(interaction : I) {
+        interactionQueue.add(QueuedInteraction.Custom(interaction))
+    }
+    fun sendBack() {
+        interactionQueue.add(QueuedInteraction.Back())
+    }
+    // --------------------------------------------------------
 
     public override fun onResume() {
         super.onResume()
@@ -59,7 +64,7 @@ abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState>(
                 while (isActive) {
                     val interaction = interactionQueue.take()
                     isProcessingInteraction = true
-                    viewModel.processInteraction(this@NavBitActivity, interaction)
+                    masterController?.processInteraction(this@NavBitActivity, interaction)
                     isProcessingInteraction = false
                 }
             }
@@ -79,22 +84,23 @@ abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState>(
         }
     }
 
-    // --------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         instance = this
-        interactionReceiver = InteractionReceiver(interactionQueue)
 
         enableEdgeToEdge()
         setContent {
             // Prepare the main state and controller of the app
-            viewModel = viewModel(
+            val controller : MasterController<I,S> = viewModel(
                 factory =  MasterControllerFactory(interactionHandler, navigationStateHandler)
             )
 
             // Display the screen
-            MainHolder(this, interactionReceiver, viewModel, screenHandler)
+            MainHolder(this, controller, screenHandler)
+
+            masterController = controller
 
             // Setup back press handling
             onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {

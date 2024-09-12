@@ -3,7 +3,6 @@ package se.soderstrom.navbitdemo.navbit
 import android.content.Context
 import androidx.compose.ui.graphics.Color
 import se.quidbit.navbit.toimplement.NavBitScreenHandler
-import se.quidbit.navbit.types.InteractionReceiver
 import se.quidbit.navbit.types.ScreenArrangement
 import se.quidbit.navbit.types.ScreenOverlayType
 import se.quidbit.navbit.types.ScreenTransitionSet
@@ -18,35 +17,34 @@ import se.soderstrom.navbitdemo.screen.SheetsInfoDetailsScreen
 import se.soderstrom.navbitdemo.screen.StartScreen
 import se.soderstrom.navbitdemo.screen.SheetsInfoScreen
 
-class ScreenHandler : NavBitScreenHandler<Interaction, NavigationState>() {
+class ScreenHandler : NavBitScreenHandler<NavigationState>() {
     override fun screenArrangementFromNavigationState(
-        s: NavigationState,
-        i: InteractionReceiver<Interaction>,
-        context: Context
+        context: Context,
+        s: NavigationState
     ): ScreenArrangement {
         return when (s) {
             is NavigationState.Start -> ScreenArrangement(
-                "StartScreen") { StartScreen(i, s.count) }
+                "StartScreen") { StartScreen(s.count) }
             is NavigationState.ClearCheck -> ScreenArrangement(
-                "StartScreen", { StartScreen(i, s.count) },
-                ScreenOverlayType.Popup, "PopupClearScreen", { PopupClearScreen(i) },
+                "StartScreen", { StartScreen(s.count) },
+                ScreenOverlayType.Popup, "PopupClearScreen", { PopupClearScreen() },
             )
             is NavigationState.ClearCheckAgain -> ScreenArrangement(
-                "StartScreen", { StartScreen(i, s.count) },
-                ScreenOverlayType.Popup,"PopupClearAgainScreen", { PopupClearAgainScreen(i) },
+                "StartScreen", { StartScreen(s.count) },
+                ScreenOverlayType.Popup,"PopupClearAgainScreen", { PopupClearAgainScreen() },
             )
             is NavigationState.Info -> ScreenArrangement(
-                "StartScreen", { StartScreen(i, s.count) },
-                ScreenOverlayType.Sheet,"SheetsInfoScreen", { SheetsInfoScreen(i) }
+                "StartScreen", { StartScreen(s.count) },
+                ScreenOverlayType.Sheet,"SheetsInfoScreen", { SheetsInfoScreen() }
             )
             is NavigationState.InfoDetails -> ScreenArrangement(
-                "StartScreen", { StartScreen(i, s.count) },
-                ScreenOverlayType.Sheet, "SheetsInfoScreen", { SheetsInfoScreen(i) },
-                ScreenOverlayType.Sheet, "SheetsInfoDetailScreen") { SheetsInfoDetailsScreen(i, s.expanded) }
+                "StartScreen", { StartScreen(s.count) },
+                ScreenOverlayType.Sheet, "SheetsInfoScreen", { SheetsInfoScreen() },
+                ScreenOverlayType.Sheet, "SheetsInfoDetailScreen") { SheetsInfoDetailsScreen(s.expanded) }
             is NavigationState.ScreenA -> ScreenArrangement(
-                "ScreenA") { ScreenA(i, s.count) }
+                "ScreenA") { ScreenA(s.count) }
             is NavigationState.ScreenB -> ScreenArrangement(
-                "ScreenB") { ScreenB(i) }
+                "ScreenB") { ScreenB() }
         }
     }
 

@@ -27,17 +27,16 @@ import androidx.compose.ui.window.Dialog
 import se.quidbit.navbit.toimplement.NavBitInteraction
 import se.quidbit.navbit.toimplement.NavBitNavigationState
 import se.quidbit.navbit.toimplement.NavBitScreenHandler
-import se.quidbit.navbit.types.InteractionReceiver
 import se.quidbit.navbit.types.ScreenOverlayType
 import se.quidbit.navbit.types.TransitionFade
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun <I : NavBitInteraction, S : NavBitNavigationState>
-    MainHolder(context : Context, interactionReceiver: InteractionReceiver<I>, viewModel: MasterController<I, S>, screenHandler: NavBitScreenHandler<I, S>)
+    MainHolder(context : Context, controller: MasterController<I, S>, screenHandler: NavBitScreenHandler<S>)
 {
     val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
-    val navStates by viewModel.navState.collectAsState()
+    val navStates by controller.navState.collectAsState()
 
     Log.e("NavBit", "okay, updating main holder...")
 
@@ -50,9 +49,8 @@ internal fun <I : NavBitInteraction, S : NavBitNavigationState>
     // ----------------------------------------------
 
     val screenArrangement = screenHandler.screenArrangementFromNavigationState(
-        navStates.current,
-        interactionReceiver,
-        context
+        context,
+        navStates.current
     )
 
     Box(

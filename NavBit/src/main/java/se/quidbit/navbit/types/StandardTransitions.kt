@@ -31,8 +31,8 @@ object StandardTransitions {
 
     object FadeTransition : NewScreenTransition() {
         override fun offset(direction : TransitionDirection, width: Int, height: Int): IntOffset { return IntOffset(0, 0) }
-        override fun alpha(direction : TransitionDirection): Float { return 0.8f }
-        override fun scale(direction : TransitionDirection): Float { return 0f }
+        override fun alpha(direction : TransitionDirection): Float { return 0f }
+        override fun scale(direction : TransitionDirection): Float { return 1f }
     }
 }
 

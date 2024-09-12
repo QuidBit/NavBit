@@ -25,7 +25,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import se.quidbit.navbit.types.InteractionReceiver
 import se.soderstrom.navbitdemo.navbit.Interaction
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
@@ -33,9 +32,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import se.soderstrom.navbitdemo.BaseActivity
 
 @Composable
-fun StartScreen(i: InteractionReceiver<Interaction>, count: Int) {
+fun StartScreen(count: Int) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -49,10 +49,10 @@ fun StartScreen(i: InteractionReceiver<Interaction>, count: Int) {
         }
 
         // Buttons that do not depend on count
-        InfoButtonSection(i)
+        InfoButtonSection()
 
         // Dynamic UI component that depends on count
-        IncrementSection(i, count)
+        IncrementSection(count)
     }
 }
 
@@ -73,7 +73,7 @@ fun WelcomeText() {
 }
 
 @Composable
-fun InfoButtonSection(i: InteractionReceiver<Interaction>) {
+fun InfoButtonSection() {
     Log.e("NavBitDemo", "RECOMPOSE INFO BUTTON")
     val configuration = LocalConfiguration.current
 
@@ -83,9 +83,9 @@ fun InfoButtonSection(i: InteractionReceiver<Interaction>) {
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier.padding(vertical = 16.dp)
         ) {
-            InfoButton("View Info") { i.send(Interaction.ViewSheetsInfo) }
+            InfoButton("View Info") { BaseActivity.instance().send(Interaction.ViewSheetsInfo) }
             Spacer(modifier = Modifier.width(16.dp))
-            InfoButton("Go to Screen") { i.send(Interaction.GoToNext) }
+            InfoButton("Go to Screen") { BaseActivity.instance().send(Interaction.GoToNext) }
         }
     } else {
         // Column layout for portrait orientation
@@ -93,9 +93,9 @@ fun InfoButtonSection(i: InteractionReceiver<Interaction>) {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(vertical = 48.dp)
         ) {
-            InfoButton("View Info") { i.send(Interaction.ViewSheetsInfo) }
+            InfoButton("View Info") { BaseActivity.instance().send(Interaction.ViewSheetsInfo) }
             Spacer(modifier = Modifier.height(24.dp))
-            InfoButton("Go to Screen") { i.send(Interaction.GoToNext) }
+            InfoButton("Go to Screen") { BaseActivity.instance().send(Interaction.GoToNext) }
         }
     }
 }
@@ -118,7 +118,7 @@ fun InfoButton(text: String, onClick: () -> Unit) {
 }
 
 @Composable
-fun IncrementSection(i : InteractionReceiver<Interaction>, count: Int) {
+fun IncrementSection(count: Int) {
     Log.e("NavBitDemo", "RECOMPOSE INCREMENT")
     val configuration = LocalConfiguration.current
 
@@ -144,15 +144,15 @@ fun IncrementSection(i : InteractionReceiver<Interaction>, count: Int) {
                     horizontalArrangement = Arrangement.Center,
                     modifier = Modifier.padding(vertical = 16.dp)
                 ) {
-                    InfoButton(text = "Increment", onClick = { i.send(Interaction.Increment) })
+                    InfoButton(text = "Increment", onClick = { BaseActivity.instance().send(Interaction.Increment) })
                     Spacer(modifier = Modifier.width(16.dp))
                     ClearButton(count = count, onClear = { })
                 }
             } else {
                 // In portrait mode, place the buttons in a single column (no extra column)
-                InfoButton(text = "Increment", onClick = { i.send(Interaction.Increment) })
+                InfoButton(text = "Increment", onClick = { BaseActivity.instance().send(Interaction.Increment) })
                 Spacer(modifier = Modifier.height(16.dp))
-                ClearButton(count = count, onClear = { i.send(Interaction.ClearCheck) })
+                ClearButton(count = count, onClear = { BaseActivity.instance().send(Interaction.ClearCheck) })
             }
         }
     }
@@ -222,11 +222,11 @@ fun ClearButton(count: Int, onClear: () -> Unit) {
 @Preview(showBackground = true, name = "Portrait Mode with count = 0")
 @Composable
 fun PreviewStartScreenPortraitWithZeroCount() {
-    StartScreen(InteractionReceiver(), count = 0)
+    StartScreen(count = 0)
 }
 
 @Preview(showBackground = true, widthDp = 600, heightDp = 300, name = "Landscape Mode with count = 5")
 @Composable
 fun PreviewStartScreenLandscapeWithFiveCount() {
-    StartScreen(InteractionReceiver(), count = 5)
+    StartScreen(count = 5)
 }

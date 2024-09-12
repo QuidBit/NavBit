@@ -17,12 +17,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import se.quidbit.navbit.types.InteractionReceiver
+import se.soderstrom.navbitdemo.BaseActivity
 import se.soderstrom.navbitdemo.navbit.Interaction
 import se.soderstrom.navbitdemo.parts.ActionButton
 
 @Composable
-fun PopupClearScreen(i : InteractionReceiver<Interaction>) {
+fun PopupClearScreen() {
     Column(
         modifier = Modifier
             .wrapContentSize()
@@ -47,13 +47,13 @@ fun PopupClearScreen(i : InteractionReceiver<Interaction>) {
             ActionButton(
                 text = "Yes",
                 backgroundColor = Color(0xFF018786),
-                onClick = {i.send(Interaction.ClearCheck)}
+                onClick = { BaseActivity.instance().send(Interaction.ClearCheck)}
             )
             Spacer(modifier = Modifier.width(32.dp))
             ActionButton(
                 text = "No",
                 backgroundColor = Color.Black,
-                onClick = {i.sendBack()}
+                onClick = {BaseActivity.instance().sendBack()}
             )
         }
     }
@@ -62,5 +62,5 @@ fun PopupClearScreen(i : InteractionReceiver<Interaction>) {
 @Preview(showBackground = true, widthDp = 360, heightDp = 400, name = "Landscape Preview")
 @Composable
 fun PopupPreview() {
-    PopupClearScreen(InteractionReceiver())
+    PopupClearScreen()
 }

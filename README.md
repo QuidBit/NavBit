@@ -63,3 +63,5 @@ class ScreenHandler : NavBitScreenHandler<Interaction, NavigationState>()
 ## Other info
 
 A demo app is included, showing general navigation and state handling, as well generating and updating screens.
+
+The `NavigationState` should be a `sealed class` of all states in the app Each state should be a `data class`, where all the data is `val`. The use of `val` is important for effecient recompositions. This also means that whenever we go to a new `NavigationState`, the current state should be "modified" using `.copy()`, as in creating a new state based on the old one.

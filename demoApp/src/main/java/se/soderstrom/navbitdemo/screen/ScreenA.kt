@@ -11,19 +11,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import se.quidbit.navbit.types.InteractionReceiver
+import se.soderstrom.navbitdemo.BaseActivity
 import se.soderstrom.navbitdemo.navbit.Interaction
 import se.soderstrom.navbitdemo.parts.ActionButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScreenA(i : InteractionReceiver<Interaction>, count : Int) {
+fun ScreenA(count : Int) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Screen A") },
                 navigationIcon = {
-                    IconButton(onClick = {  i.sendBack() }) {
+                    IconButton(onClick = {  BaseActivity.instance().sendBack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
@@ -45,9 +45,9 @@ fun ScreenA(i : InteractionReceiver<Interaction>, count : Int) {
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
-                ActionButton(text = "Increment", backgroundColor = Color(0xFF018786), onClick = {i.send(Interaction.Increment) })
+                ActionButton(text = "Increment", backgroundColor = Color(0xFF018786), onClick = { BaseActivity.instance().send(Interaction.Increment) })
                 Spacer(modifier = Modifier.height(16.dp))
-                ActionButton(text = "Next Screen", backgroundColor = Color.Gray, onClick = {i.send(Interaction.GoToNext) })
+                ActionButton(text = "Next Screen", backgroundColor = Color.Gray, onClick = { BaseActivity.instance().send(Interaction.GoToNext) })
             }
         }
     )

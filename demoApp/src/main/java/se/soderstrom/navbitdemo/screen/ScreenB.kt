@@ -11,19 +11,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import se.quidbit.navbit.types.InteractionReceiver
+import se.soderstrom.navbitdemo.BaseActivity
 import se.soderstrom.navbitdemo.navbit.Interaction
 import se.soderstrom.navbitdemo.parts.ActionButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScreenB(i : InteractionReceiver<Interaction>) {
+fun ScreenB() {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Screen B") },
                 navigationIcon = {
-                    IconButton(onClick = {  i.sendBack() }) {
+                    IconButton(onClick = {  BaseActivity.instance().sendBack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
@@ -45,7 +45,7 @@ fun ScreenB(i : InteractionReceiver<Interaction>) {
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
-                ActionButton(text = "Go home", backgroundColor = Color(0xFF018786), onClick = {i.send(Interaction.Done) })
+                ActionButton(text = "Go home", backgroundColor = Color(0xFF018786), onClick = { BaseActivity.instance().send(Interaction.Done) })
             }
         }
     )

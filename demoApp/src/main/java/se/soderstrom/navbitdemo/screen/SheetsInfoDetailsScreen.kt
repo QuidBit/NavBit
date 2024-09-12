@@ -26,14 +26,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import se.quidbit.navbit.types.InteractionReceiver
+import se.soderstrom.navbitdemo.BaseActivity
 import se.soderstrom.navbitdemo.navbit.Interaction
 
 @Composable
-fun SheetsInfoDetailsScreen(
-    i : InteractionReceiver<Interaction>,
-    expanded: Boolean
-) {
+fun SheetsInfoDetailsScreen(expanded: Boolean) {
     val configuration = LocalConfiguration.current
 
     Column(
@@ -58,13 +55,13 @@ fun SheetsInfoDetailsScreen(
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.padding(vertical = 16.dp)
             ) {
-                DoneButton { i.send(Interaction.Done) }
-                ExpandButton(expanded) { i.send(Interaction.Expand) }
+                DoneButton { BaseActivity.instance().send(Interaction.Done) }
+                ExpandButton(expanded) { BaseActivity.instance().send(Interaction.Expand) }
             }
         } else {
             // In portrait mode, place the buttons in a Column
-            DoneButton { i.send(Interaction.Done) }
-            ExpandButton(expanded) { i.send(Interaction.Expand)}
+            DoneButton { BaseActivity.instance().send(Interaction.Done) }
+            ExpandButton(expanded) { BaseActivity.instance().send(Interaction.Expand)}
         }
 
         AnimatedVisibility(
@@ -123,17 +120,11 @@ fun ExpandButton(expanded: Boolean, onClick: () -> Unit) {
 @Preview(showBackground = true, widthDp = 360, heightDp = 640, name = "Portrait Preview")
 @Composable
 fun SheetsInfoDetailsPreview() {
-    SheetsInfoDetailsScreen(
-        InteractionReceiver(),
-        true
-    )
+    SheetsInfoDetailsScreen(true)
 }
 
 @Preview(showBackground = true, widthDp = 640, heightDp = 360, name = "Landscape Preview")
 @Composable
 fun SheetsInfoDetailsScreenPreview() {
-    SheetsInfoDetailsScreen(
-        InteractionReceiver(),
-        expanded = true
-    )
+    SheetsInfoDetailsScreen(expanded = true)
 }
