@@ -43,7 +43,7 @@ android {
 }
 
 fun versionName(): String {
-    return "3.0.0-beta.2"
+    return "3.0.0-beta.4"
 }
 
 val githubProperties = Properties().apply {

@@ -109,21 +109,6 @@ internal fun <I : NavBitInteraction, S : NavBitNavigationState>
         else 1f
     }
 
-    // Define the z-index values based on which slot is currently active
-    val slotAZIndex by transition.animateFloat(
-        label = "slotAZIndex",
-        transitionSpec = { tween(durationMillis = TRANSITION_TIME_MS) }
-    ) { _animating ->
-        if (screenSlots.currentSlot == ScreenSlot.SlotA) 1f else 0f
-    }
-
-    val slotBZIndex by transition.animateFloat(
-        label = "slotBZIndex",
-        transitionSpec = { tween(durationMillis = TRANSITION_TIME_MS) }
-    ) { _animating ->
-        if (screenSlots.currentSlot == ScreenSlot.SlotB) 1f else 0f
-    }
-
     // Box to contain the screen slots
     Box(modifier = Modifier.wrapContentSize()) {
         screenSlots.contentSlotA?.let {
@@ -133,7 +118,7 @@ internal fun <I : NavBitInteraction, S : NavBitNavigationState>
                     .offset { slotAOffset }
                     .alpha(slotAAlpha)
                     .scale(slotAScale)
-                    .zIndex(slotAZIndex)
+                    .zIndex(if (transitionSet.transition.nextOnTop(transitionSet.direction)) 1f else 0f)
             ) {
                 it.content.invoke()
             }
@@ -146,7 +131,7 @@ internal fun <I : NavBitInteraction, S : NavBitNavigationState>
                     .offset { slotBOffset }
                     .alpha(slotBAlpha)
                     .scale(slotBScale)
-                    .zIndex(slotBZIndex)
+                    .zIndex(if (!transitionSet.transition.nextOnTop(transitionSet.direction)) 1f else 0f)
             ) {
                 it.content.invoke()
             }

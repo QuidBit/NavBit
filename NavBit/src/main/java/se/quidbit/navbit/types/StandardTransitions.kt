@@ -15,6 +15,7 @@ abstract class NewScreenTransition {
     abstract fun offset(direction : TransitionDirection, width: Int, height: Int): IntOffset
     abstract fun alpha(direction : TransitionDirection): Float
     abstract fun scale(direction : TransitionDirection): Float
+    abstract fun nextOnTop(direction: TransitionDirection) : Boolean
 }
 
 object StandardTransitions {
@@ -27,12 +28,18 @@ object StandardTransitions {
         }
         override fun alpha(direction : TransitionDirection): Float { return 0f }
         override fun scale(direction : TransitionDirection): Float { return 0.8f }
+        override fun nextOnTop(direction : TransitionDirection): Boolean {
+            return direction == TransitionDirection.Forward
+        }
     }
 
     object FadeTransition : NewScreenTransition() {
         override fun offset(direction : TransitionDirection, width: Int, height: Int): IntOffset { return IntOffset(0, 0) }
         override fun alpha(direction : TransitionDirection): Float { return 0f }
         override fun scale(direction : TransitionDirection): Float { return 1f }
+        override fun nextOnTop(direction : TransitionDirection): Boolean {
+            return true
+        }
     }
 }
 
