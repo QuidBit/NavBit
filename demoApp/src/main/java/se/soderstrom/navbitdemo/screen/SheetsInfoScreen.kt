@@ -17,12 +17,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import se.soderstrom.navbitdemo.BaseActivity
+import se.soderstrom.navbitdemo.R
 import se.soderstrom.navbitdemo.navbit.Interaction
 import se.soderstrom.navbitdemo.parts.ActionButton
 
@@ -32,7 +34,7 @@ fun SheetsInfoScreen() {
 
     Box(
         modifier = Modifier.fillMaxSize()
-            .background(Color(0xFFB3E5FC))
+            .background(colorResource(R.color.demo_teal_200)),
     ) {
         Column(
             modifier = Modifier.align(Alignment.Center),
@@ -52,12 +54,12 @@ fun SheetsInfoScreen() {
                     horizontalArrangement = Arrangement.Center,
                     modifier = Modifier.padding(16.dp)
                 ) {
-                    ActionButton(text = "Details", backgroundColor = Color(0xFF018786), onClick = { BaseActivity.instance().send(Interaction.ViewSheetsInfoDetails) })
+                    ActionButton(text = "Details", backgroundColor = colorResource(R.color.demo_teal_700), onClick = { BaseActivity.instance().send(Interaction.ViewSheetsInfoDetails) })
                     Spacer(modifier = Modifier.width(32.dp))
                     ActionButton(text = "Close", backgroundColor = Color.Black, onClick = { BaseActivity.instance().sendBack()})
                 }
             } else {
-                ActionButton(text = "Details", backgroundColor = Color(0xFF018786), onClick = {BaseActivity.instance().send(Interaction.ViewSheetsInfoDetails) })
+                ActionButton(text = "Details", backgroundColor = colorResource(R.color.demo_teal_700), onClick = {BaseActivity.instance().send(Interaction.ViewSheetsInfoDetails) })
                 Spacer(modifier = Modifier.height(32.dp))
                 ActionButton(text = "Close", backgroundColor = Color.Black, onClick = { BaseActivity.instance().sendBack()})
             }

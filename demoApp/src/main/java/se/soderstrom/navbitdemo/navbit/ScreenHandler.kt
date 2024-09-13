@@ -2,13 +2,15 @@ package se.soderstrom.navbitdemo.navbit
 
 import android.content.Context
 import androidx.compose.ui.graphics.Color
+import androidx.core.content.ContextCompat
 import se.quidbit.navbit.toimplement.NavBitScreenHandler
+import se.quidbit.navbit.types.TransitionFade
 import se.quidbit.navbit.types.ScreenArrangement
 import se.quidbit.navbit.types.ScreenOverlayType
-import se.quidbit.navbit.types.ScreenTransitionSet
-import se.quidbit.navbit.types.TransitionFade
-import se.quidbit.navbit.types.TransitionSlideBack
-import se.quidbit.navbit.types.TransitionSlideForward
+import se.quidbit.navbit.types.ScreenTransition
+import se.quidbit.navbit.types.TransitionSlide
+import se.quidbit.navbit.types.TransitionDirection
+import se.soderstrom.navbitdemo.R
 import se.soderstrom.navbitdemo.screen.PopupClearAgainScreen
 import se.soderstrom.navbitdemo.screen.PopupClearScreen
 import se.soderstrom.navbitdemo.screen.ScreenA
@@ -51,34 +53,38 @@ class ScreenHandler : NavBitScreenHandler<NavigationState>() {
     override fun transitionFromNavigationStates(
         old: NavigationState,
         new: NavigationState
-    ): ScreenTransitionSet {
+    ): ScreenTransition {
         val result = when (old) {
             is NavigationState.Start -> when (new) {
-                is NavigationState.ScreenA -> TransitionSlideForward
+                is NavigationState.ScreenA -> TransitionSlide(TransitionDirection.Forward)
                 else -> null
             }
             is NavigationState.ClearCheck -> when (new) {
-                is NavigationState.ClearCheckAgain -> TransitionSlideForward
+                is NavigationState.ClearCheckAgain -> TransitionSlide(TransitionDirection.Forward)
                 else -> null
             }
-            is NavigationState.ClearCheckAgain -> TransitionSlideBack
+            is NavigationState.ClearCheckAgain -> TransitionSlide(TransitionDirection.Backward)
             is NavigationState.Info -> when (new) {
-                is NavigationState.InfoDetails -> TransitionSlideForward
+                is NavigationState.InfoDetails -> TransitionSlide(TransitionDirection.Forward)
                 else -> null
             }
-            is NavigationState.InfoDetails -> TransitionSlideBack
+            is NavigationState.InfoDetails -> TransitionSlide(TransitionDirection.Backward)
             is NavigationState.ScreenA -> when (new) {
-                is NavigationState.Start -> TransitionSlideBack
-                is NavigationState.ScreenB -> TransitionSlideForward
+                is NavigationState.Start -> TransitionSlide(TransitionDirection.Backward)
+                is NavigationState.ScreenB -> TransitionSlide(TransitionDirection.Forward)
                 else -> null
             }
-            is NavigationState.ScreenB -> TransitionSlideBack
+            is NavigationState.ScreenB -> TransitionSlide(TransitionDirection.Backward)
         }
 
         return result ?: TransitionFade
     }
 
-    override fun mainBackgroundColor(): Color {
-        return Color.Gray
+    override fun holderBackgroundColor(context : Context): Color {
+        return Color(ContextCompat.getColor(context, R.color.demo_grey))
+    }
+
+    override fun screenBackgroundColor(context : Context): Color {
+        return Color(ContextCompat.getColor(context, R.color.demo_white))
     }
 }

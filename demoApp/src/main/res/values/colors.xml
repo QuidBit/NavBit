@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="teal_200">#03DAC5</color>
-    <color name="teal_700">#018786</color>
+    <color name="demo_teal_200">#03DAC5</color>
+    <color name="demo_teal_700">#018786</color>
 
-    <color name="black">#000000</color>
-    <color name="white">#FFFFFF</color>
-    <color name="grey">#DDDDDD</color>
-
-    <color name="pattern_background">#15000000</color>
+    <color name="demo_black">#000000</color>
+    <color name="demo_white">#FFFFFF</color>
+    <color name="demo_red">#FF0000</color>
+    <color name="demo_grey">#DDDDDD</color>
 </resources>

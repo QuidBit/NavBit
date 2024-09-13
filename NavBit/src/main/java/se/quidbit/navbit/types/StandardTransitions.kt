@@ -1,45 +1,91 @@
 package se.quidbit.navbit.types
 
-import androidx.compose.ui.unit.IntOffset
+import se.quidbit.navbit.internal.ScreenChange
+import kotlin.math.abs
 
-val TransitionSlideBack = ScreenTransitionSet(TransitionDirection.Backward, StandardTransitions.SlideTransition)
-val TransitionSlideForward = ScreenTransitionSet(TransitionDirection.Forward, StandardTransitions.SlideTransition)
-val TransitionFade = ScreenTransitionSet(TransitionDirection.Forward, StandardTransitions.FadeTransition)
+// ---------------------------------------------------------------------
 
-data class ScreenTransitionSet (
-    val direction: TransitionDirection,
-    val transition: NewScreenTransition
-)
-
-abstract class NewScreenTransition {
-    abstract fun offset(direction : TransitionDirection, width: Int, height: Int): IntOffset
-    abstract fun alpha(direction : TransitionDirection): Float
-    abstract fun scale(direction : TransitionDirection): Float
-    abstract fun nextOnTop(direction: TransitionDirection) : Boolean
-}
-
-object StandardTransitions {
-    object SlideTransition : NewScreenTransition() {
-        override fun offset(direction : TransitionDirection, width: Int, height: Int): IntOffset {
-            return when (direction) {
-                TransitionDirection.Forward -> IntOffset(-width, 0)
-                TransitionDirection.Backward -> IntOffset(width, 0)
+class TransitionSlide(private val direction: TransitionDirection) : ScreenTransition() {
+    override fun start(screenChange: ScreenChange, width : Float): TransitionTransform {
+        return when (screenChange) {
+            ScreenChange.Entering -> when (direction) {
+                TransitionDirection.Forward -> TransitionTransform(width, 0.95f, 0.2f)
+                TransitionDirection.Backward -> TransitionTransform(-width, 0.95f, 0.2f)
+            }
+            ScreenChange.Leaving -> TransitionTransform()
+        }
+    }
+    override fun end(screenChange: ScreenChange, width : Float): TransitionTransform {
+        return when (screenChange) {
+            ScreenChange.Entering -> TransitionTransform(0f, 1f, 1f)
+            ScreenChange.Leaving -> when (direction) {
+                TransitionDirection.Forward -> TransitionTransform(-width, 0.95f, 0.2f)
+                TransitionDirection.Backward -> TransitionTransform(width, 0.95f, 0.2f)
             }
         }
-        override fun alpha(direction : TransitionDirection): Float { return 0f }
-        override fun scale(direction : TransitionDirection): Float { return 0.8f }
-        override fun nextOnTop(direction : TransitionDirection): Boolean {
-            return direction == TransitionDirection.Forward
-        }
     }
 
-    object FadeTransition : NewScreenTransition() {
-        override fun offset(direction : TransitionDirection, width: Int, height: Int): IntOffset { return IntOffset(0, 0) }
-        override fun alpha(direction : TransitionDirection): Float { return 0f }
-        override fun scale(direction : TransitionDirection): Float { return 1f }
-        override fun nextOnTop(direction : TransitionDirection): Boolean {
-            return true
-        }
+    override fun shouldSnap(
+        current: TransitionTransform,
+        new: TransitionTransform,
+        screenChange: ScreenChange,
+        width: Float
+    ): Boolean {
+        return abs(current.offset - new.offset) > width - 1f
+    }
+
+    override fun enteringOnTop(): Boolean {
+        return direction == TransitionDirection.Forward
     }
 }
 
+// ---------------------------------------------------------------------
+
+object TransitionFade : ScreenTransition() {
+    override fun start(screenChange: ScreenChange, width : Float): TransitionTransform {
+        return when (screenChange) {
+            ScreenChange.Entering -> TransitionTransform(alpha = 0f)
+            ScreenChange.Leaving -> TransitionTransform()
+        }
+    }
+
+    override fun end(screenChange: ScreenChange, width : Float): TransitionTransform {
+        return TransitionTransform()
+    }
+
+    override fun shouldSnap(
+        current: TransitionTransform,
+        new: TransitionTransform,
+        screenChange: ScreenChange,
+        width: Float
+    ): Boolean {
+        return true
+    }
+
+    override fun enteringOnTop(): Boolean {
+        return true
+    }
+}
+
+object TransitionNone : ScreenTransition() {
+    override fun start(screenChange: ScreenChange, width : Float): TransitionTransform {
+        return TransitionTransform()
+    }
+
+    override fun end(screenChange: ScreenChange, width : Float): TransitionTransform {
+        return TransitionTransform()
+    }
+
+    override fun shouldSnap(
+        current: TransitionTransform,
+        new: TransitionTransform,
+        screenChange: ScreenChange,
+        width: Float
+    ): Boolean {
+        return true
+    }
+
+    override fun enteringOnTop(): Boolean {
+        return true
+    }
+}

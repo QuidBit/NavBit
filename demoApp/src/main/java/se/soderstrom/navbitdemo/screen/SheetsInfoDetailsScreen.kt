@@ -4,6 +4,7 @@ import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,12 +22,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import se.soderstrom.navbitdemo.BaseActivity
+import se.soderstrom.navbitdemo.R
 import se.soderstrom.navbitdemo.navbit.Interaction
 
 @Composable
@@ -37,13 +40,14 @@ fun SheetsInfoDetailsScreen(expanded: Boolean) {
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .verticalScroll(rememberScrollState()),
+            .verticalScroll(rememberScrollState())
+            .background(colorResource(R.color.demo_white)),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = "In multiple layers",
             fontSize = 20.sp,
-            color = Color.Black,
+            color = colorResource(R.color.demo_black),
             modifier = Modifier
                 .padding(vertical = 24.dp),
             textAlign = TextAlign.Center
@@ -72,7 +76,7 @@ fun SheetsInfoDetailsScreen(expanded: Boolean) {
             Text(
                 text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at lorem vel sapien mattis malesuada. Integer imperdiet vulputate dignissim. Donec quis accumsan felis. Donec et accumsan est. Phasellus tristique tellus sit amet turpis sodales tempor. Donec eleifend turpis hendrerit neque scelerisque, eu feugiat mi pretium. Sed fermentum arcu sed mi consectetur, ut ultrices est fringilla. Mauris ac elementum libero. Aliquam rhoncus leo eros, eu interdum purus laoreet sit amet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at lorem vel sapien mattis malesuada. Integer imperdiet vulputate dignissim. Donec quis accumsan felis. Donec et accumsan est. Phasellus tristique tellus sit amet turpis sodales tempor. Donec eleifend turpis hendrerit neque scelerisque, eu feugiat mi pretium. Sed fermentum arcu sed mi consectetur, ut ultrices est fringilla. Mauris ac elementum libero. Aliquam rhoncus leo eros, eu interdum purus laoreet sit amet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at lorem vel sapien mattis malesuada. Integer imperdiet vulputate dignissim. Donec quis accumsan felis. Donec et accumsan est. Phasellus tristique tellus sit amet turpis sodales tempor. Donec eleifend turpis hendrerit neque scelerisque, eu feugiat mi pretium. Sed fermentum arcu sed mi consectetur, ut ultrices est fringilla. Mauris ac elementum libero. Aliquam rhoncus leo eros, eu interdum purus laoreet sit amet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at lorem vel sapien mattis malesuada. Integer imperdiet vulputate dignissim. Donec quis accumsan felis. Donec et accumsan est. Phasellus tristique tellus sit amet turpis sodales tempor. Donec eleifend turpis hendrerit neque scelerisque, eu feugiat mi pretium. Sed fermentum arcu sed mi consectetur, ut ultrices est fringilla. Mauris ac elementum libero. Aliquam rhoncus leo eros, eu interdum purus laoreet sit amet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at lorem vel sapien mattis malesuada. Integer imperdiet vulputate dignissim. Donec quis accumsan felis. Donec et accumsan est. Phasellus tristique tellus sit amet turpis sodales tempor. Donec eleifend turpis hendrerit neque scelerisque, eu feugiat mi pretium. Sed fermentum arcu sed mi consectetur, ut ultrices est fringilla. Mauris ac elementum libero. Aliquam rhoncus leo eros, eu interdum purus laoreet sit amet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at lorem vel sapien mattis malesuada. Integer imperdiet vulputate dignissim. Donec quis accumsan felis. Donec et accumsan est. Phasellus tristique tellus sit amet turpis sodales tempor. Donec eleifend turpis hendrerit neque scelerisque, eu feugiat mi pretium. Sed fermentum arcu sed mi consectetur, ut ultrices est fringilla. Mauris ac elementum libero. Aliquam rhoncus leo eros, eu interdum purus laoreet sit amet.",
                 fontSize = 18.sp,
-                color = Color.Black,
+                color = colorResource(R.color.demo_black),
                 modifier = Modifier
                     .padding(bottom = 24.dp, start = 24.dp, end = 24.dp),
                 textAlign = TextAlign.Center
@@ -85,7 +89,7 @@ fun SheetsInfoDetailsScreen(expanded: Boolean) {
 fun DoneButton(onClick: () -> Unit) {
     Button(
         onClick = onClick,
-        colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
+        colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.demo_black)),
         shape = MaterialTheme.shapes.medium,
         elevation = ButtonDefaults.buttonElevation(4.dp),
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 24.dp),
@@ -93,7 +97,7 @@ fun DoneButton(onClick: () -> Unit) {
         Text(
             text = "Close",
             fontSize = 18.sp,
-            color = Color.White,
+            color = colorResource(R.color.demo_white),
             fontWeight = FontWeight.Bold
         )
     }
@@ -103,7 +107,7 @@ fun DoneButton(onClick: () -> Unit) {
 fun ExpandButton(expanded: Boolean, onClick: () -> Unit) {
     Button(
         onClick = onClick,
-        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF018786)),
+        colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.demo_teal_700)),
         shape = MaterialTheme.shapes.medium,
         elevation = ButtonDefaults.buttonElevation(4.dp),
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 24.dp),
@@ -111,7 +115,7 @@ fun ExpandButton(expanded: Boolean, onClick: () -> Unit) {
         Text(
             text = if (expanded) "Collapse" else "Expand",
             fontSize = 18.sp,
-            color = Color.White,
+            color = colorResource(R.color.demo_white),
             fontWeight = FontWeight.Bold
         )
     }

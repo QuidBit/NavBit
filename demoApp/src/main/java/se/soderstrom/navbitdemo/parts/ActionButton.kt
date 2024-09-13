@@ -8,12 +8,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import se.soderstrom.navbitdemo.R
 
 @Composable
-fun ActionButton(text: String, backgroundColor: Color, onClick: () -> Unit) {
+fun ActionButton(text: String, textColor : Color = Color.White, backgroundColor: Color, onClick: () -> Unit) {
     Button(
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
@@ -23,7 +25,7 @@ fun ActionButton(text: String, backgroundColor: Color, onClick: () -> Unit) {
         Text(
             text = text,
             fontSize = 18.sp,
-            color = Color.White,
+            color = textColor,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(2.dp)
         )

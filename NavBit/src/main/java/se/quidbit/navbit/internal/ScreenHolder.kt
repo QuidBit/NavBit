@@ -1,10 +1,8 @@
 package se.quidbit.navbit.internal
 
 import android.util.Log
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateIntOffset
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.wrapContentSize
@@ -13,39 +11,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import se.quidbit.navbit.toimplement.NavBitInteraction
-import se.quidbit.navbit.toimplement.NavBitNavigationState
 import se.quidbit.navbit.types.ScreenComposable
-import se.quidbit.navbit.types.ScreenTransitionSet
+import se.quidbit.navbit.types.ScreenTransition
 
 internal const val TRANSITION_TIME_MS = 500
 
 @Composable
-internal fun <I : NavBitInteraction, S : NavBitNavigationState>
-    ScreenHolder(newScreenComposable: ScreenComposable, transitionSet: ScreenTransitionSet)
-{
-    val holderTransition = transitionSet.transition
-    val direction = transitionSet.direction
-    Log.e("NavBit", " -- IN SCREEN HOLDER")
+internal fun ScreenHolder(
+    newScreenComposable: ScreenComposable,
+    transition: ScreenTransition
+) {
+    val screenSlots by remember { mutableStateOf(ScreenSlots(newScreenComposable)) }
 
-    val screenSlots by remember { mutableStateOf(ScreenSlots(null, null, ScreenSlot.SlotA)) }
-
-    // Flag for managing the visibility of the old screen
-    var isAnimating by remember { mutableStateOf(false) }
-
-    val oldScreenComposable = when (screenSlots.currentSlot) {
-        ScreenSlot.SlotA -> screenSlots.contentSlotA
-        ScreenSlot.SlotB -> screenSlots.contentSlotB
+    val currentScreenComposable = when (screenSlots.currentIsA()) {
+        true -> screenSlots.contentSlotA
+        false -> screenSlots.contentSlotB
     }
 
-    // Trigger animation only if the ID has changed
-    if (oldScreenComposable?.id != newScreenComposable.id) {
+    if (currentScreenComposable?.id != newScreenComposable.id) {
         screenSlots.currentSlot = screenSlots.currentSlot.opposite()
-        isAnimating = true
+        screenSlots.transitionCounter++
     }
 
     when (screenSlots.currentSlot) {
@@ -53,97 +40,81 @@ internal fun <I : NavBitInteraction, S : NavBitNavigationState>
         ScreenSlot.SlotB -> screenSlots.contentSlotB = newScreenComposable
     }
 
-    // Animation progress for the screen
-    val transition = updateTransition(targetState = isAnimating, label = "")
-    val screenWidthDp = LocalConfiguration.current.screenWidthDp
-    val screenWidth = with(LocalDensity.current) { screenWidthDp.dp.toPx() }
-    val screenHeightDp = LocalConfiguration.current.screenHeightDp
-    val screenHeight = with(LocalDensity.current) { screenHeightDp.dp.toPx() }
-
-    // Create the content transform equivalent
-    val slotAOffset by transition.animateIntOffset(
-        label = "slotAOffset",
-        transitionSpec = { tween(durationMillis = TRANSITION_TIME_MS) }
-    ) { isAnim ->
-        if (isAnim && screenSlots.currentSlot != ScreenSlot.SlotA) holderTransition.offset(direction, screenWidth.toInt(), screenHeight.toInt())
-        else IntOffset(0, 0)
-    }
-
-    val slotBOffset by transition.animateIntOffset(
-        label = "slotBOffset",
-        transitionSpec = { tween(durationMillis = TRANSITION_TIME_MS) }
-    ) { isAnim ->
-        if (isAnim && screenSlots.currentSlot != ScreenSlot.SlotB) holderTransition.offset(direction, screenWidth.toInt(), screenHeight.toInt())
-        else IntOffset(0, 0)
-    }
-
-    val slotAAlpha by transition.animateFloat(
-        label = "slotAAlpha",
-        transitionSpec = { tween(durationMillis = TRANSITION_TIME_MS) }
-    ) { isAnim ->
-        if (isAnim && screenSlots.currentSlot != ScreenSlot.SlotA) holderTransition.alpha(direction)
-        else 1f
-    }
-
-    val slotBAlpha by transition.animateFloat(
-        label = "slotBAlpha",
-        transitionSpec = { tween(durationMillis = TRANSITION_TIME_MS) }
-    ) { isAnim ->
-        if (isAnim && screenSlots.currentSlot != ScreenSlot.SlotB) holderTransition.alpha(direction.opposite())
-        else 1f
-    }
-
-    val slotAScale by transition.animateFloat(
-        label = "slotAScale",
-        transitionSpec = { tween(durationMillis = TRANSITION_TIME_MS) }
-    ) { isAnim ->
-        if (isAnim && screenSlots.currentSlot != ScreenSlot.SlotA) holderTransition.scale(direction)
-        else 1f
-    }
-
-    val slotBScale by transition.animateFloat(
-        label = "slotBScale",
-        transitionSpec = { tween(durationMillis = TRANSITION_TIME_MS) }
-    ) { isAnim ->
-        if (isAnim && screenSlots.currentSlot != ScreenSlot.SlotB) holderTransition.scale(direction.opposite())
-        else 1f
-    }
-
     // Box to contain the screen slots
     Box(modifier = Modifier.wrapContentSize()) {
-        screenSlots.contentSlotA?.let {
-            Box(
-                modifier = Modifier
-                    .wrapContentSize()
-                    .offset { slotAOffset }
-                    .alpha(slotAAlpha)
-                    .scale(slotAScale)
-                    .zIndex(if (transitionSet.transition.nextOnTop(transitionSet.direction)) 1f else 0f)
-            ) {
-                it.content.invoke()
-            }
+        screenSlots.contentSlotB?.let {
+            JumpAndAnimateBox(
+                screenSlots.transitionCounter,
+                it,
+                transition,
+                ScreenChange.entering(!screenSlots.currentIsA())
+            )
         }
 
-        screenSlots.contentSlotB?.let {
-            Box(
-                modifier = Modifier
-                    .wrapContentSize()
-                    .offset { slotBOffset }
-                    .alpha(slotBAlpha)
-                    .scale(slotBScale)
-                    .zIndex(if (!transitionSet.transition.nextOnTop(transitionSet.direction)) 1f else 0f)
-            ) {
-                it.content.invoke()
-            }
+        // NOTE: Slot A is placed last to make sure it is on top in the beginning, when no secondary slot is visible
+            // Otherwise, slotB becomes visible for a split second when it is added
+        JumpAndAnimateBox(
+            screenSlots.transitionCounter,
+            screenSlots.contentSlotA,
+            transition,
+            ScreenChange.entering(screenSlots.currentIsA())
+        )
+    }
+}
+
+@Composable
+fun JumpAndAnimateBox(counter: Int, composable : ScreenComposable, transition: ScreenTransition, screenChange: ScreenChange) {
+
+    val animation = remember { Animatable(TransitionAnimation(), TransitionAnimationTypeConverter()) }
+
+    val screenWidthDp = LocalConfiguration.current.screenWidthDp.toFloat()
+
+    // Update the offset instantly when the counter changes
+    LaunchedEffect(counter) {
+
+        // NOTE: To avoid glitching during fades, the zIndex must be set at the same time as the other properties
+        // (even though it is not actually animating)
+        val z = if (transition.isOnTop(screenChange)) 1f else 0f
+
+        val start = transition.start(screenChange, screenWidthDp)
+
+        // Conditional snapping
+        // -------------------------------
+        // Makes sure the current screen is animated in a flow without jumping for moving transitions
+        // However, the screen coming in might appear directly in the position of the old slot, essentially a swap in view
+        // But, realistically no one will notice the difference anyway with normal transition speeds
+        if (transition.shouldSnap(animation.value.toTransform(), start, screenChange, screenWidthDp)) {
+            animation.snapTo(TransitionAnimation.new(z, start))
         }
+
+        animation.animateTo(
+            TransitionAnimation.new(z, transition.end(screenChange, screenWidthDp)),
+            tween(durationMillis = TRANSITION_TIME_MS)
+        )
+    }
+
+    Box(
+        modifier = Modifier
+            .wrapContentSize()
+            .offset(x = animation.value.offset.dp, y = 0.dp)
+            .alpha(animation.value.alpha)
+            .scale(animation.value.scale)
+            .zIndex(animation.value.z)
+    ) {
+        composable.content.invoke()
     }
 }
 
 data class ScreenSlots(
-    var contentSlotA: ScreenComposable?,
-    var contentSlotB: ScreenComposable?,
-    var currentSlot: ScreenSlot
-)
+    var contentSlotA: ScreenComposable,
+    var contentSlotB: ScreenComposable? = null,
+    var currentSlot: ScreenSlot = ScreenSlot.SlotA,
+    var transitionCounter : Int = 0
+) {
+    fun currentIsA() : Boolean {
+        return currentSlot == ScreenSlot.SlotA
+    }
+}
 
 enum class ScreenSlot {
     SlotA, SlotB;
@@ -152,6 +123,17 @@ enum class ScreenSlot {
         return when (this) {
             SlotA -> SlotB
             SlotB -> SlotA
+        }
+    }
+}
+
+enum class ScreenChange {
+    Entering,
+    Leaving;
+
+    companion object {
+        fun entering(entering : Boolean) : ScreenChange {
+            return if (entering) Entering else Leaving
         }
     }
 }

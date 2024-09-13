@@ -1,5 +1,6 @@
 package se.soderstrom.navbitdemo.screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,11 +14,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import se.soderstrom.navbitdemo.BaseActivity
+import se.soderstrom.navbitdemo.R
 import se.soderstrom.navbitdemo.navbit.Interaction
 import se.soderstrom.navbitdemo.parts.ActionButton
 
@@ -26,13 +29,14 @@ fun PopupClearAgainScreen() {
     Column(
         modifier = Modifier
             .wrapContentSize()
-            .padding(vertical = 32.dp, horizontal = 48.dp),
+            .padding(vertical = 32.dp, horizontal = 48.dp)
+            .background(colorResource(R.color.demo_white)),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = "Are you sure?",
             fontSize = 20.sp,
-            color = Color.Black,
+            color = colorResource(R.color.demo_black),
             modifier = Modifier
                 .padding(vertical = 32.dp, horizontal = 16.dp),
             textAlign = TextAlign.Center
@@ -46,13 +50,14 @@ fun PopupClearAgainScreen() {
         ) {
             ActionButton(
                 text = "Yes",
-                backgroundColor = Color.Red,
+                backgroundColor = colorResource(R.color.demo_red),
                 onClick = { BaseActivity.instance().send(Interaction.ClearPerform)}
             )
             Spacer(modifier = Modifier.width(32.dp))
             ActionButton(
                 text = "No",
-                backgroundColor = Color.Black,
+                textColor = colorResource(R.color.demo_white),
+                backgroundColor = colorResource(R.color.demo_black),
                 onClick = {BaseActivity.instance().sendBack()}
             )
         }

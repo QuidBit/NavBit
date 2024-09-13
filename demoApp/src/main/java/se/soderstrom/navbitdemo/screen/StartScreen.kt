@@ -26,12 +26,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import se.soderstrom.navbitdemo.navbit.Interaction
+import se.soderstrom.navbitdemo.R
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.ui.res.colorResource
 import se.soderstrom.navbitdemo.BaseActivity
 
 @Composable
@@ -39,7 +41,7 @@ fun StartScreen(count: Int) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFFFFFFF)),
+            .background(colorResource(R.color.demo_white)),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -58,23 +60,23 @@ fun StartScreen(count: Int) {
 
 @Composable
 fun WelcomeText() {
-    Log.e("NavBitDemo", "RECOMPOSE TEXT")
+    Log.i("NavBitDemo", "--StartScreen - RECOMPOSE TEXT")
     Text(
         text = "Welcome to NavBit",
         fontSize = 30.sp,
-        color = Color.Black
+        color = colorResource(R.color.demo_black)
     )
     Spacer(modifier = Modifier.height(8.dp))
     Text(
         text = "Easy and fluid navigation",
         fontSize = 15.sp,
-        color = Color.Black
+        color = colorResource(R.color.demo_black)
     )
 }
 
 @Composable
 fun InfoButtonSection() {
-    Log.e("NavBitDemo", "RECOMPOSE INFO BUTTON")
+    Log.i("NavBitDemo", "--StartScreen - RECOMPOSE INFO BUTTON")
     val configuration = LocalConfiguration.current
 
     if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -119,7 +121,7 @@ fun InfoButton(text: String, onClick: () -> Unit) {
 
 @Composable
 fun IncrementSection(count: Int) {
-    Log.e("NavBitDemo", "RECOMPOSE INCREMENT")
+    Log.i("NavBitDemo", "--StartScreen - RECOMPOSE INCREMENT")
     val configuration = LocalConfiguration.current
 
     Card(
@@ -160,13 +162,14 @@ fun IncrementSection(count: Int) {
 
 @Composable
 fun AnimatedIncrementText(count: Int) {
+    Log.i("NavBitDemo", " --incremented value $count")
     Row(
         modifier = Modifier.padding(16.dp)
     ) {
         Text(
             text = "Incremented Value: ",
             fontSize = 15.sp,
-            color = Color.Black
+            color = colorResource(R.color.demo_black)
         )
 
         AnimatedContent(
@@ -186,7 +189,7 @@ fun AnimatedIncrementText(count: Int) {
             Text(
                 text = "$targetCount",
                 fontSize = 15.sp,
-                color = Color.Black
+                color = colorResource(R.color.demo_black)
             )
         }
     }
