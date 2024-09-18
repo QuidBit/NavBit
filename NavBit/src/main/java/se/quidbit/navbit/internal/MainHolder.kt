@@ -3,6 +3,7 @@ package se.quidbit.navbit.internal
 import android.content.Context
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -60,55 +62,60 @@ internal fun <I : NavBitInteraction, S : NavBitNavigationState>
         navStates.current
     )
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(screenHandler.holderBackgroundColor(context))
-    ) {
-        ScreenHolder(screenArrangement.main, transition)
+    val theme = screenHandler.getTheme(context, isSystemInDarkTheme())
+    MaterialTheme (
+        colorScheme = theme.colorScheme,
+        typography = theme.typography,
 
-        screenArrangement.overlays.forEachIndexed { index, overlay ->
-            // Skip any transition of the content within the first time an overlay is shown
-            val overlayTransition = oldScreenArrangement?.overlays?.takeIf { it.size > index }?.get(index)?.let {
-                if (it.overlayType == overlay.overlayType) transition else TransitionNone
-            } ?: TransitionNone
+        content =  { Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(theme.holderBackgroundColor)
+        ) {
+            ScreenHolder(screenArrangement.main, transition)
 
-            when (overlay.overlayType) {
-                ScreenOverlayType.Sheet -> {
-                    ModalBottomSheet(
-                        modifier = Modifier
-                            .windowInsetsPadding(WindowInsets.systemBars)
-                            .padding(top = (index * 36).dp + 16.dp),
-                        onDismissRequest = {
-                            onBackPressedDispatcher?.onBackPressed()
-                        },
-                        sheetState = rememberModalBottomSheetState(true),
-                        containerColor = screenHandler.screenBackgroundColor(context)
-                    ) {
-                        ScreenHolder(overlay.screen, overlayTransition)
-                    }
-                }
+            screenArrangement.overlays.forEachIndexed { index, overlay ->
+                // Skip any transition of the content within the first time an overlay is shown
+                val overlayTransition = oldScreenArrangement?.overlays?.takeIf { it.size > index }?.get(index)?.let {
+                    if (it.overlayType == overlay.overlayType) transition else TransitionNone
+                } ?: TransitionNone
 
-                ScreenOverlayType.Popup -> {
-                    Dialog(
-                        onDismissRequest = {
-                            onBackPressedDispatcher?.onBackPressed()
-                        }
-                    ) {
-                        Card(
+                when (overlay.overlayType) {
+                    ScreenOverlayType.Sheet -> {
+                        ModalBottomSheet(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentHeight(Alignment.CenterVertically),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = screenHandler.screenBackgroundColor(context)
-                            ),
+                                .windowInsetsPadding(WindowInsets.systemBars)
+                                .padding(top = (index * 36).dp + 16.dp),
+                            onDismissRequest = {
+                                onBackPressedDispatcher?.onBackPressed()
+                            },
+                            sheetState = rememberModalBottomSheetState(true),
+                            containerColor = theme.colorScheme.background
                         ) {
                             ScreenHolder(overlay.screen, overlayTransition)
                         }
                     }
+
+                    ScreenOverlayType.Popup -> {
+                        Dialog(
+                            onDismissRequest = {
+                                onBackPressedDispatcher?.onBackPressed()
+                            }
+                        ) {
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .wrapContentHeight(Alignment.CenterVertically),
+                                shape = RoundedCornerShape(16.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = theme.colorScheme.background
+                                ),
+                            ) {
+                                ScreenHolder(overlay.screen, overlayTransition)
+                            }
+                        }
+                    }
                 }
-            }
-        }
-    }
+            }}
+    })
 }

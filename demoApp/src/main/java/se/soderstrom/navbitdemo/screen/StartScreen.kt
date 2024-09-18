@@ -41,7 +41,7 @@ fun StartScreen(count: Int) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(colorResource(R.color.demo_white)),
+            .background(MaterialTheme.colorScheme.background),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

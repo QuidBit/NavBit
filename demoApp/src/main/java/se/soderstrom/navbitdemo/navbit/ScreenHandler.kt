@@ -1,8 +1,16 @@
 package se.soderstrom.navbitdemo.navbit
 
 import android.content.Context
+import androidx.compose.material3.Typography
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import se.quidbit.navbit.toimplement.AppTheme
 import se.quidbit.navbit.toimplement.NavBitScreenHandler
 import se.quidbit.navbit.types.TransitionFade
 import se.quidbit.navbit.types.ScreenArrangement
@@ -80,11 +88,33 @@ class ScreenHandler : NavBitScreenHandler<NavigationState>() {
         return result ?: TransitionFade
     }
 
-    override fun holderBackgroundColor(context : Context): Color {
-        return Color(ContextCompat.getColor(context, R.color.demo_grey))
-    }
+    override fun getTheme(context: Context, isDarkMode: Boolean): AppTheme {
+        val typography = Typography(
+            bodyLarge = TextStyle(
+                fontFamily = FontFamily.Default,
+                fontWeight = FontWeight.Normal,
+                fontSize = 16.sp,
+                lineHeight = 24.sp,
+                letterSpacing = 0.5.sp
+            )
+        )
 
-    override fun screenBackgroundColor(context : Context): Color {
-        return Color(ContextCompat.getColor(context, R.color.demo_white))
+        // NOTE: Identical content, but required to duplicate to get the correct default colors
+        val light = lightColorScheme(
+            primary = Color(ContextCompat.getColor(context, R.color.demo_teal_200)),
+            secondary = Color(ContextCompat.getColor(context, R.color.demo_teal_700)),
+            tertiary = Color(ContextCompat.getColor(context, R.color.demo_red)),
+        )
+        val dark = darkColorScheme(
+            primary = Color(ContextCompat.getColor(context, R.color.demo_teal_200)),
+            secondary = Color(ContextCompat.getColor(context, R.color.demo_teal_700)),
+            tertiary = Color(ContextCompat.getColor(context, R.color.demo_red)),
+        )
+
+        return AppTheme (
+            typography = typography,
+            colorScheme = if (isDarkMode) dark else light,
+            holderBackgroundColor = Color(ContextCompat.getColor(context, R.color.holder_background))
+        )
     }
 }

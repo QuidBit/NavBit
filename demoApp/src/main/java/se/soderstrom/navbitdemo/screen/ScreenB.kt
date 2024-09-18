@@ -41,7 +41,7 @@ fun ScreenB() {
                     text = "End of the road",
                     fontSize = 32.sp,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    modifier = Modifier.padding(bottom = 16.dp),
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))

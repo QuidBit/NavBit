@@ -41,7 +41,7 @@ fun ScreenA(count : Int) {
                     text = "$count",
                     fontSize = 64.sp,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    modifier = Modifier.padding(bottom = 16.dp),
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))

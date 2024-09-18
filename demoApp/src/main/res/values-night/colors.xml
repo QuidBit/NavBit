@@ -6,4 +6,6 @@
     <color name="demo_black">#FFFFFF</color>
     <color name="demo_white">#000000</color>
     <color name="demo_grey">#444444</color>
+
+    <color name="holder_background">#222222</color>
 </resources>

@@ -7,4 +7,6 @@
     <color name="demo_white">#FFFFFF</color>
     <color name="demo_red">#FF0000</color>
     <color name="demo_grey">#DDDDDD</color>
+
+    <color name="holder_background">#FFEEEEEE</color>
 </resources>
