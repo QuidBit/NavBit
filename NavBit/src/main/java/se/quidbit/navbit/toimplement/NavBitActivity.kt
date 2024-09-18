@@ -5,6 +5,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -13,6 +16,7 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import se.quidbit.navbit.internal.AppThemeHolder
 import se.quidbit.navbit.internal.MainHolder
 import se.quidbit.navbit.internal.MasterController
 import se.quidbit.navbit.internal.MasterControllerFactory
@@ -98,7 +102,10 @@ abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState>(
             )
 
             // Display the screen
-            MainHolder(this, controller, screenHandler)
+            val theme = screenHandler.getTheme(LocalContext.current, isSystemInDarkTheme())
+            AppThemeHolder<S>(theme) {
+                MainHolder(this, controller, screenHandler, theme)
+            }
 
             masterController = controller
 

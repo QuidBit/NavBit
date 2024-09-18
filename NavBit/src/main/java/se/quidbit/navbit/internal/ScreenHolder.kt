@@ -3,9 +3,12 @@ package se.quidbit.navbit.internal
 import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -93,13 +96,14 @@ fun JumpAndAnimateBox(counter: Int, composable : ScreenComposable, transition: S
         )
     }
 
-    Box(
+    Surface(
         modifier = Modifier
             .wrapContentSize()
             .offset(x = animation.value.offset.dp, y = 0.dp)
             .alpha(animation.value.alpha)
             .scale(animation.value.scale)
             .zIndex(animation.value.z)
+            .background(MaterialTheme.colorScheme.background) // Enforce a background on all screens, since it is required for correct fade animations right now
     ) {
         composable.content.invoke()
     }

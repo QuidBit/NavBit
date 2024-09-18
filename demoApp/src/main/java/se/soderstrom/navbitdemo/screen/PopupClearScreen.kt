@@ -19,9 +19,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import se.quidbit.navbit.types.PreviewTheme
 import se.soderstrom.navbitdemo.BaseActivity
 import se.soderstrom.navbitdemo.R
 import se.soderstrom.navbitdemo.navbit.Interaction
+import se.soderstrom.navbitdemo.navbit.ScreenHandler
 import se.soderstrom.navbitdemo.parts.ActionButton
 
 @Composable
@@ -29,8 +31,7 @@ fun PopupClearScreen() {
     Column(
         modifier = Modifier
             .wrapContentSize()
-            .padding(vertical = 32.dp, horizontal = 48.dp)
-            .background(colorResource(R.color.demo_white)),
+            .padding(vertical = 32.dp, horizontal = 48.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -64,8 +65,10 @@ fun PopupClearScreen() {
     }
 }
 
-@Preview(showBackground = true, widthDp = 360, heightDp = 400, name = "Landscape Preview")
+@Preview(widthDp = 360, heightDp = 400, name = "Landscape Preview")
 @Composable
 fun PopupPreview() {
-    PopupClearScreen()
+    PreviewTheme(ScreenHandler(), true) {
+        PopupClearScreen()
+    }
 }

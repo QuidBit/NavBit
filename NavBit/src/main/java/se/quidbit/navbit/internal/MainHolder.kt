@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import se.quidbit.navbit.toimplement.AppTheme
 import se.quidbit.navbit.toimplement.NavBitInteraction
 import se.quidbit.navbit.toimplement.NavBitNavigationState
 import se.quidbit.navbit.toimplement.NavBitScreenHandler
@@ -37,7 +38,7 @@ import se.quidbit.navbit.types.TransitionNone
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun <I : NavBitInteraction, S : NavBitNavigationState>
-    MainHolder(context : Context, controller: MasterController<I, S>, screenHandler: NavBitScreenHandler<S>)
+    MainHolder(context : Context, controller: MasterController<I, S>, screenHandler: NavBitScreenHandler<S>, theme : AppTheme)
 {
     val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     val navStates by controller.navState.collectAsState()
@@ -62,12 +63,7 @@ internal fun <I : NavBitInteraction, S : NavBitNavigationState>
         navStates.current
     )
 
-    val theme = screenHandler.getTheme(context, isSystemInDarkTheme())
-    MaterialTheme (
-        colorScheme = theme.colorScheme,
-        typography = theme.typography,
-
-        content =  { Box(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(theme.holderBackgroundColor)
@@ -117,5 +113,5 @@ internal fun <I : NavBitInteraction, S : NavBitNavigationState>
                     }
                 }
             }}
-    })
+
 }

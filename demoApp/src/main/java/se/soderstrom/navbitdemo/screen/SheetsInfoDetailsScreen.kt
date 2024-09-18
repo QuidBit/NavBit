@@ -28,9 +28,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import se.quidbit.navbit.types.PreviewTheme
 import se.soderstrom.navbitdemo.BaseActivity
 import se.soderstrom.navbitdemo.R
 import se.soderstrom.navbitdemo.navbit.Interaction
+import se.soderstrom.navbitdemo.navbit.ScreenHandler
 
 @Composable
 fun SheetsInfoDetailsScreen(expanded: Boolean) {
@@ -121,14 +123,18 @@ fun ExpandButton(expanded: Boolean, onClick: () -> Unit) {
     }
 }
 
-@Preview(showBackground = true, widthDp = 360, heightDp = 640, name = "Portrait Preview")
+@Preview(widthDp = 360, heightDp = 640, name = "Portrait Preview")
 @Composable
 fun SheetsInfoDetailsPreview() {
-    SheetsInfoDetailsScreen(true)
+    PreviewTheme(ScreenHandler(), true) {
+        SheetsInfoDetailsScreen(true)
+    }
 }
 
-@Preview(showBackground = true, widthDp = 640, heightDp = 360, name = "Landscape Preview")
+@Preview(widthDp = 640, heightDp = 360, name = "Landscape Preview")
 @Composable
 fun SheetsInfoDetailsScreenPreview() {
-    SheetsInfoDetailsScreen(expanded = true)
+    PreviewTheme(ScreenHandler(), true) {
+        SheetsInfoDetailsScreen(expanded = true)
+    }
 }

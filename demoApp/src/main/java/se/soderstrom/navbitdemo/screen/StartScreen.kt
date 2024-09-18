@@ -34,14 +34,14 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.res.colorResource
+import se.quidbit.navbit.types.PreviewTheme
 import se.soderstrom.navbitdemo.BaseActivity
+import se.soderstrom.navbitdemo.navbit.ScreenHandler
 
 @Composable
 fun StartScreen(count: Int) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+        modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -108,7 +108,7 @@ fun InfoButton(text: String, onClick: () -> Unit) {
     Button (
         onClick = onClick,
         modifier = Modifier.wrapContentSize(),
-        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF03DAC5)),
+        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
         elevation = ButtonDefaults.elevatedButtonElevation(8.dp),
     ) {
         Text(
@@ -222,14 +222,18 @@ fun ClearButton(count: Int, onClear: () -> Unit) {
     }
 }
 
-@Preview(showBackground = true, name = "Portrait Mode with count = 0")
+@Preview(name = "Portrait Mode with count = 0")
 @Composable
 fun PreviewStartScreenPortraitWithZeroCount() {
-    StartScreen(count = 0)
+    PreviewTheme(ScreenHandler(), true) {
+        StartScreen(count = 0)
+    }
 }
 
-@Preview(showBackground = true, widthDp = 600, heightDp = 300, name = "Landscape Mode with count = 5")
+@Preview(widthDp = 600, heightDp = 300, name = "Landscape Mode with count = 5")
 @Composable
 fun PreviewStartScreenLandscapeWithFiveCount() {
-    StartScreen(count = 5)
+    PreviewTheme(ScreenHandler(), true) {
+        StartScreen(count = 5)
+    }
 }
