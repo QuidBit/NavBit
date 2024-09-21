@@ -42,6 +42,7 @@ internal class MasterController<I : NavBitInteraction, S : NavBitNavigationState
     val  navState: StateFlow<NavigationStates<S>> = _navState
 
     fun processInteraction(activity: ComponentActivity, interaction : QueuedInteraction<I>) {
+        Log.i("NavBit", "--Interaction Processing: $interaction")
         val currentState = _navState.value.current
 
         val interactionResult = when(interaction) {
@@ -50,35 +51,35 @@ internal class MasterController<I : NavBitInteraction, S : NavBitNavigationState
         }
 
         when (interactionResult) {
-            is InteractionResult.Ignore -> {}
+            is InteractionResult.Ignore -> Log.i("NavBit", "----Interaction Ignored")
             is InteractionResult.ToDo ->
-                showError(activity, currentState,"Interaction", "ToDo: [${ StringHelper.prettyPrintSealedClassString(interaction.toString())}")
+                showError(activity, currentState,"ToDo: [${ StringHelper.prettyPrintSealedClassString(interaction.toString())}")
             is InteractionResult.Unexpected ->
-                showError(activity, currentState,"Interaction", "Unexpected: [${ StringHelper.prettyPrintSealedClassString(interaction.toString())}")
+                showError(activity, currentState,"Unexpected: [${ StringHelper.prettyPrintSealedClassString(interaction.toString())}")
             is InteractionResult.ErrorRead ->
-                showError(activity, currentState,"Interaction", "Error Reading: [${interactionResult.error}]")
+                showError(activity, currentState, "Error Reading: [${interactionResult.error}]")
             is InteractionResult.CloseApp ->
                 activity.finish()
             is InteractionResult.Complete -> {
                 val state = interactionResult.state
                 navigationStateHandler.onNavigatingToNewState(state)
-                Log.i("NavBit", "Interaction Complete - Current State: $state")
+                Log.i("NavBit", "----Interaction Complete -> State: $state")
                 _navState.value = NavigationStates(_navState.value.triggerCounter + 1, _navState.value.current, state)
             }
         }
     }
 
-    private fun showError(context: Context, currentState : S, source : String, error : String) {
+    private fun showError(context: Context, currentState : S, error : String) {
         val infoString = "$error - ${currentState.prettyString()}"
 
-        Log.e("NavBit", "$source $infoString")
+        Log.e("NavBit", "----Interaction $infoString")
 
         // If we are debugging, we can show the error directly on screen for simplicity
         Handler(Looper.getMainLooper()).post {
             if (BuildConfig.DEBUG) {
                 Toast.makeText(
                     context,
-                    "$source - $infoString",
+                    "Interaction - $infoString",
                     Toast.LENGTH_LONG
                 ).show()
             }

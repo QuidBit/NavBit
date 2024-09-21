@@ -1,6 +1,7 @@
 package se.quidbit.navbit.toimplement
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
@@ -13,6 +14,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -44,9 +46,11 @@ abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState>(
     private val interactionQueue : BlockingQueue<QueuedInteraction<I>> = LinkedBlockingQueue()
 
     fun send(interaction : I) {
+        Log.i("NavBit", "Interaction Received: $interaction")
         interactionQueue.add(QueuedInteraction.Custom(interaction))
     }
     fun sendBack() {
+        Log.i("NavBit", "Interaction Received: [Back]")
         interactionQueue.add(QueuedInteraction.Back())
     }
     // --------------------------------------------------------
@@ -66,10 +70,14 @@ abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState>(
             interactionJob = CoroutineScope(Dispatchers.IO).launch {
                 // Process interactions until cancel has been called
                 while (isActive) {
-                    val interaction = interactionQueue.take()
-                    isProcessingInteraction = true
-                    masterController?.processInteraction(this@NavBitActivity, interaction)
-                    isProcessingInteraction = false
+                    // Make sure no interactions are processed before the masterController is ready
+                    masterController?.let {
+                        val interaction = interactionQueue.take()
+                        isProcessingInteraction = true
+                        masterController?.processInteraction(this@NavBitActivity, interaction)
+                        isProcessingInteraction = false
+                    }
+                    delay(50)
                 }
             }
         }
