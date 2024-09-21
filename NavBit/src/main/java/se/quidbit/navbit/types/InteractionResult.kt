@@ -14,6 +14,10 @@ sealed class InteractionResult <S : NavBitNavigationState> {
     class ToDo<S : NavBitNavigationState> : InteractionResult<S>()
     class Unexpected<S : NavBitNavigationState> : InteractionResult<S>()
     class ErrorRead<S : NavBitNavigationState>(var error : ReadError) : InteractionResult<S>()
-    class NewState<S : NavBitNavigationState>(var state : S) : InteractionResult<S>()
     class CloseApp<S : NavBitNavigationState> : InteractionResult<S>()
+
+    /**
+     * Used when the app content has been modified  (and consequently the UI might need updating)
+     */
+    class Complete<S : NavBitNavigationState>(var state : S) : InteractionResult<S>()
 }

@@ -16,7 +16,7 @@ class InteractionHandler : NavBitInteractionHandler<Interaction, NavigationState
             is NavigationState.ScreenB -> NavigationState.ScreenA(s.count)
         }
 
-        return InteractionResult.NewState(newState)
+        return InteractionResult.Complete(newState)
     }
 
     override fun applyInteractionOnState(
@@ -71,6 +71,6 @@ class InteractionHandler : NavBitInteractionHandler<Interaction, NavigationState
             }
         }
 
-        return InteractionResult.NewState(newState)
+        return InteractionResult.Complete(newState)
     }
 }

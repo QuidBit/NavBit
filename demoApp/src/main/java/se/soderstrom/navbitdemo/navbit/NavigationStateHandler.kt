@@ -15,6 +15,10 @@ class NavigationStateHandler : NavBitNavigationStateHandler<NavigationState>() {
         return NavigationState.Start(count)
     }
 
+    override fun getFallbackState(state: NavigationState): NavigationState {
+        return NavigationState.Start(0)
+    }
+
     override fun onNavigatingToNewState(state: NavigationState) {
         // ---------------------------------------------------------
         // Store the state for app restarts
@@ -28,6 +32,8 @@ class NavigationStateHandler : NavBitNavigationStateHandler<NavigationState>() {
             is NavigationState.ScreenA -> state.count
             is NavigationState.ScreenB -> state.count
         }
+
+        state.prettyString()
 
         val sharedPreferences = BaseActivity.instance().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()

@@ -1,9 +1,10 @@
 package se.quidbit.navbit.internal
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -24,10 +24,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import se.quidbit.navbit.toimplement.AppTheme
+import se.quidbit.navbit.toimplement.NavBitActivity
 import se.quidbit.navbit.toimplement.NavBitInteraction
 import se.quidbit.navbit.toimplement.NavBitNavigationState
 import se.quidbit.navbit.toimplement.NavBitScreenHandler
@@ -52,17 +52,27 @@ internal fun <I : NavBitInteraction, S : NavBitNavigationState>
     // ----------------------------------------------
 
     val oldScreenArrangement = navStates.old?.let {
-        screenHandler.screenArrangementFromNavigationState(
+        screenHandler.screenFromNavigationState(
             context,
             it
-        )
+        ).asArrangement()
     }
 
-    val screenArrangement = screenHandler.screenArrangementFromNavigationState(
+    val newScreenArrangement = screenHandler.screenFromNavigationState(
         context,
         navStates.current
-    )
+    ).asArrangement()
 
+    val screenArrangement = newScreenArrangement ?: oldScreenArrangement
+
+    if (newScreenArrangement == null) {
+        controller.goToFallbackState()
+    }
+
+    // In the extreme case, where neither the previous state or the new state is valid, the screen will be left empty
+    // However, this should never happen in practice, since when an invalid screen is found
+    // we move to a fallback state that is expected to be valid
+    screenArrangement?.let {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -112,6 +122,7 @@ internal fun <I : NavBitInteraction, S : NavBitNavigationState>
                         }
                     }
                 }
-            }}
-
+            }
+        }
+    }
 }

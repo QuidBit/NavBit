@@ -15,6 +15,7 @@ import se.quidbit.navbit.toimplement.NavBitScreenHandler
 import se.quidbit.navbit.types.TransitionFade
 import se.quidbit.navbit.types.ScreenArrangement
 import se.quidbit.navbit.types.ScreenOverlayType
+import se.quidbit.navbit.types.ScreenResult
 import se.quidbit.navbit.types.ScreenTransition
 import se.quidbit.navbit.types.TransitionSlide
 import se.quidbit.navbit.types.TransitionDirection
@@ -28,11 +29,11 @@ import se.soderstrom.navbitdemo.screen.StartScreen
 import se.soderstrom.navbitdemo.screen.SheetsInfoScreen
 
 class ScreenHandler : NavBitScreenHandler<NavigationState>() {
-    override fun screenArrangementFromNavigationState(
+    override fun screenFromNavigationState(
         context: Context,
         s: NavigationState
-    ): ScreenArrangement {
-        return when (s) {
+    ): ScreenResult {
+        val arrangement = when (s) {
             is NavigationState.Start -> ScreenArrangement(
                 "StartScreen") { StartScreen(s.count) }
             is NavigationState.ClearCheck -> ScreenArrangement(
@@ -53,9 +54,12 @@ class ScreenHandler : NavBitScreenHandler<NavigationState>() {
                 ScreenOverlayType.Sheet, "SheetsInfoDetailScreen") { SheetsInfoDetailsScreen(s.expanded) }
             is NavigationState.ScreenA -> ScreenArrangement(
                 "ScreenA") { ScreenA(s.count) }
-            is NavigationState.ScreenB -> ScreenArrangement(
-                "ScreenB") { ScreenB() }
+            is NavigationState.ScreenB -> return ScreenResult.InvalidState
+//                ScreenArrangement(
+//                "ScreenB") { ScreenB() }
         }
+
+        return ScreenResult.Arrangement(arrangement)
     }
 
     override fun transitionFromNavigationStates(

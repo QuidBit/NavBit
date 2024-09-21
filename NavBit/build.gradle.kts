@@ -43,7 +43,7 @@ android {
 }
 
 fun versionName(): String {
-    return "3.1.5"
+    return "3.2.0-beta3"
 }
 
 val githubProperties = Properties().apply {
@@ -73,10 +73,10 @@ publishing {
 }
 
 dependencies {
-    implementation("androidx.compose.animation:animation-android:1.7.1")
+    implementation("androidx.compose.animation:animation-android:1.7.2")
     implementation("androidx.compose.material3:material3-android:1.3.0")
     val composeBom = platform("androidx.compose:compose-bom:2024.09.00")
-    val lifecycleVersion = "2.8.5"
+    val lifecycleVersion = "2.8.6"
 
     implementation(composeBom)
     androidTestImplementation(composeBom)

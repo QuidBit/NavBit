@@ -38,7 +38,7 @@ internal class MasterController<I : NavBitInteraction, S : NavBitNavigationState
     private val navigationStateHandler: NavBitNavigationStateHandler<S>
 ) : ViewModel() {
 
-    private val _navState = MutableStateFlow(NavigationStates(null, navigationStateHandler.loadStartupNavigationState()))
+    private val _navState = MutableStateFlow(NavigationStates(0, null, navigationStateHandler.loadStartupNavigationState()))
     val  navState: StateFlow<NavigationStates<S>> = _navState
 
     fun processInteraction(activity: ComponentActivity, interaction : QueuedInteraction<I>) {
@@ -59,11 +59,11 @@ internal class MasterController<I : NavBitInteraction, S : NavBitNavigationState
                 showError(activity, currentState,"Interaction", "Error Reading: [${interactionResult.error}]")
             is InteractionResult.CloseApp ->
                 activity.finish()
-            is InteractionResult.NewState -> {
-                val newState = interactionResult.state
-                navigationStateHandler.onNavigatingToNewState(newState)
-                Log.i("NavBit", "New State: $newState")
-                _navState.value = NavigationStates(_navState.value.current, newState)
+            is InteractionResult.Complete -> {
+                val state = interactionResult.state
+                navigationStateHandler.onNavigatingToNewState(state)
+                Log.i("NavBit", "Interaction Complete - Current State: $state")
+                _navState.value = NavigationStates(_navState.value.triggerCounter + 1, _navState.value.current, state)
             }
         }
     }
@@ -84,9 +84,19 @@ internal class MasterController<I : NavBitInteraction, S : NavBitNavigationState
             }
         }
     }
+
+    fun goToFallbackState() {
+        val fallbackState = navigationStateHandler.getFallbackState(_navState.value.current)
+        navigationStateHandler.onNavigatingToNewState(fallbackState)
+        _navState.value = NavigationStates(_navState.value.triggerCounter, null, fallbackState)
+    }
 }
 
 data class NavigationStates<S: NavBitNavigationState> (
+    // Trigger counter is always incremented on a completed Interaction
+    // That is to make sure that the UI is updated with the latest data, regardless if the NavigationState itself looks identical
+    // For example if it contains the same id to an object, which itself has been modified
+    val triggerCounter : Int,
     val old : S?,
     val current : S
 )
