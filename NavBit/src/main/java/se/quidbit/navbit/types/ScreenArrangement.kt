@@ -23,9 +23,9 @@ data class OverlayScreen (
     val screen : ScreenComposable
 )
 
-enum class ScreenOverlayType {
-    Sheet,
-    Popup
+sealed class ScreenOverlayType {
+    data class Sheet(val handle : Boolean = true, val inset : Boolean = false) : ScreenOverlayType()
+    data object Popup : ScreenOverlayType()
 }
 
 data class ScreenComposable (

@@ -12,10 +12,8 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import se.quidbit.navbit.toimplement.AppTheme
 import se.quidbit.navbit.toimplement.NavBitScreenHandler
-import se.quidbit.navbit.types.OverlayScreen
 import se.quidbit.navbit.types.TransitionFade
 import se.quidbit.navbit.types.ScreenArrangement
-import se.quidbit.navbit.types.ScreenComposable
 import se.quidbit.navbit.types.ScreenOverlayType
 import se.quidbit.navbit.types.ScreenResult
 import se.quidbit.navbit.types.ScreenTransition
@@ -45,10 +43,10 @@ class ScreenHandler : NavBitScreenHandler<NavigationState>() {
                 // Detail Sheets
                 // ---------------------------
                 if (s is NavigationState.Info || s is NavigationState.InfoDetails) {
-                    screenArrangement.addOverlay(ScreenOverlayType.Sheet, "SheetsInfoScreen") { SheetsInfoScreen() }
+                    screenArrangement.addOverlay(ScreenOverlayType.Sheet(handle = false), "SheetsInfoScreen") { SheetsInfoScreen() }
                 }
                 if (s is NavigationState.InfoDetails) {
-                    screenArrangement.addOverlay(ScreenOverlayType.Sheet, "SheetsInfoDetailsScreen") { SheetsInfoDetailsScreen(s.expanded) }
+                    screenArrangement.addOverlay(ScreenOverlayType.Sheet(), "SheetsInfoDetailsScreen") { SheetsInfoDetailsScreen(s.expanded) }
                 }
 
                 // Clear Popups
