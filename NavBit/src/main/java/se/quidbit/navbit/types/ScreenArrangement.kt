@@ -4,36 +4,18 @@ import androidx.compose.runtime.Composable
 
 data class ScreenArrangement(
     val main: ScreenComposable,
-    val overlays: List<OverlayScreen> = ArrayList()
+    val overlays: ArrayList<OverlayScreen> = ArrayList()
 ) {
-    // Constructor for the main screen only
-    constructor(id: String, compose: @Composable () -> Unit) : this(
+    constructor(
+        id: String,
+        compose: @Composable () -> Unit
+    ) : this(
         ScreenComposable(id, compose)
     )
 
-    // Constructor for one overlay
-    constructor(
-        id: String, compose: @Composable () -> Unit,
-        firstType: ScreenOverlayType, firstId: String, firstCompose: @Composable () -> Unit
-    ) : this(
-        ScreenComposable(id, compose),
-        listOf(
-            OverlayScreen(firstType, ScreenComposable(firstId, firstCompose))
-        )
-    )
-
-    // Constructor for two overlays
-    constructor(
-        id: String, compose: @Composable () -> Unit,
-        firstType: ScreenOverlayType, firstId: String, firstCompose: @Composable () -> Unit,
-        secondType: ScreenOverlayType, secondId: String, secondCompose: @Composable () -> Unit
-    ) : this(
-        ScreenComposable(id, compose),
-        listOf(
-            OverlayScreen(firstType, ScreenComposable(firstId, firstCompose)),
-            OverlayScreen(secondType, ScreenComposable(secondId, secondCompose))
-        )
-    )
+    fun addOverlay(overlayType: ScreenOverlayType, id : String, compose: @Composable () -> Unit) {
+        overlays.add(OverlayScreen(overlayType, ScreenComposable(id, compose)))
+    }
 }
 
 data class OverlayScreen (

@@ -10,8 +10,6 @@ class NavigationStateHandler : NavBitNavigationStateHandler<NavigationState>() {
         // Load any previously stored count
         val sharedPreferences = BaseActivity.instance().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         val count = sharedPreferences.getInt("count", 0)
-
-        BaseActivity.instance().send(Interaction.GoToNext)
         return NavigationState.Start(count)
     }
 

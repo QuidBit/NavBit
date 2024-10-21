@@ -29,6 +29,8 @@ import se.soderstrom.navbitdemo.navbit.Interaction
 import se.soderstrom.navbitdemo.R
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.getValue
@@ -40,21 +42,29 @@ import se.soderstrom.navbitdemo.navbit.ScreenHandler
 
 @Composable
 fun StartScreen(count: Int) {
-    Column(
+    LazyColumn(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Static UI components that do not depend on count
-           key(Unit) {
-            WelcomeText()
+
+        item {
+            Spacer(Modifier.padding(top = 128.dp))
+
+            // Static UI components that do not depend on count
+            key(Unit) {
+                WelcomeText()
+                InfoButtonSection()
+            }
+
+            // Dynamic UI component that depends on count
+            IncrementSection(count)
+            Spacer(Modifier.padding(top = 64.dp))
         }
 
-        // Buttons that do not depend on count
-        InfoButtonSection()
-
-        // Dynamic UI component that depends on count
-        IncrementSection(count)
+        items(List(10) { it }) { _ ->
+            Text(text = "Some item for scroll testing", modifier = Modifier.padding(vertical = 16.dp))
+        }
     }
 }
 

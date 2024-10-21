@@ -12,8 +12,10 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import se.quidbit.navbit.toimplement.AppTheme
 import se.quidbit.navbit.toimplement.NavBitScreenHandler
+import se.quidbit.navbit.types.OverlayScreen
 import se.quidbit.navbit.types.TransitionFade
 import se.quidbit.navbit.types.ScreenArrangement
+import se.quidbit.navbit.types.ScreenComposable
 import se.quidbit.navbit.types.ScreenOverlayType
 import se.quidbit.navbit.types.ScreenResult
 import se.quidbit.navbit.types.ScreenTransition
@@ -34,29 +36,35 @@ class ScreenHandler : NavBitScreenHandler<NavigationState>() {
         s: NavigationState
     ): ScreenResult {
         val arrangement = when (s) {
-            is NavigationState.Start -> ScreenArrangement(
-                "StartScreen") { StartScreen(s.count) }
-            is NavigationState.ClearCheck -> ScreenArrangement(
-                "StartScreen", { StartScreen(s.count) },
-                ScreenOverlayType.Popup, "PopupClearScreen", { PopupClearScreen() },
-            )
-            is NavigationState.ClearCheckAgain -> ScreenArrangement(
-                "StartScreen", { StartScreen(s.count) },
-                ScreenOverlayType.Popup,"PopupClearAgainScreen", { PopupClearAgainScreen() },
-            )
-            is NavigationState.Info -> ScreenArrangement(
-                "StartScreen", { StartScreen(s.count) },
-                ScreenOverlayType.Sheet,"SheetsInfoScreen", { SheetsInfoScreen() }
-            )
-            is NavigationState.InfoDetails -> ScreenArrangement(
-                "StartScreen", { StartScreen(s.count) },
-                ScreenOverlayType.Sheet, "SheetsInfoScreen", { SheetsInfoScreen() },
-                ScreenOverlayType.Sheet, "SheetsInfoDetailScreen") { SheetsInfoDetailsScreen(s.expanded) }
-            is NavigationState.ScreenA -> ScreenArrangement(
-                "ScreenA") { ScreenA(s.count) }
-            is NavigationState.ScreenB -> return ScreenResult.InvalidState
-//                ScreenArrangement(
-//                "ScreenB") { ScreenB() }
+            is StartBasedState -> {
+
+                val screenArrangement = ScreenArrangement("StartScreen") {
+                    StartScreen(s.count)
+                }
+
+                // Detail Sheets
+                // ---------------------------
+                if (s is NavigationState.Info || s is NavigationState.InfoDetails) {
+                    screenArrangement.addOverlay(ScreenOverlayType.Sheet, "SheetsInfoScreen") { SheetsInfoScreen() }
+                }
+                if (s is NavigationState.InfoDetails) {
+                    screenArrangement.addOverlay(ScreenOverlayType.Sheet, "SheetsInfoDetailsScreen") { SheetsInfoDetailsScreen(s.expanded) }
+                }
+
+                // Clear Popups
+                // ---------------------------
+                if (s is NavigationState.ClearCheck) {
+                    screenArrangement.addOverlay(ScreenOverlayType.Popup, "PopupClearScreen") { PopupClearScreen() }
+                }
+                if (s is NavigationState.ClearCheckAgain) {
+                    screenArrangement.addOverlay(ScreenOverlayType.Popup, "PopupClearAgainScreen") { PopupClearAgainScreen() }
+                }
+
+                screenArrangement
+            }
+
+            is NavigationState.ScreenA -> ScreenArrangement("ScreenA") { ScreenA(s.count) }
+            is NavigationState.ScreenB -> ScreenArrangement("ScreenB") { ScreenB() }
         }
 
         return ScreenResult.Arrangement(arrangement)

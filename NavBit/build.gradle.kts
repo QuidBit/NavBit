@@ -43,7 +43,7 @@ android {
 }
 
 fun versionName(): String {
-    return "3.2.7"
+    return "3.3.1"
 }
 
 val githubProperties = Properties().apply {
@@ -73,7 +73,7 @@ publishing {
 }
 
 dependencies {
-    implementation("androidx.compose.animation:animation-android:1.7.2")
+    implementation("androidx.compose.animation:animation-android:1.7.4")
     implementation("androidx.compose.material3:material3-android:1.3.0")
     val composeBom = platform("androidx.compose:compose-bom:2024.09.00")
     val lifecycleVersion = "2.8.6"
@@ -84,7 +84,7 @@ dependencies {
     implementation("androidx.compose.compiler:compiler:1.5.15")
 
     implementation("androidx.core:core-ktx:1.13.1")
-    implementation("androidx.activity:activity-compose:1.9.2")
+    implementation("androidx.activity:activity-compose:1.9.3")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
