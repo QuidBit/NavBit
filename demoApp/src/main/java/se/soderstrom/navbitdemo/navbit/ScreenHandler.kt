@@ -43,7 +43,7 @@ class ScreenHandler : NavBitScreenHandler<NavigationState>() {
                 // Detail Sheets
                 // ---------------------------
                 if (s is NavigationState.Info || s is NavigationState.InfoDetails) {
-                    screenArrangement.addOverlay(ScreenOverlayType.Sheet(handle = false), "SheetsInfoScreen") { SheetsInfoScreen() }
+                    screenArrangement.addOverlay(ScreenOverlayType.Sheet(handle = false, locked = true), "SheetsInfoScreen") { SheetsInfoScreen() }
                 }
                 if (s is NavigationState.InfoDetails) {
                     screenArrangement.addOverlay(ScreenOverlayType.Sheet(), "SheetsInfoDetailsScreen") { SheetsInfoDetailsScreen(s.expanded) }

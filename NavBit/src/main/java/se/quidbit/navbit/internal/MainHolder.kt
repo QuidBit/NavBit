@@ -93,9 +93,13 @@ internal fun <I : NavBitInteraction, S : NavBitNavigationState>
                                 .windowInsetsPadding(WindowInsets.statusBars)
                                 .padding(top = (index * 36).dp + 16.dp),
                             onDismissRequest = {
-                                onBackPressedDispatcher?.onBackPressed()
+                                if (!type.locked) {
+                                    onBackPressedDispatcher?.onBackPressed()
+                                }
                             },
-                            sheetState = rememberModalBottomSheetState(true),
+                            sheetState = rememberModalBottomSheetState(true, confirmValueChange = {
+                                !type.locked
+                            }),
                             containerColor = theme.colorScheme.background,
                             dragHandle = if (type.handle) {
                                 { BottomSheetDefaults.DragHandle() }

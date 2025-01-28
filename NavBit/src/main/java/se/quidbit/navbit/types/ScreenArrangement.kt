@@ -24,7 +24,7 @@ data class OverlayScreen (
 )
 
 sealed class ScreenOverlayType {
-    data class Sheet(val handle : Boolean = true, val inset : Boolean = false) : ScreenOverlayType()
+    data class Sheet(val handle : Boolean = true, val inset : Boolean = false, val locked : Boolean = false) : ScreenOverlayType()
     data object Popup : ScreenOverlayType()
 }
 
