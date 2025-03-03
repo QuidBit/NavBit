@@ -1,2 +1,2 @@
 jdk:
-  version: openjdk11
+  - openjdk17
