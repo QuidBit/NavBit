@@ -39,6 +39,20 @@ android {
     }
 }
 
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("release") {
+                from(components["release"])
+
+                groupId = "com.github.quidbit"
+                artifactId = "NavBit"
+                version = "3.4.7"
+            }
+        }
+    }
+}
+
 dependencies {
     implementation("androidx.compose.animation:animation-android:1.7.8")
     implementation("androidx.compose.material3:material3-android:1.3.1")
