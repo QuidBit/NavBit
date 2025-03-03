@@ -1,6 +1,3 @@
-import java.util.Properties
-import java.io.FileInputStream
-
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
@@ -39,36 +36,6 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
-    }
-}
-
-fun versionName(): String {
-    return "3.4.5"
-}
-
-val githubProperties = Properties().apply {
-    load(FileInputStream(rootProject.file("github.properties")))
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("bar") {
-            groupId = "se.quidbit"
-            artifactId = "navbit"
-            version = versionName()
-            artifact("$buildDir/outputs/aar/NavBit-release.aar")
-        }
-    }
-
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/QuidBit/NavBit")
-            credentials {
-                username = githubProperties["gpr.usr"] as String? ?: System.getenv("GPR_USER")
-                password = githubProperties["gpr.key"] as String? ?: System.getenv("GPR_API_KEY")
-            }
-        }
     }
 }
 
