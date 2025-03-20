@@ -1,6 +1,7 @@
 package se.quidbit.navbit.internal
 
 import android.content.Context
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -113,6 +114,16 @@ internal fun <I : NavBitInteraction, S : NavBitNavigationState>
                                     WindowInsets(bottom = 0.dp) }
                                 }
                         ) {
+                            // ----------------------------------------------
+                            // Take back interactions to prevent issue where the sheet is closed anyways
+                            // ----------------------------------------------
+                            BackHandler {
+                                if (!type.locked) {
+                                    onBackPressedDispatcher?.onBackPressed()
+                                }
+                            }
+                            // ----------------------------------------------
+
                             ScreenHolder(overlay.screen, overlayTransition)
                         }
                     }
