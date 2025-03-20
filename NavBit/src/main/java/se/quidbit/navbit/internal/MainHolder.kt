@@ -118,9 +118,7 @@ internal fun <I : NavBitInteraction, S : NavBitNavigationState>
                             // Take back interactions to prevent issue where the sheet is closed anyways
                             // ----------------------------------------------
                             BackHandler {
-                                if (!type.locked) {
-                                    onBackPressedDispatcher?.onBackPressed()
-                                }
+                                onBackPressedDispatcher?.onBackPressed()
                             }
                             // ----------------------------------------------
 
