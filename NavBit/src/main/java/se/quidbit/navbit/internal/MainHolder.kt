@@ -47,7 +47,7 @@ internal fun <I : NavBitInteraction, S : NavBitNavigationState>
     // ----------------------------------------------
     val transition = navStates.old?.let {
         screenHandler.transitionFromNavigationStates(it, navStates.current)
-    } ?: TransitionFade
+    } ?: TransitionFade()
     // ----------------------------------------------
 
     val oldScreenArrangement = navStates.old?.let {

@@ -95,7 +95,7 @@ class ScreenHandler : NavBitScreenHandler<NavigationState>() {
             is NavigationState.ScreenB -> TransitionSlide(TransitionDirection.Backward)
         }
 
-        return result ?: TransitionFade
+        return result ?: TransitionFade()
     }
 
     override fun getTheme(context: Context, isDarkMode: Boolean): AppTheme {

@@ -28,7 +28,7 @@ import java.util.concurrent.LinkedBlockingQueue
 abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState>(
     private val interactionHandler: NavBitInteractionHandler<I, S>,
     private val navigationStateHandler: NavBitNavigationStateHandler<S>,
-    private val screenHandler: NavBitScreenHandler<S>
+    private val screenHandler: NavBitScreenHandler<S>,
 )  : ComponentActivity() {
 
     private var masterController : MasterController<I, S>? = null

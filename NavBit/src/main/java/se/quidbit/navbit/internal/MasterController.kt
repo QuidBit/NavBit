@@ -53,11 +53,11 @@ internal class MasterController<I : NavBitInteraction, S : NavBitNavigationState
         when (interactionResult) {
             is InteractionResult.Ignore -> Log.i("NavBit", "----Interaction Ignored")
             is InteractionResult.ToDo ->
-                showError(activity, currentState,"ToDo: [${ StringHelper.prettyPrintSealedClassString(interaction.toString())}")
+                showError(activity, currentState,"Not Yet Implemented: [${ StringHelper.prettyPrintSealedClassString(interaction.toString())}", true)
             is InteractionResult.Unexpected ->
-                showError(activity, currentState,"Unexpected: [${ StringHelper.prettyPrintSealedClassString(interaction.toString())}")
+                showError(activity, currentState,"Unexpected: [${ StringHelper.prettyPrintSealedClassString(interaction.toString())}", false)
             is InteractionResult.ErrorRead ->
-                showError(activity, currentState, "Error Reading: [${interactionResult.error}]")
+                showError(activity, currentState, "Error Reading: [${interactionResult.error}]", true)
             is InteractionResult.CloseApp ->
                 activity.finish()
             is InteractionResult.Complete -> {
@@ -69,14 +69,14 @@ internal class MasterController<I : NavBitInteraction, S : NavBitNavigationState
         }
     }
 
-    private fun showError(context: Context, currentState : S, error : String) {
+    private fun showError(context: Context, currentState : S, error : String, showToast : Boolean) {
         val infoString = "$error - ${currentState.prettyString()}"
 
         Log.e("NavBit", "----Interaction $infoString")
 
         // If we are debugging, we can show the error directly on screen for simplicity
-        Handler(Looper.getMainLooper()).post {
-            if (BuildConfig.DEBUG) {
+        if (showToast && interactionHandler.showDebugToasts()) {
+            Handler(Looper.getMainLooper()).post {
                 Toast.makeText(
                     context,
                     "Interaction - $infoString",

@@ -18,8 +18,6 @@ import androidx.compose.ui.zIndex
 import se.quidbit.navbit.types.ScreenComposable
 import se.quidbit.navbit.types.ScreenTransition
 
-internal const val TRANSITION_TIME_MS = 500
-
 @Composable
 internal fun ScreenHolder(
     newScreenComposable: ScreenComposable,
@@ -91,7 +89,7 @@ fun JumpAndAnimateBox(counter: Int, composable : ScreenComposable, transition: S
 
         animation.animateTo(
             TransitionAnimation.new(z, transition.end(screenChange, screenWidthDp)),
-            tween(durationMillis = TRANSITION_TIME_MS)
+            tween(durationMillis = transition.durationMs())
         )
     }
 

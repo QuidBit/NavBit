@@ -5,6 +5,10 @@ import se.quidbit.navbit.types.InteractionResult
 import se.quidbit.navbit.toimplement.NavBitInteractionHandler
 
 class InteractionHandler : NavBitInteractionHandler<Interaction, NavigationState>() {
+    override fun showDebugToasts(): Boolean {
+        return true
+    }
+
     override fun applyBackInteractionOnState(s: NavigationState): InteractionResult<NavigationState> {
         val newState = when (s) {
             is NavigationState.Start -> return InteractionResult.CloseApp()

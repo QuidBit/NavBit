@@ -3,6 +3,7 @@ package se.quidbit.navbit.types
 import se.quidbit.navbit.internal.ScreenChange
 
 abstract class ScreenTransition {
+    abstract fun durationMs() : Int
     abstract fun start(screenChange: ScreenChange, width: Float): TransitionTransform
     abstract fun end(screenChange: ScreenChange, width: Float): TransitionTransform
     abstract fun shouldSnap(current : TransitionTransform, new : TransitionTransform, screenChange: ScreenChange, width: Float) : Boolean

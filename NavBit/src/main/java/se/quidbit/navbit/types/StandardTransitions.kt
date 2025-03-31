@@ -3,9 +3,13 @@ package se.quidbit.navbit.types
 import se.quidbit.navbit.internal.ScreenChange
 import kotlin.math.abs
 
+const val TRANSITION_DURATION_DEFAULT_MS = 250
+
 // ---------------------------------------------------------------------
 
-class TransitionSlide(private val direction: TransitionDirection) : ScreenTransition() {
+class TransitionSlide(private val direction: TransitionDirection, private val duration: Int = TRANSITION_DURATION_DEFAULT_MS) : ScreenTransition() {
+    override fun durationMs() : Int { return duration }
+
     override fun start(screenChange: ScreenChange, width : Float): TransitionTransform {
         return when (screenChange) {
             ScreenChange.Entering -> when (direction) {
@@ -41,7 +45,9 @@ class TransitionSlide(private val direction: TransitionDirection) : ScreenTransi
 
 // ---------------------------------------------------------------------
 
-object TransitionFade : ScreenTransition() {
+class TransitionFade(private val duration : Int = TRANSITION_DURATION_DEFAULT_MS) : ScreenTransition() {
+    override fun durationMs() : Int { return duration }
+
     override fun start(screenChange: ScreenChange, width : Float): TransitionTransform {
         return when (screenChange) {
             ScreenChange.Entering -> TransitionTransform(alpha = 0f)
@@ -68,6 +74,8 @@ object TransitionFade : ScreenTransition() {
 }
 
 object TransitionNone : ScreenTransition() {
+    override fun durationMs() : Int { return 0 }
+
     override fun start(screenChange: ScreenChange, width : Float): TransitionTransform {
         return TransitionTransform()
     }
