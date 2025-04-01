@@ -157,7 +157,7 @@ fun IncrementSection(count: Int) {
                 ) {
                     InfoButton(text = "Increment", onClick = { BaseActivity.instance().send(Interaction.Increment) })
                     Spacer(modifier = Modifier.width(16.dp))
-                    ClearButton(count = count, onClear = { })
+                    ClearButton(count = count, onClear = { BaseActivity.instance().send(Interaction.ClearCheck) })
                 }
             } else {
                 // In portrait mode, place the buttons in a single column (no extra column)

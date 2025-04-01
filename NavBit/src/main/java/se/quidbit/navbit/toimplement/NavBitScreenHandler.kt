@@ -11,6 +11,7 @@ abstract class NavBitScreenHandler<S : NavBitNavigationState> {
     abstract fun screenFromNavigationState(context : Context, s : S,) : ScreenResult
     abstract fun transitionFromNavigationStates(old : S, new : S) : ScreenTransition
     abstract fun getTheme(context : Context, isDarkMode : Boolean) : AppTheme
+    abstract fun maxOverlayCount() : Int
 }
 
 data class AppTheme (

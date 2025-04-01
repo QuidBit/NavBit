@@ -9,6 +9,18 @@ class InteractionHandler : NavBitInteractionHandler<Interaction, NavigationState
         return true
     }
 
+    override fun applyCloseInteractionOnState(s: NavigationState): InteractionResult<NavigationState> {
+        val newState = when (s) {
+            is NavigationState.ClearCheck -> NavigationState.Start(s.count)
+            is NavigationState.ClearCheckAgain ->  NavigationState.Start(s.count)
+            is NavigationState.Info -> return InteractionResult.Ignore()
+            is NavigationState.InfoDetails -> NavigationState.Info(s.count)
+            else -> return InteractionResult.Unexpected()
+        }
+
+        return InteractionResult.Complete(newState)
+    }
+
     override fun applyBackInteractionOnState(s: NavigationState): InteractionResult<NavigationState> {
         val newState = when (s) {
             is NavigationState.Start -> return InteractionResult.CloseApp()

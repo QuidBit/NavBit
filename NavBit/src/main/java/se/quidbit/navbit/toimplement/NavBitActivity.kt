@@ -52,6 +52,10 @@ abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState>(
         Log.i("NavBit", "Interaction Received: [Back]")
         interactionQueue.add(QueuedInteraction.Back())
     }
+    fun sendClose() {
+        Log.i("NavBit", "Interaction Received: [Close]")
+        interactionQueue.add(QueuedInteraction.Back())
+    }
     // --------------------------------------------------------
 
     public override fun onResume() {
@@ -112,7 +116,7 @@ abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState>(
             // Display the screen
             val theme = screenHandler.getTheme(LocalContext.current, isSystemInDarkTheme())
             AppThemeHolder<S>(theme) {
-                MainHolder(this, controller, screenHandler, theme)
+                MainHolder(this, controller, screenHandler, interactionQueue, theme)
             }
 
             masterController = controller

@@ -7,6 +7,9 @@ sealed class QueuedInteraction<I : NavBitInteraction> {
     class Back<I : NavBitInteraction>: QueuedInteraction<I>() {
         override fun toString() = "[Back]"
     }
+    class Close<I : NavBitInteraction>: QueuedInteraction<I>() {
+        override fun toString() = "[Close]"
+    }
     data class Custom<I : NavBitInteraction>(val interaction: I) : QueuedInteraction<I>() {
         override fun toString() = interaction.toString()
     }

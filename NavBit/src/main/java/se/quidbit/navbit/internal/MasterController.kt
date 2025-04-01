@@ -47,6 +47,7 @@ internal class MasterController<I : NavBitInteraction, S : NavBitNavigationState
 
         val interactionResult = when(interaction) {
             is QueuedInteraction.Back -> interactionHandler.applyBackInteractionOnState(currentState)
+            is QueuedInteraction.Close -> interactionHandler.applyCloseInteractionOnState(currentState)
             is QueuedInteraction.Custom -> interactionHandler.applyInteractionOnState(interaction.interaction, currentState, activity)
         }
 

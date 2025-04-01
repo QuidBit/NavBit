@@ -43,10 +43,10 @@ class ScreenHandler : NavBitScreenHandler<NavigationState>() {
                 // Detail Sheets
                 // ---------------------------
                 if (s is NavigationState.Info || s is NavigationState.InfoDetails) {
-                    screenArrangement.addOverlay(ScreenOverlayType.Sheet(handle = false, locked = true), "SheetsInfoScreen") { SheetsInfoScreen() }
+                    screenArrangement.addOverlay(ScreenOverlayType.Sheet, "SheetsInfoScreen") { SheetsInfoScreen() }
                 }
                 if (s is NavigationState.InfoDetails) {
-                    screenArrangement.addOverlay(ScreenOverlayType.Sheet(), "SheetsInfoDetailsScreen") { SheetsInfoDetailsScreen(s.expanded) }
+                    screenArrangement.addOverlay(ScreenOverlayType.Sheet, "SheetsInfoDetailsScreen") { SheetsInfoDetailsScreen(s.expanded) }
                 }
 
                 // Clear Popups
@@ -126,5 +126,9 @@ class ScreenHandler : NavBitScreenHandler<NavigationState>() {
             colorScheme = if (isDarkMode) dark else light,
             holderBackgroundColor = Color(ContextCompat.getColor(context, R.color.holder_background))
         )
+    }
+
+    override fun maxOverlayCount(): Int {
+        return 2
     }
 }

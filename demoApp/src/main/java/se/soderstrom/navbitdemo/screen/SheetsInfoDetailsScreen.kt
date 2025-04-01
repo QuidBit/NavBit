@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -41,8 +42,6 @@ fun SheetsInfoDetailsScreen(expanded: Boolean) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .wrapContentHeight()
-            .verticalScroll(rememberScrollState())
             .background(colorResource(R.color.demo_white)),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -50,8 +49,7 @@ fun SheetsInfoDetailsScreen(expanded: Boolean) {
             text = "In multiple layers",
             fontSize = 20.sp,
             color = colorResource(R.color.demo_black),
-            modifier = Modifier
-                .padding(vertical = 24.dp),
+            modifier = Modifier.padding(vertical = 24.dp),
             textAlign = TextAlign.Center
         )
 

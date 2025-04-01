@@ -1,9 +1,17 @@
 package se.quidbit.navbit.internal
 
 import android.content.Context
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,33 +21,46 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import se.quidbit.navbit.toimplement.AppTheme
 import se.quidbit.navbit.toimplement.NavBitInteraction
 import se.quidbit.navbit.toimplement.NavBitNavigationState
 import se.quidbit.navbit.toimplement.NavBitScreenHandler
+import se.quidbit.navbit.types.OverlayScreen
+import se.quidbit.navbit.types.QueuedInteraction
+import se.quidbit.navbit.types.ScreenArrangement
 import se.quidbit.navbit.types.ScreenOverlayType
+import se.quidbit.navbit.types.ScreenTransition
+import se.quidbit.navbit.types.TRANSITION_DURATION_DEFAULT_MS
 import se.quidbit.navbit.types.TransitionFade
 import se.quidbit.navbit.types.TransitionNone
+import java.util.concurrent.BlockingQueue
 
-@OptIn(ExperimentalMaterial3Api::class)
+const val OVERLAY_ANIMATION_MS = TRANSITION_DURATION_DEFAULT_MS
+
 @Composable
 internal fun <I : NavBitInteraction, S : NavBitNavigationState>
-    MainHolder(context : Context, controller: MasterController<I, S>, screenHandler: NavBitScreenHandler<S>, theme : AppTheme)
-{
-    val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+    MainHolder(
+    context : Context,
+    controller: MasterController<I, S>,
+    screenHandler: NavBitScreenHandler<S>,
+    interactionQueue : BlockingQueue<QueuedInteraction<I>>,
+    theme : AppTheme
+) {
     val navStates by controller.navState.collectAsState()
 
     // ----------------------------------------------
@@ -79,69 +100,100 @@ internal fun <I : NavBitInteraction, S : NavBitNavigationState>
         ) {
             ScreenHolder(screenArrangement.main, transition)
 
-            screenArrangement.overlays.forEachIndexed { index, overlay ->
-                val type = overlay.overlayType
+            // NOTE: To get proper animations of the sheets in and out, a fixed supported count is used just now
+            for (index in 1..screenHandler.maxOverlayCount()) {
+                OverlayLayer(index - 1, screenArrangement, oldScreenArrangement, interactionQueue, transition)
+            }
+        }
+    }
+}
 
-                // Skip any transition of the content within the first time an overlay is shown
-                val overlayTransition = oldScreenArrangement?.overlays?.takeIf { it.size > index }?.get(index)?.let {
-                    if (it.overlayType == type) transition else TransitionNone
-                } ?: TransitionNone
+@Composable
+fun <I : NavBitInteraction>OverlayLayer(
+    index : Int,
+    screenArrangement: ScreenArrangement,
+    oldScreenArrangement: ScreenArrangement?,
+    interactionQueue: BlockingQueue<QueuedInteraction<I>>,
+    transition: ScreenTransition
+) {
+    val overlay = screenArrangement.overlays.getOrNull(index)
 
-                when (type) {
-                    is ScreenOverlayType.Sheet -> {
-                        ModalBottomSheet(
-                            modifier = Modifier
-                                .windowInsetsPadding(WindowInsets.statusBars)
-                                .padding(top = (index * 36).dp + 16.dp),
-                            onDismissRequest = {
-                                if (!type.locked) {
-                                    onBackPressedDispatcher?.onBackPressed()
-                                }
-                            },
-                            sheetState = rememberModalBottomSheetState(true, confirmValueChange = {
-                                !type.locked
-                            }),
-                            containerColor = theme.colorScheme.background,
-                            dragHandle = if (type.handle) {
-                                { BottomSheetDefaults.DragHandle() }
-                            } else {
-                                null
-                            },
-                            contentWindowInsets = {
-                                if (type.inset) {
-                                    BottomSheetDefaults. windowInsets
-                                } else {
-                                    WindowInsets(bottom = 0.dp) }
-                                }
-                        ) {
-                            // ----------------------------------------------
-                            // Take back interactions to prevent issue where the sheet is closed anyways
-                            // ----------------------------------------------
-                            BackHandler {
-                                onBackPressedDispatcher?.onBackPressed()
-                            }
-                            // ----------------------------------------------
+    // Darkening backdrop
+    // -------------------------------------------------------------------------------
+    AnimatedVisibility(
+        visible = overlay != null,
+        modifier = Modifier.fillMaxSize(),
+        enter = fadeIn(animationSpec = tween(durationMillis = OVERLAY_ANIMATION_MS)),
+        exit = fadeOut(animationSpec = tween(durationMillis = OVERLAY_ANIMATION_MS)),
+        label = "OverlayTransition"
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.3f))
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = {
+                        interactionQueue.add(QueuedInteraction.Close())
+                    })
+                }
+        )
+    }
 
-                            ScreenHolder(overlay.screen, overlayTransition)
-                        }
-                    }
+    // Must retain the last overlay in order to animate it out even after it is gone
+    // -------------------------------------------------------------------------------
+    var retainedOverlay by remember { mutableStateOf<OverlayScreen?>(null) }
 
-                    ScreenOverlayType.Popup -> {
-                        Dialog(
-                            onDismissRequest = {
-                                onBackPressedDispatcher?.onBackPressed()
-                            }
-                        ) {
-                            Card(
+    LaunchedEffect(overlay) {
+        if (overlay != null) {
+            retainedOverlay = overlay
+        }
+    }
+
+    AnimatedContent(
+        targetState = overlay != null,
+        transitionSpec = {
+            slideInVertically(
+                initialOffsetY = { fullHeight -> fullHeight }, animationSpec = tween(OVERLAY_ANIMATION_MS)
+            ) togetherWith
+            slideOutVertically(
+                targetOffsetY = { fullHeight -> fullHeight }, animationSpec = tween(OVERLAY_ANIMATION_MS)
+            )
+        },
+        label = "OverlayTransition"
+    ) { visible ->
+        Box(Modifier.fillMaxSize()) {
+            if (visible) {
+                retainedOverlay?.let { over ->
+
+                    val type = over.overlayType
+
+                    // Skip any transition of the content within the first time an overlay is shown
+                        // As in, this high index was not present among the old screens
+                    val overlayTransition =
+                        oldScreenArrangement?.overlays
+                            ?.getOrNull(index)
+                            ?.let { if (it.overlayType == type) transition else TransitionNone }
+                            ?: TransitionNone
+
+                    when (type) {
+                        ScreenOverlayType.Sheet -> {
+                            CustomSheet(
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .wrapContentHeight(Alignment.CenterVertically),
-                                shape = RoundedCornerShape(16.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = theme.colorScheme.background
-                                ),
+                                    .windowInsetsPadding(WindowInsets.statusBars)
+                                    .padding(top = (index * 36).dp + 8.dp),
+                                onClose = {
+                                    interactionQueue.add(QueuedInteraction.Close())
+                                }
                             ) {
-                                ScreenHolder(overlay.screen, overlayTransition)
+                                ScreenHolder(over.screen, overlayTransition)
+                            }
+                        }
+
+                        ScreenOverlayType.Popup -> {
+                            CustomPopup(
+                                modifier = Modifier,
+                            ) {
+                                ScreenHolder(over.screen, overlayTransition)
                             }
                         }
                     }
