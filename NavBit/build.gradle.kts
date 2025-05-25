@@ -47,7 +47,7 @@ afterEvaluate {
 
                 groupId = "com.github.quidbit"
                 artifactId = "NavBit"
-                version = "3.6.1"
+                version = "3.6.2"
             }
         }
     }
@@ -57,7 +57,7 @@ dependencies {
     implementation("androidx.compose.animation:animation-android:1.8.2")
     implementation("androidx.compose.material3:material3-android:1.3.2")
     val composeBom = platform("androidx.compose:compose-bom:2024.09.00")
-    val lifecycleVersion = "2.9.0"
+    val lifecycleVersion = "2.8.7"
 
     implementation(composeBom)
     androidTestImplementation(composeBom)
