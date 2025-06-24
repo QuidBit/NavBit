@@ -1,11 +1,7 @@
 package se.quidbit.navbit.internal
 
-import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.animation.core.CubicBezierEasing
-import androidx.compose.animation.core.Easing
-import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Box
@@ -36,8 +32,9 @@ import kotlin.math.roundToInt
 
 @Composable
 fun CustomSheet(
-    onClose: () -> Unit,
+    locked : Boolean,
     modifier: Modifier = Modifier,
+    onClose: () -> Unit,
     content: @Composable () -> Unit
 ) {
     val sheetAnimationSpec: AnimationSpec<Float> = tween(
@@ -67,43 +64,52 @@ fun CustomSheet(
                 .wrapContentHeight()
                 .offset { IntOffset(0, offsetToUse.roundToInt()) }
                 .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
-                .pointerInput(Unit) {
-                    detectVerticalDragGestures(
-                        onDragStart = {
-                            isDragging = true
-                        },
-                        onVerticalDrag = { change, delta ->
-                            change.consume()
-                            rawOffset = (rawOffset + delta).coerceAtLeast(0f)
+                .then(
+                    if (locked) {
+                        Modifier
+                    } else {
+                        Modifier.pointerInput(Unit) {
+                            detectVerticalDragGestures(
+                                onDragStart = {
+                                    isDragging = true
+                                },
+                                onVerticalDrag = { change, delta ->
+                                    change.consume()
+                                    rawOffset = (rawOffset + delta).coerceAtLeast(0f)
 
-                            coroutineScope.launch {
-                                animatedOffset.snapTo(rawOffset)
-                            }
-                        },
-                        onDragEnd = {
-                            isDragging = false
+                                    coroutineScope.launch {
+                                        animatedOffset.snapTo(rawOffset)
+                                    }
+                                },
+                                onDragEnd = {
+                                    isDragging = false
 
-                            coroutineScope.launch {
-                                // Snap to current raw offset before animating
-                                animatedOffset.snapTo(rawOffset)
+                                    coroutineScope.launch {
+                                        // Snap to current raw offset before animating
+                                        animatedOffset.snapTo(rawOffset)
 
-                                if (rawOffset > dragThresholdPx) {
-                                    onClose()
+                                        if (rawOffset > dragThresholdPx) {
+                                            onClose()
+                                        } else {
+                                            animatedOffset.animateTo(
+                                                0f,
+                                                animationSpec = sheetAnimationSpec
+                                            )
+                                            rawOffset = 0f
+                                        }
+                                    }
+                                },
+                                onDragCancel = {
+                                    isDragging = false
+                                    coroutineScope.launch {
+                                        animatedOffset.animateTo(0f, animationSpec = sheetAnimationSpec)
+                                        rawOffset = 0f
+                                    }
                                 }
-
-                                animatedOffset.animateTo(0f, animationSpec = sheetAnimationSpec)
-                                rawOffset = 0f
-                            }
-                        },
-                        onDragCancel = {
-                            isDragging = false
-                            coroutineScope.launch {
-                                animatedOffset.animateTo(0f, animationSpec = sheetAnimationSpec)
-                                rawOffset = 0f
-                            }
+                            )
                         }
-                    )
-                },
+                    }
+                ),
             tonalElevation = 4.dp,
             color = MaterialTheme.colorScheme.surface
         ) {

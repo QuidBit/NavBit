@@ -170,8 +170,9 @@ fun <I : NavBitInteraction>OverlayLayer(
                     ?: TransitionNone
 
             when (type) {
-                ScreenOverlayType.Sheet -> {
+                is ScreenOverlayType.Sheet -> {
                     CustomSheet(
+                        type.locked,
                         modifier = Modifier
                             .windowInsetsPadding(WindowInsets.statusBars)
                             .padding(top = (index * 36).dp + 8.dp),
@@ -183,7 +184,7 @@ fun <I : NavBitInteraction>OverlayLayer(
                     }
                 }
 
-                ScreenOverlayType.Popup -> {
+                is ScreenOverlayType.Popup -> {
                     CustomPopup(modifier = Modifier) {
                         ScreenHolder(over.screen, overlayTransition)
                     }

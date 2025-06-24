@@ -54,7 +54,7 @@ abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState>(
     }
     fun sendClose() {
         Log.i("NavBit", "Interaction Received: [Close]")
-        interactionQueue.add(QueuedInteraction.Back())
+        interactionQueue.add(QueuedInteraction.Close())
     }
     // --------------------------------------------------------
 

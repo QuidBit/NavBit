@@ -43,10 +43,11 @@ class ScreenHandler : NavBitScreenHandler<NavigationState>() {
                 // Detail Sheets
                 // ---------------------------
                 if (s is NavigationState.Info || s is NavigationState.InfoDetails) {
-                    screenArrangement.addOverlay(ScreenOverlayType.Sheet, "SheetsInfoScreen") { SheetsInfoScreen() }
-                }
-                if (s is NavigationState.InfoDetails) {
-                    screenArrangement.addOverlay(ScreenOverlayType.Sheet, "SheetsInfoDetailsScreen") { SheetsInfoDetailsScreen(s.expanded) }
+                    screenArrangement.addOverlay(ScreenOverlayType.Sheet(), "SheetsInfoScreen") { SheetsInfoScreen() }
+
+                    if (s is NavigationState.InfoDetails) {
+                        screenArrangement.addOverlay(ScreenOverlayType.Sheet(false), "SheetsInfoDetailsScreen") { SheetsInfoDetailsScreen(s.expanded) }
+                    }
                 }
 
                 // Clear Popups
