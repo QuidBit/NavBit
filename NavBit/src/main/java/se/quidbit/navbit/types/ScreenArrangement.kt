@@ -1,6 +1,8 @@
 package se.quidbit.navbit.types
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 
 data class ScreenArrangement(
     val main: ScreenComposable,
@@ -24,7 +26,7 @@ data class OverlayScreen (
 )
 
 sealed class ScreenOverlayType {
-    data class Sheet(val locked : Boolean = true) : ScreenOverlayType()
+    data class Sheet(val locked : Boolean = true, val maxWidth : Dp = 600.dp) : ScreenOverlayType()
     data object Popup : ScreenOverlayType()
 }
 

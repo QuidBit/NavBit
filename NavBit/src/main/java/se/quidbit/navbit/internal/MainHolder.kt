@@ -109,6 +109,8 @@ fun <I : NavBitInteraction>OverlayLayer(
 ) {
     val overlay = screenArrangement.overlays.getOrNull(index)
 
+    val isClosing = remember { mutableStateOf(false) }
+
     // Darkening backdrop
     // -------------------------------------------------------------------------------
     AnimatedVisibility(
@@ -143,11 +145,13 @@ fun <I : NavBitInteraction>OverlayLayer(
             visible = false
             delay(OVERLAY_ANIMATION_MS.toLong())
             displayOverlay = null
+            isClosing.value = false
         }
     }
 
+    // Retain the visibility when a drag is closing the sheet, to not get two animations pulling out the sheet over each other (incorrect, too fast speed)
     AnimatedVisibility(
-        visible = visible && displayOverlay != null,
+        visible = (visible && displayOverlay != null) || isClosing.value,
         enter = slideInVertically(
             initialOffsetY = { fullHeight -> fullHeight },
             animationSpec = tween(OVERLAY_ANIMATION_MS)
@@ -173,6 +177,8 @@ fun <I : NavBitInteraction>OverlayLayer(
                 is ScreenOverlayType.Sheet -> {
                     CustomSheet(
                         type.locked,
+                        type.maxWidth,
+                        isClosing,
                         modifier = Modifier
                             .windowInsetsPadding(WindowInsets.statusBars)
                             .padding(top = (index * 36).dp + 8.dp),
