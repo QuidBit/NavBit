@@ -22,6 +22,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,7 +44,6 @@ import se.quidbit.navbit.types.TransitionFade
 import se.quidbit.navbit.types.TransitionNone
 import java.util.concurrent.BlockingQueue
 import kotlin.math.max
-import kotlin.math.roundToInt
 
 const val OVERLAY_ANIMATION_MS = TRANSITION_DURATION_DEFAULT_MS
 
@@ -123,6 +123,9 @@ fun <I : NavBitInteraction>OverlayLayer(
     val openingFadeTime = OVERLAY_ANIMATION_MS + 250 // Have the darkening finishing slightly after on open seems to look better
     val closingFadeTime = max(closingTime.value ?: 0, OVERLAY_ANIMATION_MS) // Use the standard overlay animation time as a minimum to reduce "jumping" feeling on fast close
 
+    val updatedOverlay by rememberUpdatedState(overlay)
+    val updatedClosingTime by rememberUpdatedState(closingTime)
+
     AnimatedVisibility(
         visible = overlay != null,
         modifier = Modifier.fillMaxSize(),
@@ -136,7 +139,9 @@ fun <I : NavBitInteraction>OverlayLayer(
                 .background(Color.Black.copy(alpha = 0.3f))
                 .pointerInput(Unit) {
                     detectTapGestures(onTap = {
-                        interactionQueue.add(QueuedInteraction.Close())
+                        if (updatedOverlay != null && updatedClosingTime.value == null) {
+                            interactionQueue.add(QueuedInteraction.Close())
+                        }
                     })
                 }
         )

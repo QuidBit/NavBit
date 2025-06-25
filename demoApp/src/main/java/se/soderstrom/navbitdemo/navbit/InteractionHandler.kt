@@ -10,12 +10,13 @@ class InteractionHandler : NavBitInteractionHandler<Interaction, NavigationState
     }
 
     override fun applyCloseInteractionOnState(s: NavigationState): InteractionResult<NavigationState> {
-        val newState = when (s) {
-            is NavigationState.InfoDetails -> NavigationState.Info(s.count)
-            else -> return InteractionResult.Unexpected()
+
+        // Everything behaves like a normal backing, except in one case, where we essentially back multiple steps
+        if (s is NavigationState.ClearCheckAgain) {
+            return InteractionResult.Complete(NavigationState.Start(s.count))
         }
 
-        return InteractionResult.Complete(newState)
+        return applyBackInteractionOnState(s)
     }
 
     override fun applyBackInteractionOnState(s: NavigationState): InteractionResult<NavigationState> {

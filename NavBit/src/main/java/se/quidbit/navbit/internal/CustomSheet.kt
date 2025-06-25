@@ -44,7 +44,6 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import kotlin.math.ln
 import kotlin.math.roundToInt
-import kotlin.math.roundToLong
 import kotlin.math.sqrt
 
 @Composable
@@ -62,7 +61,7 @@ fun CustomSheet(
     )
 
     val returnAnimationSpec = sheetAnimationSpec(OVERLAY_ANIMATION_MS)
-    
+
     val coroutineScope = rememberCoroutineScope()
 
     var isDragging by remember { mutableStateOf(false) }
