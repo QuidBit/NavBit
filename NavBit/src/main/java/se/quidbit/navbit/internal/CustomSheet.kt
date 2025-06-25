@@ -262,31 +262,26 @@ fun CustomSheet(
     // ----------------------------------------------------------
     // The actual sheet
     // ----------------------------------------------------------
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.BottomCenter
-    ) {
-        Surface(
-            modifier = modifier
-                .widthIn(max = maxWidth)
-                .wrapContentHeight()
-                .offset { IntOffset(0, offsetToUse.roundToInt()) }
-                .onGloballyPositioned { coordinates ->
-                    sheetHeightPx.intValue = coordinates.size.height
+    Surface(
+        modifier = modifier
+            .widthIn(max = maxWidth)
+            .wrapContentHeight()
+            .offset { IntOffset(0, offsetToUse.roundToInt()) }
+            .onGloballyPositioned { coordinates ->
+                sheetHeightPx.intValue = coordinates.size.height
+            }
+            .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+            .then(
+                if (locked) {
+                    Modifier
+                } else {
+                    pointerInputModifier.nestedScroll(nestedScrollConnection)
                 }
-                .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
-                .then(
-                    if (locked) {
-                        Modifier
-                    } else {
-                        pointerInputModifier.nestedScroll(nestedScrollConnection)
-                    }
-                ),
-            tonalElevation = 4.dp,
-            color = MaterialTheme.colorScheme.surface
-        ) {
-            content()
-        }
+            ),
+        tonalElevation = 4.dp,
+        color = MaterialTheme.colorScheme.surface
+    ) {
+        content()
     }
 }
 

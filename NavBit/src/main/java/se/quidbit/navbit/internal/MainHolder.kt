@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -22,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -40,6 +42,8 @@ import se.quidbit.navbit.types.TRANSITION_DURATION_DEFAULT_MS
 import se.quidbit.navbit.types.TransitionFade
 import se.quidbit.navbit.types.TransitionNone
 import java.util.concurrent.BlockingQueue
+import kotlin.math.max
+import kotlin.math.roundToInt
 
 const val OVERLAY_ANIMATION_MS = TRANSITION_DURATION_DEFAULT_MS
 
@@ -87,7 +91,8 @@ internal fun <I : NavBitInteraction, S : NavBitNavigationState>
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(theme.holderBackgroundColor)
+                .background(theme.holderBackgroundColor),
+            contentAlignment = Alignment.BottomCenter // Sheet are at the bottom, and popups fill the screen so it is not affected
         ) {
             ScreenHolder(screenArrangement.main, transition)
 
@@ -111,15 +116,18 @@ fun <I : NavBitInteraction>OverlayLayer(
 
     val closingTime = remember { mutableStateOf<Int?>(null) }
 
-    val closingAnimationTime = closingTime.value ?: OVERLAY_ANIMATION_MS
-
+    // -------------------------------------------------------------------------------
     // Darkening backdrop
     // -------------------------------------------------------------------------------
+
+    val openingFadeTime = OVERLAY_ANIMATION_MS + 250 // Have the darkening finishing slightly after on open seems to look better
+    val closingFadeTime = max(closingTime.value ?: 0, OVERLAY_ANIMATION_MS) // Use the standard overlay animation time as a minimum to reduce "jumping" feeling on fast close
+
     AnimatedVisibility(
         visible = overlay != null,
         modifier = Modifier.fillMaxSize(),
-        enter = fadeIn(animationSpec = tween(durationMillis = OVERLAY_ANIMATION_MS)),
-        exit = fadeOut(animationSpec = tween(durationMillis = closingAnimationTime)),
+        enter = fadeIn(animationSpec = tween(durationMillis = openingFadeTime)),
+        exit = fadeOut(animationSpec = tween(durationMillis = closingFadeTime)),
         label = "OverlayTransition"
     ) {
         Box(
@@ -145,7 +153,7 @@ fun <I : NavBitInteraction>OverlayLayer(
             visible = true
         } else {
             visible = false
-            delay(closingAnimationTime.toLong())
+            delay(closingFadeTime.toLong())
             displayOverlay = null
             closingTime.value = null
         }
