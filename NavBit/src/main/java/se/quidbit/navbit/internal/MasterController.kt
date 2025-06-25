@@ -42,7 +42,7 @@ internal class MasterController<I : NavBitInteraction, S : NavBitNavigationState
     val  navState: StateFlow<NavigationStates<S>> = _navState
 
     fun processInteraction(activity: ComponentActivity, interaction : QueuedInteraction<I>) {
-        Log.i("NavBit", "--Interaction Processing: $interaction")
+        InfoLog.i( "--Interaction Processing: $interaction")
         val currentState = _navState.value.current
 
         val interactionResult = when(interaction) {
@@ -52,7 +52,7 @@ internal class MasterController<I : NavBitInteraction, S : NavBitNavigationState
         }
 
         when (interactionResult) {
-            is InteractionResult.Ignore -> Log.i("NavBit", "----Interaction Ignored")
+            is InteractionResult.Ignore -> InfoLog.i( "----Interaction Ignored")
             is InteractionResult.ToDo ->
                 showError(activity, currentState,"Not Yet Implemented: [${ StringHelper.prettyPrintSealedClassString(interaction.toString())}", true)
             is InteractionResult.Unexpected ->
@@ -64,7 +64,7 @@ internal class MasterController<I : NavBitInteraction, S : NavBitNavigationState
             is InteractionResult.Complete -> {
                 val state = interactionResult.state
                 navigationStateHandler.onNavigatingToNewState(state)
-                Log.i("NavBit", "----Interaction Complete -> State: $state")
+                InfoLog.i( "----Interaction Complete -> State: $state")
                 _navState.value = NavigationStates(_navState.value.triggerCounter + 1, _navState.value.current, state)
             }
         }
@@ -73,7 +73,7 @@ internal class MasterController<I : NavBitInteraction, S : NavBitNavigationState
     private fun showError(context: Context, currentState : S, error : String, showToast : Boolean) {
         val infoString = "$error - ${currentState.prettyString()}"
 
-        Log.e("NavBit", "----Interaction $infoString")
+        InfoLog.e("----Interaction $infoString")
 
         // If we are debugging, we can show the error directly on screen for simplicity
         if (showToast && interactionHandler.showDebugToasts()) {

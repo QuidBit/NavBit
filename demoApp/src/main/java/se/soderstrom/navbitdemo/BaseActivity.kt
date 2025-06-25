@@ -11,6 +11,7 @@ class BaseActivity : NavBitActivity<Interaction, NavigationState>(
     InteractionHandler(),
     NavigationStateHandler(),
     ScreenHandler(),
+    true
 ) {
     companion object {
         fun instance() : NavBitActivity<Interaction, NavigationState> {

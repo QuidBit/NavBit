@@ -109,7 +109,9 @@ fun <I : NavBitInteraction>OverlayLayer(
 ) {
     val overlay = screenArrangement.overlays.getOrNull(index)
 
-    val isClosing = remember { mutableStateOf(false) }
+    val closingTime = remember { mutableStateOf<Int?>(null) }
+
+    val closingAnimationTime = closingTime.value ?: OVERLAY_ANIMATION_MS
 
     // Darkening backdrop
     // -------------------------------------------------------------------------------
@@ -117,7 +119,7 @@ fun <I : NavBitInteraction>OverlayLayer(
         visible = overlay != null,
         modifier = Modifier.fillMaxSize(),
         enter = fadeIn(animationSpec = tween(durationMillis = OVERLAY_ANIMATION_MS)),
-        exit = fadeOut(animationSpec = tween(durationMillis = OVERLAY_ANIMATION_MS)),
+        exit = fadeOut(animationSpec = tween(durationMillis = closingAnimationTime)),
         label = "OverlayTransition"
     ) {
         Box(
@@ -143,15 +145,16 @@ fun <I : NavBitInteraction>OverlayLayer(
             visible = true
         } else {
             visible = false
-            delay(OVERLAY_ANIMATION_MS.toLong())
+            delay(closingAnimationTime.toLong())
             displayOverlay = null
-            isClosing.value = false
+            closingTime.value = null
         }
     }
 
     // Retain the visibility when a drag is closing the sheet, to not get two animations pulling out the sheet over each other (incorrect, too fast speed)
+    // NOTE: Does not use the closing animation time since is not used during dragging
     AnimatedVisibility(
-        visible = (visible && displayOverlay != null) || isClosing.value,
+        visible = (visible && displayOverlay != null) || closingTime.value != null,
         enter = slideInVertically(
             initialOffsetY = { fullHeight -> fullHeight },
             animationSpec = tween(OVERLAY_ANIMATION_MS)
@@ -178,7 +181,7 @@ fun <I : NavBitInteraction>OverlayLayer(
                     CustomSheet(
                         type.locked,
                         type.maxWidth,
-                        isClosing,
+                        closingTime,
                         modifier = Modifier
                             .windowInsetsPadding(WindowInsets.statusBars)
                             .padding(top = (index * 36).dp + 8.dp),

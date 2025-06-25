@@ -3,6 +3,9 @@ package se.quidbit.navbit.internal
 import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.calculateTargetValue
+import androidx.compose.animation.core.exponentialDecay
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Box
@@ -31,20 +34,20 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import kotlin.math.ln
 import kotlin.math.roundToInt
 
 @Composable
 fun CustomSheet(
     locked : Boolean,
     maxWidth : Dp,
-    isClosing : MutableState<Boolean>,
+    closingTime : MutableState<Int?>,
     modifier: Modifier = Modifier,
     onClose: () -> Unit,
     content: @Composable () -> Unit
@@ -126,7 +129,7 @@ fun CustomSheet(
 
                 // Collapse if dragged enough distance in total
                 if (rawOffset > sheetHeightPx.intValue * sheetDragThreshold) {
-                    isClosing.value = true
+                    closingTime.value = OVERLAY_ANIMATION_MS
                     onClose()
                     coroutineScope.launch {
                         animatedOffset.animateTo(sheetHeightPx.intValue.toFloat(), animationSpec = sheetAnimationSpec)
@@ -147,9 +150,29 @@ fun CustomSheet(
                 coroutineScope.launch {
                     // Collapse if fast enough
                     // And if the children consumed almost nothing (so we don't close the sheet after a long list scroll reaches its end)
-                    if (!isClosing.value && available.y > velocityThreshold && consumed.y < 100f) {
+                    if (closingTime.value == null && available.y > velocityThreshold && consumed.y < 100f) {
+                        val sheetHeight = sheetHeightPx.intValue.toFloat()
+
                         onClose()
-                        animatedOffset.animateTo(sheetHeightPx.intValue.toFloat(), animationSpec = sheetAnimationSpec)
+
+                        // Try to use a natural decay (if the velocity is high enough for the sheet to leave)
+                        val decay = exponentialDecay<Float>()
+                        val target = decay.calculateTargetValue(rawOffset, available.y)
+
+                        if (target >= sheetHeight) {
+                            // Safe to decay — it'll go off screen
+                            closingTime.value = estimateDecayTimeToTarget(rawOffset, available.y, sheetHeight)
+                            animatedOffset.animateDecay(available.y, decay)
+                        } else {
+                            // Not enough momentum — manually animate to full close with linear speed
+                            val distance = sheetHeight - rawOffset
+                            val safeVelocity = available.y.takeIf { it > 0f } ?: 1f
+                            val durationMs = ((distance / safeVelocity) * 1000).toInt().coerceIn(1, 10000)
+
+                            closingTime.value = durationMs
+
+                            animatedOffset.animateTo(sheetHeight, animationSpec = tween(durationMillis = durationMs, easing = LinearEasing))
+                        }
                     }
                 }
 
@@ -195,10 +218,31 @@ fun CustomSheet(
                     // Collapse if dragged enough distance in total, or if dragged fast enough
                     // -------------------------------------------------------------------------
                     // NOTE: More strict than nested scroll, so reduce the threshold for a similar experience
-                    if (rawOffset > sheetHeightPx.intValue * sheetDragThreshold || velocity > velocityThreshold) {
-                        isClosing.value = true
+
+
+                    if (rawOffset >  sheetHeightPx.intValue * sheetDragThreshold || velocity > velocityThreshold) {
+                        val sheetHeight = sheetHeightPx.intValue.toFloat()
+
                         onClose()
-                        animatedOffset.animateTo(sheetHeightPx.intValue.toFloat(), animationSpec = sheetAnimationSpec)
+
+                        // Try to use a natural decay (if the velocity is high enough for the sheet to leave)
+                        val decay = exponentialDecay<Float>()
+                        val target = decay.calculateTargetValue(rawOffset, velocity)
+
+                        if (target >= sheetHeight) {
+                            // Safe to decay — it'll go off screen
+                            closingTime.value = estimateDecayTimeToTarget(rawOffset, velocity, sheetHeight)
+                            animatedOffset.animateDecay(velocity, decay)
+                        } else {
+                            // Not enough momentum — manually animate to full close with linear speed
+                            val distance = sheetHeight - rawOffset
+                            val safeVelocity = velocity.takeIf { it > 0f } ?: 1f
+                            val durationMs = ((distance / safeVelocity) * 1000).toInt().coerceIn(1, 10000)
+
+                            closingTime.value = durationMs
+
+                            animatedOffset.animateTo(sheetHeight, animationSpec = tween(durationMillis = durationMs))
+                        }
                     } else {
                         animatedOffset.animateTo(0f, animationSpec = sheetAnimationSpec)
                         rawOffset = 0f
@@ -266,4 +310,22 @@ fun CustomPopup(
             content()
         }
     }
+}
+
+fun estimateDecayTimeToTarget(
+    startOffset: Float,
+    velocity: Float,
+    targetOffset: Float
+): Int? {
+    if (velocity == 0f) return null
+
+    val decayRate = 8.0f // Used by compose
+
+    val delta = targetOffset - startOffset
+    val ratio = 1f - (delta * decayRate / velocity)
+
+    if (ratio <= 0f || ratio >= 1f) return null
+
+    val t = -ln(ratio) / decayRate
+    return (t * 1000).roundToInt()
 }

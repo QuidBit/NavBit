@@ -18,6 +18,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import se.quidbit.navbit.internal.AppThemeHolder
+import se.quidbit.navbit.internal.InfoLog
 import se.quidbit.navbit.internal.MainHolder
 import se.quidbit.navbit.internal.MasterController
 import se.quidbit.navbit.internal.MasterControllerFactory
@@ -29,7 +30,12 @@ abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState>(
     private val interactionHandler: NavBitInteractionHandler<I, S>,
     private val navigationStateHandler: NavBitNavigationStateHandler<S>,
     private val screenHandler: NavBitScreenHandler<S>,
+    loggingEnabled : Boolean
 )  : ComponentActivity() {
+
+    init {
+        InfoLog.LOGGING_ENABLED = loggingEnabled
+    }
 
     private var masterController : MasterController<I, S>? = null
 
@@ -45,15 +51,15 @@ abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState>(
     private val interactionQueue : BlockingQueue<QueuedInteraction<I>> = LinkedBlockingQueue()
 
     fun send(interaction : I) {
-        Log.i("NavBit", "Interaction Received: $interaction")
+        InfoLog.i( "Interaction Received: $interaction")
         interactionQueue.add(QueuedInteraction.Custom(interaction))
     }
     fun sendBack() {
-        Log.i("NavBit", "Interaction Received: [Back]")
+        InfoLog.i( "Interaction Received: [Back]")
         interactionQueue.add(QueuedInteraction.Back())
     }
     fun sendClose() {
-        Log.i("NavBit", "Interaction Received: [Close]")
+        InfoLog.i( "Interaction Received: [Close]")
         interactionQueue.add(QueuedInteraction.Close())
     }
     // --------------------------------------------------------
