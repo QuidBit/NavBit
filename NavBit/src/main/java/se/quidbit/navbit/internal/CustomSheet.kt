@@ -35,6 +35,8 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Velocity
@@ -42,6 +44,8 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import kotlin.math.ln
 import kotlin.math.roundToInt
+import kotlin.math.roundToLong
+import kotlin.math.sqrt
 
 @Composable
 fun CustomSheet(
@@ -52,11 +56,13 @@ fun CustomSheet(
     onClose: () -> Unit,
     content: @Composable () -> Unit
 ) {
-    val sheetAnimationSpec: AnimationSpec<Float> = tween(
-        durationMillis = OVERLAY_ANIMATION_MS,
+    fun sheetAnimationSpec(time : Int): AnimationSpec<Float> = tween(
+        durationMillis = time,
         easing = {f -> f*f}
     )
 
+    val returnAnimationSpec = sheetAnimationSpec(OVERLAY_ANIMATION_MS)
+    
     val coroutineScope = rememberCoroutineScope()
 
     var isDragging by remember { mutableStateOf(false) }
@@ -69,6 +75,26 @@ fun CustomSheet(
     val sheetHeightPx = remember { mutableIntStateOf(0) }
     val sheetDragThreshold = 0.5f
     val velocityThreshold = 3000f
+
+    // ----------------------------------------------------------
+    // Calculate velocity for when the sheet is released to a close (release past drag threshold)
+    // ----------------------------------------------------------
+    val screenHeightPx = with(LocalDensity.current) { LocalConfiguration.current.screenHeightDp.dp.toPx() }
+
+    fun dropDownAnimationLength(): Int {
+        val distanceLeft = (sheetHeightPx.intValue - rawOffset).coerceAtLeast(0f)
+
+        val percentage = if (screenHeightPx > 0) {
+            distanceLeft / screenHeightPx
+        } else {
+            1f
+        }
+
+        // Make large sheets move relatively faster (4x sheet -> 2x the time)
+        val scaling = sqrt(percentage)
+
+        return (OVERLAY_ANIMATION_MS * scaling).roundToInt()
+    }
 
     // ----------------------------------------------------------
     // To handle nested scroll views
@@ -129,15 +155,18 @@ fun CustomSheet(
 
                 // Collapse if dragged enough distance in total
                 if (rawOffset > sheetHeightPx.intValue * sheetDragThreshold) {
-                    closingTime.value = OVERLAY_ANIMATION_MS
+                    val animationLength = dropDownAnimationLength()
+                    closingTime.value = animationLength
+
                     onClose()
+
                     coroutineScope.launch {
-                        animatedOffset.animateTo(sheetHeightPx.intValue.toFloat(), animationSpec = sheetAnimationSpec)
+                        animatedOffset.animateTo(sheetHeightPx.intValue.toFloat(), animationSpec = sheetAnimationSpec(animationLength))
                     }
                 } else {
                     rawOffset = 0f
                     coroutineScope.launch {
-                        animatedOffset.animateTo(0f, animationSpec = sheetAnimationSpec)
+                        animatedOffset.animateTo(0f, animationSpec = returnAnimationSpec)
                     }
                 }
 
@@ -215,14 +244,11 @@ fun CustomSheet(
                     val velocity = speeds.completeForAverage()
 
                     // -------------------------------------------------------------------------
-                    // Collapse if dragged enough distance in total, or if dragged fast enough
+                    // Collapse if dragged fast enough, or if dragged enough distance in total
                     // -------------------------------------------------------------------------
-                    // NOTE: More strict than nested scroll, so reduce the threshold for a similar experience
+                    val sheetHeight = sheetHeightPx.intValue.toFloat()
 
-
-                    if (rawOffset >  sheetHeightPx.intValue * sheetDragThreshold || velocity > velocityThreshold) {
-                        val sheetHeight = sheetHeightPx.intValue.toFloat()
-
+                    if (velocity > velocityThreshold) {
                         onClose()
 
                         // Try to use a natural decay (if the velocity is high enough for the sheet to leave)
@@ -236,15 +262,25 @@ fun CustomSheet(
                         } else {
                             // Not enough momentum — manually animate to full close with linear speed
                             val distance = sheetHeight - rawOffset
-                            val safeVelocity = velocity.takeIf { it > 0f } ?: 1f
-                            val durationMs = ((distance / safeVelocity) * 1000).toInt().coerceIn(1, 10000)
+                            val durationMs = ((distance / velocity) * 1000).toInt().coerceIn(1, 1000)
 
                             closingTime.value = durationMs
 
                             animatedOffset.animateTo(sheetHeight, animationSpec = tween(durationMillis = durationMs))
                         }
-                    } else {
-                        animatedOffset.animateTo(0f, animationSpec = sheetAnimationSpec)
+                    }
+                    else if (rawOffset >  sheetHeight * sheetDragThreshold) {
+                        val animationLength = dropDownAnimationLength()
+                        closingTime.value = animationLength
+
+                        onClose()
+
+                        coroutineScope.launch {
+                            animatedOffset.animateTo(sheetHeight, animationSpec = sheetAnimationSpec(animationLength))
+                        }
+                    }
+                    else {
+                        animatedOffset.animateTo(0f, animationSpec = returnAnimationSpec)
                         rawOffset = 0f
                     }
                 }
@@ -252,7 +288,7 @@ fun CustomSheet(
             onDragCancel = {
                 isDragging = false
                 coroutineScope.launch {
-                    animatedOffset.animateTo(0f, animationSpec = sheetAnimationSpec)
+                    animatedOffset.animateTo(0f, animationSpec = returnAnimationSpec)
                     rawOffset = 0f
                 }
             }
