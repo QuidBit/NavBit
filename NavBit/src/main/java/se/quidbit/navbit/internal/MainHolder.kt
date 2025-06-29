@@ -11,8 +11,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -168,6 +171,9 @@ fun <I : NavBitInteraction>OverlayLayer(
     // NOTE: Does not use the closing animation time since is not used during dragging
     AnimatedVisibility(
         visible = (visible && displayOverlay != null) || closingTime.value != null,
+        modifier = Modifier.windowInsetsPadding(
+            WindowInsets.safeDrawing.only(WindowInsetsSides.Start + WindowInsetsSides.End)
+        ),
         enter = slideInVertically(
             initialOffsetY = { fullHeight -> fullHeight },
             animationSpec = tween(OVERLAY_ANIMATION_MS)
@@ -196,7 +202,9 @@ fun <I : NavBitInteraction>OverlayLayer(
                         type.maxWidth,
                         closingTime,
                         modifier = Modifier
-                            .windowInsetsPadding(WindowInsets.statusBars)
+                            .windowInsetsPadding(
+                                WindowInsets.safeDrawing.only(WindowInsetsSides.Top)
+                            )
                             .padding(top = (index * 36).dp + 8.dp),
                         onClose = {
                             interactionQueue.add(QueuedInteraction.Close())
