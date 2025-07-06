@@ -171,9 +171,6 @@ fun <I : NavBitInteraction>OverlayLayer(
     // NOTE: Does not use the closing animation time since is not used during dragging
     AnimatedVisibility(
         visible = (visible && displayOverlay != null) || closingTime.value != null,
-        modifier = Modifier.windowInsetsPadding(
-            WindowInsets.safeDrawing.only(WindowInsetsSides.Start + WindowInsetsSides.End)
-        ),
         enter = slideInVertically(
             initialOffsetY = { fullHeight -> fullHeight },
             animationSpec = tween(OVERLAY_ANIMATION_MS)
@@ -203,7 +200,7 @@ fun <I : NavBitInteraction>OverlayLayer(
                         closingTime,
                         modifier = Modifier
                             .windowInsetsPadding(
-                                WindowInsets.safeDrawing.only(WindowInsetsSides.Top)
+                                WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Start + WindowInsetsSides.End)
                             )
                             .padding(top = (index * 36).dp + 8.dp),
                         onClose = {
@@ -215,7 +212,7 @@ fun <I : NavBitInteraction>OverlayLayer(
                 }
 
                 is ScreenOverlayType.Popup -> {
-                    CustomPopup(modifier = Modifier) {
+                    CustomPopup(modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing)) {
                         ScreenHolder(over.screen, overlayTransition)
                     }
                 }
