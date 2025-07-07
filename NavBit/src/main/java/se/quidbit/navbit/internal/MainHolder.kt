@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import se.quidbit.navbit.toimplement.AppTheme
@@ -119,6 +120,21 @@ fun <I : NavBitInteraction>OverlayLayer(
 
     val closingTime = remember { mutableStateOf<Int?>(null) }
 
+    val isVisible = overlay != null
+
+    // -------------------------------------------------------------------------------
+    // Clear any focus/input whenever an overlay appears/is removed
+    // -------------------------------------------------------------------------------
+    val focusManager = LocalFocusManager.current
+    var wasVisible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isVisible) {
+        if (isVisible != wasVisible) {
+            wasVisible = isVisible
+            focusManager.clearFocus(force = true)
+        }
+    }
+
     // -------------------------------------------------------------------------------
     // Darkening backdrop
     // -------------------------------------------------------------------------------
@@ -130,7 +146,7 @@ fun <I : NavBitInteraction>OverlayLayer(
     val updatedClosingTime by rememberUpdatedState(closingTime)
 
     AnimatedVisibility(
-        visible = overlay != null,
+        visible = isVisible,
         modifier = Modifier.fillMaxSize(),
         enter = fadeIn(animationSpec = tween(durationMillis = openingFadeTime)),
         exit = fadeOut(animationSpec = tween(durationMillis = closingFadeTime)),

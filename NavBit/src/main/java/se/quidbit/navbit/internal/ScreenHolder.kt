@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import se.quidbit.navbit.types.ScreenComposable
@@ -33,6 +34,11 @@ internal fun ScreenHolder(
     if (currentScreenComposable?.id != newScreenComposable.id) {
         screenSlots.currentSlot = screenSlots.currentSlot.opposite()
         screenSlots.transitionCounter++
+
+        //---------------------------------------------------
+        // When switching screens, we stop any active inputs
+        //---------------------------------------------------
+        LocalFocusManager.current.clearFocus(force = true)
     }
 
     when (screenSlots.currentSlot) {
