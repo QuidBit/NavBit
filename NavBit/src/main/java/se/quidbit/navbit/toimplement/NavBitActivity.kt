@@ -50,16 +50,18 @@ abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState>(
 
     private val interactionQueue : BlockingQueue<QueuedInteraction<I>> = LinkedBlockingQueue()
 
-    fun send(interaction : I) {
-        InfoLog.i( "Interaction Received: $interaction")
+    fun send(interaction: I) {
+        InfoLog.i("Interaction Received [${interactionQueue.size}]: $interaction")
         interactionQueue.add(QueuedInteraction.Custom(interaction))
     }
+
     fun sendBack() {
-        InfoLog.i( "Interaction Received: [Back]")
+        InfoLog.i("Interaction Received [${interactionQueue.size}]: [Back]")
         interactionQueue.add(QueuedInteraction.Back())
     }
+
     fun sendClose() {
-        InfoLog.i( "Interaction Received: [Close]")
+        InfoLog.i("Interaction Received [${interactionQueue.size}]: [Close]")
         interactionQueue.add(QueuedInteraction.Close())
     }
     // --------------------------------------------------------
@@ -86,6 +88,7 @@ abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState>(
                         masterController?.processInteraction(this@NavBitActivity, interaction)
                         isProcessingInteraction = false
                     } ?: run {
+                        InfoLog.d("Delaying Interaction Processing - Waiting for MasterController")
                         delay(50)
                     }
                 }
