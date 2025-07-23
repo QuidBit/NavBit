@@ -85,8 +85,6 @@ abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState>(
                         isProcessingInteraction = true
                         masterController?.processInteraction(this@NavBitActivity, interaction)
                         isProcessingInteraction = false
-                    } ?: run {
-                        delay(50)
                     }
                 }
             }
