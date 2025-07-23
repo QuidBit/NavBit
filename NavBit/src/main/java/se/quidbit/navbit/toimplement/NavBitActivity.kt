@@ -8,6 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,6 +19,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import se.quidbit.navbit.internal.AppThemeHolder
 import se.quidbit.navbit.internal.InfoLog
 import se.quidbit.navbit.internal.MainHolder
@@ -75,14 +77,16 @@ abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState>(
         // ----------------------------------------------
         // Start the interaction processing directly
         // ----------------------------------------------
-        CoroutineScope(Dispatchers.Main).launch {
-            for (interaction in interactionChannel) {
-                masterController?.let {
-                    interactionQueueSize.decrementAndGet()
-                    it.processInteraction(this@NavBitActivity, interaction)
-                } ?: run {
-                    InfoLog.d("Delaying Interaction Processing - Waiting for MasterController")
-                    delay(50)
+        lifecycleScope.launch {
+            withContext(Dispatchers.Default) {
+                for (interaction in interactionChannel) {
+                    masterController?.let {
+                        interactionQueueSize.decrementAndGet()
+                        it.processInteraction(this@NavBitActivity, interaction)
+                    } ?: run {
+                        InfoLog.d("Delaying Interaction Processing - Waiting for MasterController")
+                        delay(50)
+                    }
                 }
             }
         }
