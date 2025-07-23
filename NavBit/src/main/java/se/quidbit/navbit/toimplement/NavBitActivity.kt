@@ -1,7 +1,6 @@
 package se.quidbit.navbit.toimplement
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
@@ -10,15 +9,11 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import se.quidbit.navbit.internal.AppThemeHolder
 import se.quidbit.navbit.internal.InfoLog
@@ -26,8 +21,6 @@ import se.quidbit.navbit.internal.MainHolder
 import se.quidbit.navbit.internal.MasterController
 import se.quidbit.navbit.internal.MasterControllerFactory
 import se.quidbit.navbit.types.QueuedInteraction
-import java.util.concurrent.BlockingQueue
-import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicInteger
 
 abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState>(
@@ -79,14 +72,16 @@ abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState>(
         // ----------------------------------------------
         lifecycleScope.launch {
             withContext(Dispatchers.Default) {
-                for (interaction in interactionChannel) {
-                    masterController?.let {
-                        interactionQueueSize.decrementAndGet()
-                        it.processInteraction(this@NavBitActivity, interaction)
-                    } ?: run {
+                while (isActive) {
+                    if (masterController == null) {
                         InfoLog.d("Delaying Interaction Processing - Waiting for MasterController")
                         delay(50)
+                        continue
                     }
+
+                    val interaction = interactionChannel.receive()
+                    interactionQueueSize.decrementAndGet()
+                    masterController?.processInteraction(this@NavBitActivity, interaction)
                 }
             }
         }
