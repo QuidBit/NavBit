@@ -46,10 +46,6 @@ abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState>(
     // --------------------------------------------------------
     // NOTE: Interactions are processed sequentially one by one to avoid concurrent issues on modifying state/data
 
-    @Volatile
-    private var isProcessingInteraction = false
-    private var interactionJob : Job? = null
-
     private val interactionChannel = Channel<QueuedInteraction<I>>(Channel.UNLIMITED)
     private val interactionQueueSize = AtomicInteger(0)
 
@@ -70,54 +66,27 @@ abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState>(
         interactionChannel.trySend(QueuedInteraction.Close())
         interactionQueueSize.incrementAndGet()
     }
-    // --------------------------------------------------------
-
-    public override fun onResume() {
-        super.onResume()
-        startInteractionProcessing()
-    }
-
-    public override fun onPause() {
-        super.onPause()
-         stopInteractionProcessing()
-    }
-
-    private fun startInteractionProcessing() {
-        if (interactionJob == null || interactionJob?.isCompleted == true) {
-            interactionJob = CoroutineScope(Dispatchers.Main).launch {
-                for (interaction in interactionChannel) {
-                    masterController?.let {
-                        isProcessingInteraction = true
-                        interactionQueueSize.decrementAndGet()
-                        it.processInteraction(this@NavBitActivity, interaction)
-                        isProcessingInteraction = false
-                    } ?: run {
-                        InfoLog.d("Delaying Interaction Processing - Waiting for MasterController")
-                        delay(50)
-                    }
-                }
-            }
-        }
-    }
-
-    private fun stopInteractionProcessing() {
-        interactionJob?.let { job ->
-            if (!isProcessingInteraction) {
-                job.cancel()
-            } else {
-                runBlocking {
-                    job.cancelAndJoin()
-                }
-            }
-            interactionJob = null
-        }
-    }
 
     // ---------------------------------------------------------------------------------------------
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         instance = this
+
+        // ----------------------------------------------
+        // Start the interaction processing directly
+        // ----------------------------------------------
+        CoroutineScope(Dispatchers.Main).launch {
+            for (interaction in interactionChannel) {
+                masterController?.let {
+                    interactionQueueSize.decrementAndGet()
+                    it.processInteraction(this@NavBitActivity, interaction)
+                } ?: run {
+                    InfoLog.d("Delaying Interaction Processing - Waiting for MasterController")
+                    delay(50)
+                }
+            }
+        }
+        // ----------------------------------------------
 
         enableEdgeToEdge()
         setContent {
