@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import se.quidbit.navbit.toimplement.AppTheme
 import se.quidbit.navbit.toimplement.NavBitInteraction
@@ -57,7 +58,7 @@ internal fun <I : NavBitInteraction, S : NavBitNavigationState>
     context : Context,
     controller: MasterController<I, S>,
     screenHandler: NavBitScreenHandler<S>,
-    interactionQueue : BlockingQueue<QueuedInteraction<I>>,
+    interactionChannel : Channel<QueuedInteraction<I>>,
     theme : AppTheme
 ) {
     val navStates by controller.navState.collectAsState()
@@ -102,7 +103,7 @@ internal fun <I : NavBitInteraction, S : NavBitNavigationState>
 
             // NOTE: To get proper animations of the sheets in and out, a fixed supported count is used just now
             for (index in 0..< screenHandler.maxOverlayCount()) {
-                OverlayLayer(index, screenArrangement, oldScreenArrangement, interactionQueue, transition)
+                OverlayLayer(index, screenArrangement, oldScreenArrangement, interactionChannel, transition)
             }
         }
     }
@@ -113,7 +114,7 @@ fun <I : NavBitInteraction>OverlayLayer(
     index : Int,
     screenArrangement: ScreenArrangement,
     oldScreenArrangement: ScreenArrangement?,
-    interactionQueue: BlockingQueue<QueuedInteraction<I>>,
+    interactionChannel: Channel<QueuedInteraction<I>>,
     transition: ScreenTransition
 ) {
     val overlay = screenArrangement.overlays.getOrNull(index)
@@ -159,7 +160,7 @@ fun <I : NavBitInteraction>OverlayLayer(
                 .pointerInput(Unit) {
                     detectTapGestures(onTap = {
                         if (updatedOverlay != null && updatedClosingTime.value == null) {
-                            interactionQueue.add(QueuedInteraction.Close())
+                            interactionChannel.trySend(QueuedInteraction.Close())
                         }
                     })
                 }
@@ -220,7 +221,7 @@ fun <I : NavBitInteraction>OverlayLayer(
                             )
                             .padding(top = (index * 36).dp + 8.dp),
                         onClose = {
-                            interactionQueue.add(QueuedInteraction.Close())
+                            interactionChannel.trySend(QueuedInteraction.Close())
                         }
                     ) {
                         ScreenHolder(over.screen, overlayTransition)

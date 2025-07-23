@@ -13,6 +13,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -25,6 +26,7 @@ import se.quidbit.navbit.internal.MasterControllerFactory
 import se.quidbit.navbit.types.QueuedInteraction
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.atomic.AtomicInteger
 
 abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState>(
     private val interactionHandler: NavBitInteractionHandler<I, S>,
@@ -48,21 +50,25 @@ abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState>(
     private var isProcessingInteraction = false
     private var interactionJob : Job? = null
 
-    private val interactionQueue : BlockingQueue<QueuedInteraction<I>> = LinkedBlockingQueue()
+    private val interactionChannel = Channel<QueuedInteraction<I>>(Channel.UNLIMITED)
+    private val interactionQueueSize = AtomicInteger(0)
 
     fun send(interaction: I) {
-        InfoLog.i("Interaction Received [${interactionQueue.size}]: $interaction")
-        interactionQueue.add(QueuedInteraction.Custom(interaction))
+        InfoLog.i("Interaction Received [$interactionQueueSize]: $interaction")
+        interactionChannel.trySend(QueuedInteraction.Custom(interaction))
+        interactionQueueSize.incrementAndGet()
     }
 
     fun sendBack() {
-        InfoLog.i("Interaction Received [${interactionQueue.size}]: [Back]")
-        interactionQueue.add(QueuedInteraction.Back())
+        InfoLog.i("Interaction Received [${interactionQueueSize}]: [Back]")
+        interactionChannel.trySend(QueuedInteraction.Back())
+        interactionQueueSize.incrementAndGet()
     }
 
     fun sendClose() {
-        InfoLog.i("Interaction Received [${interactionQueue.size}]: [Close]")
-        interactionQueue.add(QueuedInteraction.Close())
+        InfoLog.i("Interaction Received [${interactionQueueSize}]: [Close]")
+        interactionChannel.trySend(QueuedInteraction.Close())
+        interactionQueueSize.incrementAndGet()
     }
     // --------------------------------------------------------
 
@@ -78,14 +84,12 @@ abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState>(
 
     private fun startInteractionProcessing() {
         if (interactionJob == null || interactionJob?.isCompleted == true) {
-            interactionJob = CoroutineScope(Dispatchers.IO).launch {
-                // Process interactions until cancel has been called
-                while (isActive) {
-                    // Make sure no interactions are processed before the masterController is ready
+            interactionJob = CoroutineScope(Dispatchers.Main).launch {
+                for (interaction in interactionChannel) {
                     masterController?.let {
-                        val interaction = interactionQueue.take()
                         isProcessingInteraction = true
-                        masterController?.processInteraction(this@NavBitActivity, interaction)
+                        interactionQueueSize.decrementAndGet()
+                        it.processInteraction(this@NavBitActivity, interaction)
                         isProcessingInteraction = false
                     } ?: run {
                         InfoLog.d("Delaying Interaction Processing - Waiting for MasterController")
@@ -125,7 +129,7 @@ abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState>(
             // Display the screen
             val theme = screenHandler.getTheme(LocalContext.current, isSystemInDarkTheme())
             AppThemeHolder<S>(theme) {
-                MainHolder(this, controller, screenHandler, interactionQueue, theme)
+                MainHolder(this, controller, screenHandler, interactionChannel, theme)
             }
 
             masterController = controller
@@ -133,7 +137,7 @@ abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState>(
             // Setup back press handling
             onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
-                    interactionQueue.add(QueuedInteraction.Back())
+                    interactionChannel.trySend(QueuedInteraction.Back())
                 }
             })
         }
