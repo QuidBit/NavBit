@@ -6,6 +6,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -20,6 +21,7 @@ import se.quidbit.navbit.internal.InfoLog
 import se.quidbit.navbit.internal.MainHolder
 import se.quidbit.navbit.internal.MasterController
 import se.quidbit.navbit.internal.MasterControllerFactory
+import se.quidbit.navbit.types.ThemeMode
 import se.quidbit.navbit.types.QueuedInteraction
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -63,6 +65,15 @@ abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState>(
     }
 
     // ---------------------------------------------------------------------------------------------
+
+    private val themeModeState = mutableStateOf(ThemeMode.SYSTEM)
+
+    fun setThemeMode(mode : ThemeMode) {
+        InfoLog.i("Setting ThemeMode: $mode]")
+        themeModeState.value = mode
+    }
+
+    // ---------------------------------------------------------------------------------------------
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         instance = this
@@ -89,14 +100,25 @@ abstract class NavBitActivity<I : NavBitInteraction, S : NavBitNavigationState>(
 
         enableEdgeToEdge()
         setContent {
+            // ---------------------------------------------------------
             // Prepare the main state and controller of the app
+            // ---------------------------------------------------------
             val controller : MasterController<I,S> = viewModel(
                 factory =  MasterControllerFactory(interactionHandler, navigationStateHandler)
             )
 
+            // ---------------------------------------------------------
             // Display the screen
-            val theme = screenHandler.getTheme(LocalContext.current, isSystemInDarkTheme())
-            AppThemeHolder<S>(theme) {
+            // ---------------------------------------------------------
+            val isDark = when (themeModeState.value) {
+                ThemeMode.DARK -> true
+                ThemeMode.LIGHT -> false
+                ThemeMode.SYSTEM -> isSystemInDarkTheme()
+            }
+
+            val theme = screenHandler.getTheme(LocalContext.current, isDark)
+
+            AppThemeHolder(theme) {
                 MainHolder(this, controller, screenHandler, interactionChannel, theme)
             }
 

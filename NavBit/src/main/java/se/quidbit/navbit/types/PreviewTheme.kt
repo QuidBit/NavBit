@@ -17,9 +17,9 @@ fun <S : NavBitNavigationState>PreviewTheme(screenHandler: NavBitScreenHandler<S
         Box(
             Modifier.background(theme.colorScheme.background)
         ) {
-            AppThemeHolder<S>(theme, content)
+            AppThemeHolder(theme, content)
         }
     } else {
-        AppThemeHolder<S>(theme, content)
+        AppThemeHolder(theme, content)
     }
 }

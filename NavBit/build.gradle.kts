@@ -47,7 +47,7 @@ afterEvaluate {
 
                 groupId = "com.github.quidbit"
                 artifactId = "NavBit"
-                version = "3.8.5"
+                version = "3.8.6"
             }
         }
     }
