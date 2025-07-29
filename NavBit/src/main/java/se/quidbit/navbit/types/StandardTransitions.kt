@@ -1,14 +1,21 @@
 package se.quidbit.navbit.types
 
+import androidx.compose.animation.core.Easing
+import androidx.compose.animation.core.FastOutSlowInEasing
 import se.quidbit.navbit.internal.ScreenChange
 import kotlin.math.abs
 
 const val TRANSITION_DURATION_DEFAULT_MS = 250
-
+val TRANSITION_EASING_DEFAULT = FastOutSlowInEasing
 // ---------------------------------------------------------------------
 
-class TransitionSlide(private val direction: TransitionDirection, private val duration: Int = TRANSITION_DURATION_DEFAULT_MS) : ScreenTransition() {
+class TransitionSlide(
+    private val direction: TransitionDirection,
+    private val duration: Int = TRANSITION_DURATION_DEFAULT_MS,
+    private val easing : Easing = TRANSITION_EASING_DEFAULT
+) : ScreenTransition() {
     override fun durationMs() : Int { return duration }
+    override fun easing(): Easing { return easing }
 
     override fun start(screenChange: ScreenChange, width : Float): TransitionTransform {
         return when (screenChange) {
@@ -45,8 +52,12 @@ class TransitionSlide(private val direction: TransitionDirection, private val du
 
 // ---------------------------------------------------------------------
 
-class TransitionFade(private val duration : Int = TRANSITION_DURATION_DEFAULT_MS) : ScreenTransition() {
+class TransitionFade(
+    private val duration : Int = TRANSITION_DURATION_DEFAULT_MS,
+    private val easing : Easing = TRANSITION_EASING_DEFAULT
+) : ScreenTransition() {
     override fun durationMs() : Int { return duration }
+    override fun easing(): Easing { return easing }
 
     override fun start(screenChange: ScreenChange, width : Float): TransitionTransform {
         return when (screenChange) {
@@ -75,6 +86,7 @@ class TransitionFade(private val duration : Int = TRANSITION_DURATION_DEFAULT_MS
 
 object TransitionNone : ScreenTransition() {
     override fun durationMs() : Int { return 0 }
+    override fun easing(): Easing { return TRANSITION_EASING_DEFAULT }
 
     override fun start(screenChange: ScreenChange, width : Float): TransitionTransform {
         return TransitionTransform()

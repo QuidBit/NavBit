@@ -47,7 +47,6 @@ import se.quidbit.navbit.types.ScreenTransition
 import se.quidbit.navbit.types.TRANSITION_DURATION_DEFAULT_MS
 import se.quidbit.navbit.types.TransitionFade
 import se.quidbit.navbit.types.TransitionNone
-import java.util.concurrent.BlockingQueue
 import kotlin.math.max
 
 const val OVERLAY_ANIMATION_MS = TRANSITION_DURATION_DEFAULT_MS

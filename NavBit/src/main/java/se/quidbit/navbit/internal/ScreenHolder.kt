@@ -95,7 +95,7 @@ fun JumpAndAnimateBox(counter: Int, composable : ScreenComposable, transition: S
 
         animation.animateTo(
             TransitionAnimation.new(z, transition.end(screenChange, screenWidthDp)),
-            tween(durationMillis = transition.durationMs())
+            tween(durationMillis = transition.durationMs(), easing = transition.easing())
         )
     }
 
