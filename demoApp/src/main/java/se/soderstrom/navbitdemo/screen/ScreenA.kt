@@ -1,19 +1,20 @@
 package se.soderstrom.navbitdemo.screen
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import se.soderstrom.navbitdemo.BaseActivity
 import se.soderstrom.navbitdemo.navbit.Interaction
 import se.soderstrom.navbitdemo.parts.ActionButton
+import se.soderstrom.navbitdemo.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,7 +25,10 @@ fun ScreenA(count : Int) {
                 title = { Text("Screen A") },
                 navigationIcon = {
                     IconButton(onClick = {  BaseActivity.instance().sendBack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Image(
+                            painter = painterResource(R.drawable.back),
+                            contentDescription = "Back"
+                        )
                     }
                 }
             )

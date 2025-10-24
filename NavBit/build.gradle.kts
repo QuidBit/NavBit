@@ -47,17 +47,17 @@ afterEvaluate {
 
                 groupId = "com.github.quidbit"
                 artifactId = "NavBit"
-                version = "3.8.8"
+                version = "3.8.9"
             }
         }
     }
 }
 
 dependencies {
-    implementation("androidx.compose.animation:animation-android:1.8.2")
-    implementation("androidx.compose.material3:material3-android:1.3.2")
-    val composeBom = platform("androidx.compose:compose-bom:2024.09.00")
-    val lifecycleVersion = "2.8.7"
+    implementation("androidx.compose.animation:animation-android:1.9.4")
+    implementation("androidx.compose.material3:material3-android:1.4.0")
+    val composeBom = platform("androidx.compose:compose-bom:2025.10.01")
+    val lifecycleVersion = "2.9.4"
 
     implementation(composeBom)
     androidTestImplementation(composeBom)
@@ -70,11 +70,11 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
 
-    implementation("androidx.appcompat:appcompat:1.7.0")
-    implementation("com.google.android.material:material:1.12.0")
+    implementation("androidx.appcompat:appcompat:1.7.1")
+    implementation("com.google.android.material:material:1.13.0")
     testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.2.1")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+    androidTestImplementation("androidx.test.ext:junit:1.3.0")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
 }
 
 tasks.withType<PublishToMavenRepository>().configureEach {

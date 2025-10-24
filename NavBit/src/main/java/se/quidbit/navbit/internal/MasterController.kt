@@ -80,7 +80,7 @@ internal class MasterController<I : NavBitInteraction, S : NavBitNavigationState
         InfoLog.e("----[$interactionCounter]-Interaction $infoString")
 
         // If we are debugging, we can show the error directly on screen for simplicity
-        if (showToast && interactionHandler.showDebugToasts()) {
+        if (InfoLog.LOGGING_ENABLED && showToast && interactionHandler.showDebugToasts()) {
             Handler(Looper.getMainLooper()).post {
                 Toast.makeText(
                     context,
