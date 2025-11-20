@@ -1,9 +1,7 @@
 package se.quidbit.navbit.internal
 
-import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.calculateTargetValue
 import androidx.compose.animation.core.exponentialDecay
 import androidx.compose.animation.core.tween
@@ -65,11 +63,12 @@ fun CustomSheet(
     val coroutineScope = rememberCoroutineScope()
 
     var isDragging by remember { mutableStateOf(false) }
+    var isNestedDragging by remember { mutableStateOf(false) }
+
     var rawOffset by remember { mutableFloatStateOf(0f) }
 
     val animatedOffset = remember { Animatable(0f) }
-
-    val offsetToUse = if (isDragging) rawOffset else animatedOffset.value
+    val offsetToUse = if (isDragging || isNestedDragging) rawOffset else animatedOffset.value
 
     val sheetHeightPx = remember { mutableIntStateOf(0) }
     val sheetDragThreshold = 0.5f
@@ -100,13 +99,15 @@ fun CustomSheet(
     // ----------------------------------------------------------
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
+
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                 if (locked) return Offset.Zero
+                if (source == NestedScrollSource.Fling) return Offset.Zero
 
                 val deltaY = available.y
 
                 if (deltaY < 0 && rawOffset > 0f) {
-                    isDragging = true
+                    isNestedDragging = true
 
                     // Compute how much we can consume
                     val newOffset = (rawOffset + deltaY).coerceAtLeast(0f)
@@ -128,10 +129,10 @@ fun CustomSheet(
                 available: Offset,
                 source: NestedScrollSource
             ): Offset {
-                if (locked) return Offset.Zero
+                if (locked || source == NestedScrollSource.Fling) return Offset.Zero
 
-                if ((available.y > 0 || isDragging) && consumed.y == 0f) {
-                    isDragging = true
+                if ((available.y > 0 || isNestedDragging) && consumed.y == 0f) {
+                    isNestedDragging = true
                     rawOffset = (rawOffset + available.y).coerceAtLeast(0f)
                     coroutineScope.launch {
                         animatedOffset.snapTo(rawOffset)
@@ -142,68 +143,63 @@ fun CustomSheet(
                 return Offset.Zero
             }
 
-            // ---------------------------------------------------------------------
-
             override suspend fun onPreFling(available: Velocity): Velocity {
                 if (locked) return Velocity.Zero
 
-                // preFling is effectively when the finger is lifter
-                isDragging = false
+                isNestedDragging = false
+
+                // If the sheet is fully closed, let the child handle the fling
+                if (rawOffset == 0f) {
+                    return Velocity.Zero
+                }
 
                 animatedOffset.snapTo(rawOffset)
 
-                // Collapse if dragged enough distance in total
-                if (rawOffset > sheetHeightPx.intValue * sheetDragThreshold) {
-                    val animationLength = dropDownAnimationLength()
-                    closingTime.value = animationLength
+                val sheetHeight = sheetHeightPx.intValue.toFloat()
+                val shouldCloseByDistance = rawOffset > sheetHeight * sheetDragThreshold
+                val shouldCloseByVelocity = available.y > velocityThreshold
 
+                return if (shouldCloseByDistance || shouldCloseByVelocity) {
                     onClose()
 
                     coroutineScope.launch {
-                        animatedOffset.animateTo(sheetHeightPx.intValue.toFloat(), animationSpec = sheetAnimationSpec(animationLength))
-                    }
-                } else {
-                    rawOffset = 0f
-                    coroutineScope.launch {
-                        animatedOffset.animateTo(0f, animationSpec = returnAnimationSpec)
-                    }
-                }
-
-                return Velocity.Zero
-            }
-
-            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-                if (locked) return Velocity.Zero
-
-                coroutineScope.launch {
-                    // Collapse if fast enough
-                    // And if the children consumed almost nothing (so we don't close the sheet after a long list scroll reaches its end)
-                    if (closingTime.value == null && available.y > velocityThreshold && consumed.y < 100f) {
-                        val sheetHeight = sheetHeightPx.intValue.toFloat()
-
-                        onClose()
-
-                        // Try to use a natural decay (if the velocity is high enough for the sheet to leave)
                         val decay = exponentialDecay<Float>()
                         val target = decay.calculateTargetValue(rawOffset, available.y)
 
-                        if (target >= sheetHeight) {
-                            // Safe to decay — it'll go off screen
-                            closingTime.value = estimateDecayTimeToTarget(rawOffset, available.y, sheetHeight)
+                        if (shouldCloseByVelocity && target >= sheetHeight) {
+                            closingTime.value = estimateDecayTimeToTarget(
+                                rawOffset,
+                                available.y,
+                                sheetHeight
+                            )
                             animatedOffset.animateDecay(available.y, decay)
                         } else {
-                            // Not enough momentum — manually animate to full close with linear speed
-                            val distance = sheetHeight - rawOffset
-                            val safeVelocity = available.y.takeIf { it > 0f } ?: 1f
-                            val durationMs = ((distance / safeVelocity) * 1000).toInt().coerceIn(1, 10000)
-
-                            closingTime.value = durationMs
-
-                            animatedOffset.animateTo(sheetHeight, animationSpec = tween(durationMillis = durationMs, easing = LinearEasing))
+                            val animationLength = dropDownAnimationLength()
+                            closingTime.value = animationLength
+                            animatedOffset.animateTo(
+                                sheetHeight,
+                                animationSpec = sheetAnimationSpec(animationLength)
+                            )
                         }
-                    }
-                }
 
+                        rawOffset = sheetHeight
+                    }
+
+                    // Consume fling when closing sheet
+                    available
+                } else {
+                    coroutineScope.launch {
+                        closingTime.value = null
+                        animatedOffset.animateTo(0f, animationSpec = returnAnimationSpec)
+                        rawOffset = 0f
+                    }
+
+                    // Let the child handle the fling
+                    Velocity.Zero
+                }
+            }
+
+            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
                 return Velocity.Zero
             }
         }
