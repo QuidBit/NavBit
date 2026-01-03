@@ -47,16 +47,16 @@ afterEvaluate {
 
                 groupId = "com.github.quidbit"
                 artifactId = "NavBit"
-                version = "3.9.1"
+                version = "3.9.2"
             }
         }
     }
 }
 
 dependencies {
-    implementation("androidx.compose.animation:animation-android:1.9.5")
+    implementation("androidx.compose.animation:animation-android:1.10.0")
     implementation("androidx.compose.material3:material3-android:1.4.0")
-    val composeBom = platform("androidx.compose:compose-bom:2025.10.01")
+    val composeBom = platform("androidx.compose:compose-bom:2025.12.01")
     val lifecycleVersion = "2.10.0"
 
     implementation(composeBom)
@@ -65,7 +65,7 @@ dependencies {
     implementation("androidx.compose.compiler:compiler:1.5.15")
 
     implementation("androidx.core:core-ktx:1.17.0")
-    implementation("androidx.activity:activity-compose:1.12.0")
+    implementation("androidx.activity:activity-compose:1.12.2")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
