@@ -35,7 +35,8 @@ class InteractionHandler : NavBitInteractionHandler<Interaction, NavigationState
 
     override fun applyInteractionOnState(
         i: Interaction,
-        s: NavigationState
+        s: NavigationState,
+        activity : Activity
     ): InteractionResult<NavigationState> {
         val newState = when (i) {
             is Interaction.ClearCheck ->  when (s) {
